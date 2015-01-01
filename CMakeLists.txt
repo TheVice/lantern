@@ -6,6 +6,10 @@ project(lantern)
 # Add testing tool
 include(CTest)
 
+include_directories(SYSTEM gtest-1.7.0/include)
+include_directories(SYSTEM gtest-1.7.0)
+add_definitions(-U__STRICT_ANSI__)
+
 # Project directories
 include_directories(src include tests/src tests/include)
 
@@ -24,6 +28,7 @@ set(LANTERN_HEADERS
     include/matrix4x4.h
     include/camera.h)
 set(TESTS_SOURCES
+    gtest-1.7.0/src/gtest-all.cc
     tests/src/main.cpp
     tests/src/vector3.cpp
     tests/src/vector4.cpp
@@ -47,7 +52,7 @@ add_executable(
 	${LANTERN_HEADERS})
 
 # Link libraries to tests exec
-target_link_libraries(tests lantern gtest pthread)
+target_link_libraries(tests lantern pthread)
 
 # Add tests exec to tests list
 add_test(lantern_tests tests)
