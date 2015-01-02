@@ -18,7 +18,7 @@ include_directories(
 
 # Additional compiler flags
 set(COMPILER_FLAGS
-    "-std=c++11 -Wall -Werror")
+    "-std=c++11 -flto -Wall -Werror -Wextra -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter")
 
 # Add compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
