@@ -9,7 +9,7 @@
 using namespace lantern;
 
 #ifdef WIN32
-app::app(unsigned int width, unsigned int height)
+app::app(unsigned int const width, unsigned int const height)
 	: //m_handlers(nullptr),
       //m_handlers_count(0),
       m_painter{width, height},
@@ -187,7 +187,7 @@ LRESULT CALLBACK app::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 #else
 
-app::app(unsigned int width, unsigned int height) : m_painter{width, height},
+app::app(unsigned int const width, unsigned int const height) : m_painter{width, height},
 		m_dpy(nullptr),
 		m_glc(nullptr),
 		m_win(0)
