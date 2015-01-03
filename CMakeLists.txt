@@ -133,7 +133,7 @@ add_executable(
 
 set_target_properties(
     empty_app PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/empty_app")
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/empty_app")
 
 target_link_libraries(empty_app lantern ${REQUIRED_LIBRARIES})
 
@@ -147,7 +147,7 @@ add_executable(
 
 set_target_properties(
     rotating_car_app PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/rotating_car_app")
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/rotating_car_app")
 
 add_custom_command(
     TARGET rotating_car_app POST_BUILD
