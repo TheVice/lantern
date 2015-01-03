@@ -27,6 +27,9 @@ copy %CURRENT_DIR%\examples\rotating_car_app\resources\car.obj %CURRENT_DIR%\bui
 if not exist %CURRENT_DIR%\build\MSVC\tests mkdir %CURRENT_DIR%\build\MSVC\tests
 cl /EHsc /W4 /GS /D WIN32 /D _WIN32 /D WINDOWS /D_USE_MATH_DEFINES %CURRENT_DIR%\gtest-1.7.0\src\gtest-all.cc %CURRENT_DIR%\tests\src\bitmap_painter.cpp %CURRENT_DIR%\tests\src\camera.cpp %CURRENT_DIR%\tests\src\main.cpp %CURRENT_DIR%\tests\src\matrix3x3.cpp %CURRENT_DIR%\tests\src\matrix4x4.cpp %CURRENT_DIR%\tests\src\obj_import.cpp %CURRENT_DIR%\tests\src\vector3.cpp %CURRENT_DIR%\tests\src\vector4.cpp kernel32.lib lantern.lib /I"%CURRENT_DIR%\tests\include" /I"%CURRENT_DIR%\gtest-1.7.0" /I"%CURRENT_DIR%\gtest-1.7.0\include" /I"%CURRENT_DIR%\lantern\include" /link /SafeSEH /DynamicBase /NXCompat /SUBSYSTEM:CONSOLE /LIBPATH:"%CURRENT_DIR%\build\MSVC\lib" /out:"%CURRENT_DIR%\build\MSVC\tests\tests.exe"
 if not exist %CURRENT_DIR%\build\MSVC\tests\resources mkdir %CURRENT_DIR%\build\MSVC\tests\resources
-copy %CURRENT_DIR%\tests\resources\unit_cube.obj %CURRENT_DIR%\build\MSVC\tests\resources\unit_cube.obj /Y
+copy %CURRENT_DIR%\tests\resources\unit_cube_v.obj %CURRENT_DIR%\build\MSVC\tests\resources\unit_cube_v.obj /Y
+copy %CURRENT_DIR%\tests\resources\unit_cube_v_normal.obj %CURRENT_DIR%\build\MSVC\tests\resources\unit_cube_v_normal.obj /Y
+copy %CURRENT_DIR%\tests\resources\unit_cube_v_uv.obj %CURRENT_DIR%\build\MSVC\tests\resources\unit_cube_v_uv.obj /Y
+copy %CURRENT_DIR%\tests\resources\unit_cube_v_uv_normal.obj %CURRENT_DIR%\build\MSVC\tests\resources\unit_cube_v_uv_normal.obj /Y
 
 cd %CURRENT_DIR%
