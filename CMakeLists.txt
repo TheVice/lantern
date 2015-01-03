@@ -8,7 +8,6 @@ include(CTest)
 
 include_directories(SYSTEM gtest-1.7.0/include)
 include_directories(SYSTEM gtest-1.7.0)
-add_definitions(-U__STRICT_ANSI__)
 
 # Project directories
 include_directories(
@@ -18,11 +17,43 @@ include_directories(
     tests/src tests/include)
 
 # Additional compiler flags
-set(COMPILER_FLAGS
+if (MSVC)
+    set(COMPILER_FLAGS "${COMPILER_FLAGS} /W4 /GS")
+    set(LINK_FLAGS "${LINK_FLAGS} /SafeSEH /DynamicBase /NXCompat")
+else()
+    set(COMPILER_FLAGS
     "-std=c++11 -flto -Wall -Werror -Wextra -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter")
+endif()
 
 # Add compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
+
+# Additional MSVC-related stuff
+#
+if (MSVC)
+    # Setup dependencies folder
+    #
+    set(MSVC_DEPENDENCIES_FOLDER
+        "${CMAKE_BINARY_DIR}/dependencies/")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${MSVC_DEPENDENCIES_FOLDER}/include/)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${MSVC_DEPENDENCIES_FOLDER}/lib/)
+    include_directories(${MSVC_DEPENDENCIES_FOLDER}/include/)
+    link_directories(${MSVC_DEPENDENCIES_FOLDER}/lib/)
+
+    # Add math defines
+    add_definitions(-D_USE_MATH_DEFINES)
+endif()
+
+if(CMAKE_HOST_WIN32)
+    add_definitions(-DWIN32)
+    add_definitions(-D_WIN32)
+    add_definitions(-D_WINDOWS)
+endif(CMAKE_HOST_WIN32)
+
+if(NOT MSVC)
+    add_definitions(-DGTEST_HAS_PTHREAD=0)
+    add_definitions(-U__STRICT_ANSI__)
+endif(NOT MSVC)
 
 # Targets
 #
@@ -102,7 +133,7 @@ add_custom_command(
     "${PROJECT_SOURCE_DIR}/tests/resources"
     $<TARGET_FILE_DIR:tests>/resources)
 
-target_link_libraries(tests lantern pthread)
+target_link_libraries(tests lantern)
 
 add_test(lantern_tests tests)
 
@@ -112,18 +143,14 @@ add_test(lantern_tests tests)
 set(REQUIRED_LIBRARIES)
 
 if(CMAKE_HOST_WIN32)
-  add_definitions(-DWIN32)
-  add_definitions(-D_WIN32)
-  add_definitions(-D_WINDOWS)
-
-  list(APPEND REQUIRED_LIBRARIES glu32)
-  list(APPEND REQUIRED_LIBRARIES opengl32)
+    list(APPEND REQUIRED_LIBRARIES glu32)
+    list(APPEND REQUIRED_LIBRARIES opengl32)
 endif(CMAKE_HOST_WIN32)
 
 if(CMAKE_HOST_UNIX)
-  list(APPEND REQUIRED_LIBRARIES GL)
-  list(APPEND REQUIRED_LIBRARIES GLU)
-  list(APPEND REQUIRED_LIBRARIES X11)
+    list(APPEND REQUIRED_LIBRARIES GL)
+    list(APPEND REQUIRED_LIBRARIES GLU)
+    list(APPEND REQUIRED_LIBRARIES X11)
 endif(CMAKE_HOST_UNIX)
 
 add_executable(

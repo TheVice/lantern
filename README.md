@@ -28,4 +28,33 @@ Software renderer written for educational purposes. Uses OpenGL for rendering an
 * ```cmake .. -G "Eclipse CDT4 - MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"``` on Windows
 * So now you can browse project to Eclipse and make and run targets from it.
 
+###Building on Windows (using Visual Studio 2013)
+* Run cmd.exe
+* Move to your build folder
+* Run: ```cmake -G "Visual Studio 12" <path_to_lantern_source_folder>``` to generate VS solution
+* If you want to build tests target, download Google Testing Framework (https://code.google.com/p/googletest/downloads/list). Build it using solution inside of msvc folder. Note that if you want to build tests target in release configuration, then gtest library must also be built with release configuration. Then copy include files to <your_build_folder>/dependencies/include/gtest/. Copy lib file to <your_build_folder>/dependencies/lib/
+* VS solution is ready now
+* Also you can build all targets from console via MSBuild:
+* ```"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" lantern.sln /maxcpucount:%NUMBER_OF_PROCESSORS% /target:lantern /property:Configuration=Debug```
+* ```"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" lantern.sln /maxcpucount:%NUMBER_OF_PROCESSORS% /target:empty_app /property:Configuration=Debug```
+* ```"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" lantern.sln /maxcpucount:%NUMBER_OF_PROCESSORS% /target:rotating_car_app /property:Configuration=Debug```
+* ```"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" lantern.sln /maxcpucount:%NUMBER_OF_PROCESSORS% /target:tests /property:Configuration=Debug```
+* Or to build all targets above ```"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" lantern.sln /maxcpucount:%NUMBER_OF_PROCESSORS%```
+
+###Building on Windows (using Visual Studio 2013 Command Prompt)
+* Run development console
+* Move to your source directory
+* Run msvc.bat
+* You got
+├───build
+│   └───MSVC
+│       ├───examples
+│       │   ├───empty_app
+│       │   └───rotating_car_app
+│       │       └───resources
+│       ├───lib
+│       ├───obj
+│       └───tests
+│           └───resources
+
 You can also use CLion EAP (http://confluence.jetbrains.com/display/CLION/Early+Access+Program) for both platforms.
