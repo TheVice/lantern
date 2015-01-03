@@ -162,7 +162,12 @@ set_target_properties(
     empty_app PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/empty_app")
 
-target_link_libraries(empty_app lantern ${REQUIRED_LIBRARIES})
+if(APPLE)
+    MESSAGE("Unable to test on Mac OS X")
+    # target_link_libraries(empty_app lantern /Library/Frameworks/SDL2.framework)
+else()
+    target_link_libraries(empty_app lantern ${REQUIRED_LIBRARIES})
+endif(APPLE)
 
 # Rotating car app example
 #
@@ -182,4 +187,9 @@ add_custom_command(
     "${PROJECT_SOURCE_DIR}/examples/rotating_car_app/resources"
     $<TARGET_FILE_DIR:rotating_car_app>/resources)
 
-target_link_libraries(rotating_car_app lantern ${REQUIRED_LIBRARIES})
+if(APPLE)
+    MESSAGE("Unable to test on Mac OS X")
+    # target_link_libraries(rotating_car_app lantern /Library/Frameworks/SDL2.framework)
+else()
+    target_link_libraries(rotating_car_app lantern ${REQUIRED_LIBRARIES})
+endif(APPLE)
