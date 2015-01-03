@@ -1,22 +1,20 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-
 #include "app.h"
 
 using namespace lantern;
 
 #ifdef WIN32
+#define WINDOW_CLASS TEXT("szWindowClass")
 app::app(unsigned int const width, unsigned int const height)
-	: //m_handlers(nullptr),
-      //m_handlers_count(0),
-      m_painter{width, height},
+	: m_painter{width, height},
+      m_texName(0),
       m_hwnd(HWND_DESKTOP),
       m_hdc(0),
       m_hglrc(0)
 {
+	QueryPerformanceFrequency(&mFrequency);
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	if (!MyRegisterClass(hInstance))
 	{
@@ -32,7 +30,7 @@ app::app(unsigned int const width, unsigned int const height)
 	{
 		throw std::runtime_error("app::app::winGlInit");
 	}
-	init();
+	reshape(width, height);
 }
 
 app::~app()
@@ -42,9 +40,15 @@ app::~app()
 
 int app::start()
 {
+	LARGE_INTEGER timerStart;
+	QueryPerformanceCounter(&timerStart);
+	double time_accumulator_millis = 0.0;
+	unsigned int fps = 0;
 	MSG msg;
 	do
 	{
+		// Process events
+		//
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
@@ -52,8 +56,45 @@ int app::start()
 		}
 		else
 		{
-			update();
+			// Clear texture
+			m_painter.clear(0);
+
+			// Calculate time since last frame
+			//
+			LARGE_INTEGER currentTime;
+			QueryPerformanceCounter(&currentTime);
+			double delta_since_last_frame_millis = ((double(
+					currentTime.LowPart - timerStart.LowPart)
+					/ double(mFrequency.LowPart)) * 1000);
+
+			// Save last frame time
+			QueryPerformanceCounter(&timerStart);
+
+			// Execute frame
+			frame(delta_since_last_frame_millis / 1000.0);
+
+			// Sum up passed time
+			time_accumulator_millis += delta_since_last_frame_millis;
+
+			// Present texture
+			initTexture(&m_texName, m_painter.get_bitmap_width(), m_painter.get_bitmap_height(), m_painter.get_data());
+			dispalyTexture(m_texName);
 			SwapBuffers(m_hdc);
+
+			++fps;
+
+			if (time_accumulator_millis > 1000.0)
+			{
+#ifdef LANTERN_DEBUG_OUTPUT_FPS
+				std::cout << "FPS: " << fps << std::endl;
+#endif
+				time_accumulator_millis = 0.0;
+				fps = 0;
+			}
+		}
+		if (WM_CHAR == msg.message)
+		{
+			on_key_down((TCHAR) msg.wParam);
 		}
 	} while (WM_QUIT != msg.message);
 
@@ -65,18 +106,6 @@ ATOM app::MyRegisterClass(HINSTANCE hInstance)
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	/*wcex.lpfnWndProc	= [] (HWND window, UINT message,
-		      WPARAM wparam, LPARAM lparam) -> LRESULT
-		{
-		  for (auto h = m_handlers; h != m_handlers + m_handlers_count; ++h)
-		  {
-		    if (message == h->message)
-		    {
-		      return h->handler(window, wparam, lparam);
-		    }
-		  }
-		  return DefWindowProc(window, message, wparam, lparam);
-		};*/
 	wcex.lpfnWndProc	= WndProc;
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
@@ -85,7 +114,7 @@ ATOM app::MyRegisterClass(HINSTANCE hInstance)
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName	= NULL;
-	wcex.lpszClassName	= TEXT("szWindowClass");
+	wcex.lpszClassName	= WINDOW_CLASS;
 	wcex.hIconSm		= NULL;
 	return RegisterClassEx(&wcex);
 }
@@ -106,7 +135,7 @@ BOOL app::InitInstance(HINSTANCE aHinstance, int aCmdShow, UINT aWidth, UINT aHe
 		return FALSE;
 	}
 
-	aHwnd = CreateWindowEx(dwExStyle, TEXT("szWindowClass"), TEXT("Title"), dwStyle,
+	aHwnd = CreateWindowEx(dwExStyle, WINDOW_CLASS, TEXT("Title"), dwStyle,
 	                       CW_USEDEFAULT, CW_USEDEFAULT, windowRect.right - windowRect.left,
 	                       windowRect.bottom - windowRect.top,
 	                       HWND_DESKTOP, NULL, aHinstance, NULL);
@@ -160,14 +189,14 @@ void app::winGlRelease(HWND hWnd, HDC& hdc, HGLRC& hglrc)
 		wglDeleteContext(hglrc);
 	}
 
-	hglrc = NULL;
+	hglrc = 0;
 
 	if (hdc != 0)
 	{
 		ReleaseDC(hWnd, hdc);
 	}
 
-	hdc = NULL;
+	hdc = 0;
 }
 
 LRESULT CALLBACK app::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -176,6 +205,10 @@ LRESULT CALLBACK app::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	{
 		case WM_DESTROY:
 			PostQuitMessage(0);
+			break;
+
+		case WM_SIZE:
+			reshape(LOWORD(lParam), HIWORD(lParam));
 			break;
 
 		default:
@@ -207,11 +240,6 @@ app::app(unsigned int const width, unsigned int const height) : m_painter{width,
 	{
 		throw std::runtime_error("app::app no appropriate visual found");
 	}
-	/*else
-	{
-		printf("\n\tvisual %p selected\n",
-		       (void*)vi->visualid);  // %p creates hexadecimal output like in glxinfo
-	}*/
 
 	Colormap cmap = XCreateColormap(m_dpy, root, vi->visual, AllocNone);
 	XSetWindowAttributes swa;
@@ -223,7 +251,7 @@ app::app(unsigned int const width, unsigned int const height) : m_painter{width,
 	XStoreName(m_dpy, m_win, "Title");
 	m_glc = glXCreateContext(m_dpy, vi, NULL, GL_TRUE);
 	glXMakeCurrent(m_dpy, m_win, m_glc);
-	init();
+	reshape(width, height);
 }
 
 app::~app()
@@ -236,34 +264,122 @@ app::~app()
 
 int app::start()
 {
+	unsigned long timerStart = getTimer();
+	unsigned long time_accumulator_millis = 0;
+	unsigned int fps = 0;
 	XEvent xev;
 	XWindowAttributes gwa;
 	do
 	{
 		XNextEvent(m_dpy, &xev);
-
 		if (xev.type == Expose)
 		{
+			// Clear texture
+			m_painter.clear(0);
+
+			// Calculate time since last frame
+			//
+			unsigned long currentTime = getTimer();
+			unsigned long delta_since_last_frame_millis = currentTime - timerStart;
+
+			// Save last frame time
+			timerStart = getTimer();
+
 			XGetWindowAttributes(m_dpy, m_win, &gwa);
-			update();
+
+			// Execute frame
+			frame(delta_since_last_frame_millis / 1000.0);
+
+			// Sum up passed time
+			time_accumulator_millis += delta_since_last_frame_millis;
+
+			// Present texture
+			initTexture(&m_texName, m_painter.get_bitmap_width(), m_painter.get_bitmap_height(), m_painter.get_data());
+			dispalyTexture(m_texName);
 			glXSwapBuffers(m_dpy, m_win);
+
+			++fps;
+
+			if (time_accumulator_millis >= 1000)
+			{
+#ifdef LANTERN_DEBUG_OUTPUT_FPS
+				std::cout << "FPS: " << fps << std::endl;
+#endif
+				time_accumulator_millis = 0;
+				fps = 0;
+			}
+			XSendEvent(m_dpy, m_win, 0, 0, &xev);
 		}
-		else if (xev.type == KeyPress && xev.xkey.keycode == 0x09)
+		else if (xev.type == KeyPress)
 		{
-			break;
+			if (xev.xkey.keycode == 0x09)
+			{
+				break;
+			}
+			on_key_down(xev.xkey.keycode);
 		}
 	} while(1);
 	return 0;
 }
 
+unsigned long app::getTimer()
+{
+	timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	return now.tv_nsec / 1000000 + now.tv_sec * 1000;
+}
 #endif
 
-void app::init()
+bitmap_painter& app::get_painter()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	return m_painter;
+}
+
+void app::reshape(int w, int h)
+{
+	glViewport(0, 0, (GLsizei) w, (GLsizei) h);
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+//	glLoadIdentity();
+//	gluPerspective(60.0, (GLfloat) w / (GLfloat) h, 1.0, 30.0);
+//	glMatrixMode(GL_MODELVIEW);
+//	glLoadIdentity();
+//	glTranslatef(0.0, 0.0, -3.0);
+}
+
+void app::initTexture(GLuint* texName, GLuint imageWidth, GLuint imageHeight, const GLubyte* image)
+{
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, texName);
+	glBindTexture(GL_TEXTURE_2D, *texName);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth,
+			imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+}
+
+void app::dispalyTexture(GLuint texName)
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glBindTexture(GL_TEXTURE_2D, texName);
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(0.0, 0.0);
+	glVertex3f(-1.0, 1.0, 0.0);
+
+	glTexCoord2f(1.0, 0.0);
+	glVertex3f(1.0, 1.0, 0.0);
+
+	glTexCoord2f(1.0, 1.0);
+	glVertex3f(1.0, -1.0, 0.0);
+
+	glTexCoord2f(0.0, 1.0);
+	glVertex3f(-1.0, -1.0, 0.0);
+
+	glEnd();
+	glFlush();
+	glDisable(GL_TEXTURE_2D);
 }
