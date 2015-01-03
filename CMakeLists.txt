@@ -9,40 +9,19 @@ include(CTest)
 include_directories(SYSTEM gtest-1.7.0/include)
 include_directories(SYSTEM gtest-1.7.0)
 
-# Project directories
-include_directories(
-    examples/empty_app
-    examples/rotating_car_app
-    lantern/src lantern/include
-    tests/src tests/include)
-
 # Additional compiler flags
+# Compiler setup ============================
 if (MSVC)
     set(COMPILER_FLAGS "${COMPILER_FLAGS} /W4 /GS")
     set(LINK_FLAGS "${LINK_FLAGS} /SafeSEH /DynamicBase /NXCompat")
+
+    add_definitions(-D_USE_MATH_DEFINES)
 else()
     set(COMPILER_FLAGS
     "-std=c++11 -flto -Wall -Werror -Wextra -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter")
 endif()
 
-# Add compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
-
-# Additional MSVC-related stuff
-#
-if (MSVC)
-    # Setup dependencies folder
-    #
-    set(MSVC_DEPENDENCIES_FOLDER
-        "${CMAKE_BINARY_DIR}/dependencies/")
-    execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${MSVC_DEPENDENCIES_FOLDER}/include/)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${MSVC_DEPENDENCIES_FOLDER}/lib/)
-    include_directories(${MSVC_DEPENDENCIES_FOLDER}/include/)
-    link_directories(${MSVC_DEPENDENCIES_FOLDER}/lib/)
-
-    # Add math defines
-    add_definitions(-D_USE_MATH_DEFINES)
-endif()
 
 if(CMAKE_HOST_WIN32)
     add_definitions(-DWIN32)
@@ -55,12 +34,9 @@ if(NOT MSVC)
     add_definitions(-U__STRICT_ANSI__)
 endif(NOT MSVC)
 
-# Targets
-#
+# ===========================================
 
-# Library
-#
-
+# Library target ============================
 set(LANTERN_SOURCES
     lantern/src/vector3.cpp
     lantern/src/vector4.cpp
@@ -76,6 +52,7 @@ set(LANTERN_SOURCES
     lantern/src/scene_object.cpp
     lantern/src/scene.cpp
     lantern/src/pipeline.cpp)
+
 set(LANTERN_HEADERS
     lantern/include/vector3.h
     lantern/include/vector4.h
@@ -93,17 +70,18 @@ set(LANTERN_HEADERS
     lantern/include/pipeline.h)
 
 add_library(
-	lantern STATIC
-	${LANTERN_SOURCES}
-	${LANTERN_HEADERS})
+    lantern STATIC
+    ${LANTERN_SOURCES}
+    ${LANTERN_HEADERS})
+
+target_include_directories(lantern PUBLIC lantern/include)
 
 set_target_properties(
     lantern PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+# ===========================================
 
-# Tests
-#
-
+# Tests target ==============================
 set(TESTS_SOURCES
     gtest-1.7.0/src/gtest-all.cc
     tests/src/main.cpp
@@ -114,31 +92,30 @@ set(TESTS_SOURCES
     tests/src/camera.cpp
     tests/src/bitmap_painter.cpp
     tests/src/obj_import.cpp)
+
 set(TESTS_HEADERS
     tests/include/common.h)
 
 add_executable(
-	tests
-	${TESTS_SOURCES}
-	${TESTS_HEADERS}
-	${LANTERN_HEADERS})
+    tests
+    ${TESTS_SOURCES}
+    ${TESTS_HEADERS}
+    ${LANTERN_HEADERS})
+
+target_include_directories(tests PRIVATE lantern/include tests/include)
 
 set_target_properties(
     tests PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/")
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
+
+target_link_libraries(tests lantern)
 
 add_custom_command(
     TARGET tests POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${PROJECT_SOURCE_DIR}/tests/resources"
     $<TARGET_FILE_DIR:tests>/resources)
-
-target_link_libraries(tests lantern)
-
-add_test(lantern_tests tests)
-
-# Empty app example
-#
+# ===========================================
 
 set(REQUIRED_LIBRARIES)
 
@@ -153,43 +130,33 @@ if(CMAKE_HOST_UNIX)
     list(APPEND REQUIRED_LIBRARIES X11)
 endif(CMAKE_HOST_UNIX)
 
+# Empty app target ==========================
 add_executable(
     empty_app
-    examples/empty_app/main.cpp
-    ${LANTERN_HEADERS})
+    examples/empty_app/main.cpp)
 
 set_target_properties(
     empty_app PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/empty_app")
 
-if(APPLE)
-    MESSAGE("Unable to test on Mac OS X")
-    # target_link_libraries(empty_app lantern /Library/Frameworks/SDL2.framework)
-else()
-    target_link_libraries(empty_app lantern ${REQUIRED_LIBRARIES})
-endif(APPLE)
+target_include_directories(empty_app PRIVATE lantern/include)
+target_link_libraries(empty_app lantern ${REQUIRED_LIBRARIES})
+# ===========================================
 
-# Rotating car app example
-#
-
+#Rotating car app target ==========================
 add_executable(
     rotating_car_app
-    examples/rotating_car_app/main.cpp
-    ${LANTERN_HEADERS})
+    examples/rotating_car_app/main.cpp)
 
 set_target_properties(
     rotating_car_app PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/rotating_car_app")
+
+target_include_directories(rotating_car_app PRIVATE lantern/include)
+target_link_libraries(rotating_car_app lantern ${REQUIRED_LIBRARIES})
 
 add_custom_command(
     TARGET rotating_car_app POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${PROJECT_SOURCE_DIR}/examples/rotating_car_app/resources"
     $<TARGET_FILE_DIR:rotating_car_app>/resources)
-
-if(APPLE)
-    MESSAGE("Unable to test on Mac OS X")
-    # target_link_libraries(rotating_car_app lantern /Library/Frameworks/SDL2.framework)
-else()
-    target_link_libraries(rotating_car_app lantern ${REQUIRED_LIBRARIES})
-endif(APPLE)

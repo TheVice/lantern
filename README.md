@@ -3,11 +3,28 @@ lantern
 
 Software renderer written for educational purposes. Uses OpenGL for rendering and Google C++ Testing Framework for tests.
 
+###Building on Windows (MinGW)
+* Download SDL ([https://www.libsdl.org/download-2.0.php](https://www.libsdl.org/download-2.0.php), select MinGW version of development library). If you want to build tests you must also download Google C++ Testing Framework source code ([https://code.google.com/p/googletest/downloads/list](https://code.google.com/p/googletest/downloads/list))
+* Open cmd.exe, move to lantern folder
+* Run: ```mkdir build && cd build``` to create build folder and move to it
+* Run: ```set SDL2DIR=<path to SDL2>```. Note that it should be either i686-w64-mingw32 (for 32-bit) or x86_64-w64-mingw32 (for 64-bit) folder
+* Run: ```set GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target
+* Run: ```cmake -G "MinGW Makefiles" ..``` to generate makefile
+* Run: ```mingw32-make lantern``` to build library
+* Run: ```mingw32-make rotating_car_app``` to build example application
+* Run: ```mingw32-make tests``` to build tests executable
+
+###Building on Windows (Visual Studio 2013)
+* Download SDL ([https://www.libsdl.org/download-2.0.php](https://www.libsdl.org/download-2.0.php), select VC++ version of development library). If you want to build tests you must also download Google C++ Testing Framework source code ([https://code.google.com/p/googletest/downloads/list](https://code.google.com/p/googletest/downloads/list))
+* Open cmd.exe, move to lantern folder
+* Run: ```mkdir build && cd build``` to create build folder and move to it
+* Run: ```set SDL2DIR=<path to SDL2>```
+* Run: ```set GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target
+* Run: ```cmake -G "Visual Studio 12" ..``` to generate VS solution
+* Visual Studio solution is ready now
+
 ###Building on Linux
-* If you want to build tests target, you must install Google Testing Framework (https://code.google.com/p/googletest/downloads/list)
-* Run terminal. Move to lantern source code folder
-* Run: ```mkdir build && cd build``` to create and move to the build folder
-* Run: ```cmake -G "Unix Makefiles" ..``` to generate makefile
+* Open terminal, move to lantern folder* Run: ```mkdir build && cd build``` to create build folder and move to it* If you want to build tests target, you must install Google Testing Framework (https://code.google.com/p/googletest/downloads/list)* Run: ```cmake -G "Unix Makefiles" ..``` to generate makefile
 * Run: ```make lantern``` to build library
 * Run: ```make rotating_car_app``` to build example application
 * Run: ```make tests``` to build tests executable
@@ -46,15 +63,15 @@ Software renderer written for educational purposes. Uses OpenGL for rendering an
 * Move to your source directory
 * Run msvc.bat
 * You got
-├───build
-│   └───MSVC
-│       ├───examples
-│       │   ├───empty_app
-│       │   └───rotating_car_app
-│       │       └───resources
-│       ├───lib
-│       ├───obj
-│       └───tests
-│           └───resources
++---build
+�   L---MSVC
+�       +---examples
+�       �   +---empty_app
+�       �   L---rotating_car_app
+�       �       L---resources
+�       +---lib
+�       +---obj
+�       L---tests
+�           L---resources
 
 You can also use CLion EAP (http://confluence.jetbrains.com/display/CLION/Early+Access+Program) for both platforms.
