@@ -7,9 +7,9 @@ if not exist %CURRENT_DIR%\build\MSVC mkdir %CURRENT_DIR%\build\MSVC
 ::lantern
 if not exist %CURRENT_DIR%\build\MSVC\obj mkdir %CURRENT_DIR%\build\MSVC\obj
 cd %CURRENT_DIR%\build\MSVC\obj
-cl /c /EHsc /W4 /GS /D WIN32 /D _WIN32 /D WINDOWS /D _LIB %CURRENT_DIR%\lantern\src\app.cpp %CURRENT_DIR%\lantern\src\bitmap_painter.cpp %CURRENT_DIR%\lantern\src\camera.cpp %CURRENT_DIR%\lantern\src\color.cpp %CURRENT_DIR%\lantern\src\matrix3x3.cpp %CURRENT_DIR%\lantern\src\matrix4x4.cpp %CURRENT_DIR%\lantern\src\mesh.cpp %CURRENT_DIR%\lantern\src\obj_import.cpp %CURRENT_DIR%\lantern\src\pipeline.cpp %CURRENT_DIR%\lantern\src\point.cpp %CURRENT_DIR%\lantern\src\shader.cpp %CURRENT_DIR%\lantern\src\vector2.cpp %CURRENT_DIR%\lantern\src\vector3.cpp %CURRENT_DIR%\lantern\src\vector4.cpp /I"%CURRENT_DIR%\lantern\include"
+cl /c /EHsc /W4 /GS /D WIN32 /D _WIN32 /D WINDOWS /D _LIB %CURRENT_DIR%\lantern\src\app.cpp %CURRENT_DIR%\lantern\src\bitmap_painter.cpp %CURRENT_DIR%\lantern\src\camera.cpp %CURRENT_DIR%\lantern\src\color.cpp %CURRENT_DIR%\lantern\src\matrix3x3.cpp %CURRENT_DIR%\lantern\src\matrix4x4.cpp %CURRENT_DIR%\lantern\src\mesh.cpp %CURRENT_DIR%\lantern\src\obj_import.cpp %CURRENT_DIR%\lantern\src\pipeline.cpp %CURRENT_DIR%\lantern\src\shader.cpp %CURRENT_DIR%\lantern\src\vector3.cpp %CURRENT_DIR%\lantern\src\vector4.cpp /I"%CURRENT_DIR%\lantern\include"
 if not exist %CURRENT_DIR%\build\MSVC\lib mkdir %CURRENT_DIR%\build\MSVC\lib
-lib app.obj bitmap_painter.obj camera.obj color.obj matrix3x3.obj matrix4x4.obj mesh.obj obj_import.obj pipeline.obj point.obj shader.obj vector2.obj vector3.obj vector4.obj /out:"%CURRENT_DIR%\build\MSVC\lib\lantern.lib"
+lib app.obj bitmap_painter.obj camera.obj color.obj matrix3x3.obj matrix4x4.obj mesh.obj obj_import.obj pipeline.obj shader.obj vector3.obj vector4.obj /out:"%CURRENT_DIR%\build\MSVC\lib\lantern.lib"
 
 if not exist %CURRENT_DIR%\build\MSVC\examples mkdir %CURRENT_DIR%\build\MSVC\examples
 

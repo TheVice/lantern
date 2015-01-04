@@ -38,14 +38,12 @@ endif(NOT MSVC)
 
 # Library target ============================
 set(LANTERN_SOURCES
-    lantern/src/vector2.cpp
     lantern/src/vector3.cpp
     lantern/src/vector4.cpp
     lantern/src/matrix3x3.cpp
     lantern/src/matrix4x4.cpp
     lantern/src/camera.cpp
     lantern/src/app.cpp
-    lantern/src/point.cpp
     lantern/src/color.cpp
     lantern/src/bitmap_painter.cpp
     lantern/src/mesh.cpp
@@ -59,7 +57,6 @@ set(LANTERN_HEADERS
     lantern/include/vector4.h
     lantern/include/matrix3x3.h
     lantern/include/matrix4x4.h
-    lantern/include/point.h
     lantern/include/color.h
     lantern/include/camera.h
     lantern/include/app.h
