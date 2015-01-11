@@ -20,6 +20,12 @@
 *.out
 *.app
 
+# CLion
+.idea
+
+# Doxygen
+doc
+
 ### Android ###
 # Built application files
 *.apk
