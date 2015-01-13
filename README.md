@@ -45,3 +45,11 @@ lantern
 * To install apk on Android type and execute ```adb install -r "bin/Lantern tests-debug.apk"```. Flag -r is make sure that if apk already installed early it will be reinstalled by new.
 * Now on your Android navigate to installed application and find ```Lantern tests```.
 * Application just run and exit, tests results do not displayed, even on [logcat](http://developer.android.com/tools/help/logcat.html) where be only info about application run process.
+
+##Build rotating_car_app-debug.apk
+* In a terminal (console) locate into ```platforms/android-9/rotating_car_app```.
+* First of all, do not forgot to include resource to your apk package:
+* ```mkdir assets```
+* ```mkdir assets/resources```
+* ```copy ../../../examples/rotating_car_app/resources/car.obj assets/resources/car.obj```
+* Next steps the same like in tests apk package build descripted above.
