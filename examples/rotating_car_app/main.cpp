@@ -3,13 +3,6 @@
 #include "obj_import.h"
 #include "pipeline.h"
 
-#ifdef ANDROID
-#include <android/asset_manager_jni.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <stdio.h>
-#endif
-
 using namespace lantern;
 
 class rotating_car_app : public app
@@ -94,60 +87,6 @@ void rotating_car_app::onDeactivate()
 	m_camera = nullptr;
 	info("rotating_car_app deactivated");
 	app::onDeactivate();
-}
-
-void changeDirectoryToAppCacheLocation(JNIEnv* env, JavaVM* vm, jobject clazz)
-{
-	vm->AttachCurrentThread(&env, NULL);
-	jclass activityClass = env->GetObjectClass(clazz);
-	// Get path to cache dir (/data/data/appPackageName/cache)
-	jmethodID getCacheDir = env->GetMethodID(activityClass, "getCacheDir",
-	                        "()Ljava/io/File;");
-	jobject file = env->CallObjectMethod(clazz, getCacheDir);
-	jclass fileClass = env->FindClass("java/io/File");
-	jmethodID getAbsolutePath = env->GetMethodID(fileClass, "getAbsolutePath",
-	                            "()Ljava/lang/String;");
-	jstring jpath = (jstring)env->CallObjectMethod(file, getAbsolutePath);
-	const char* app_dir = env->GetStringUTFChars(jpath, NULL);
-	// chdir in the application cache directory
-	info("app cache dir: %s", app_dir);
-	chdir(app_dir);
-	env->ReleaseStringUTFChars(jpath, app_dir);
-	vm->DetachCurrentThread();
-}
-
-void unpackResourcesFromApk(AAssetManager* mgr)
-{
-	const char* dir_name = "resources";
-	mkdir(dir_name, S_IRWXU | S_IRWXG);
-	AAssetDir* assetDir = AAssetManager_openDir(mgr, dir_name);
-	const char* filename = (const char*)NULL;
-
-	while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
-	{
-		char input_path[BUFSIZ];
-		strcpy(input_path, dir_name);
-		strcat(input_path, "/");
-		strcat(input_path, filename);
-		AAsset* asset = AAssetManager_open(mgr, input_path, AASSET_MODE_STREAMING);
-		char buf[BUFSIZ];
-		int nb_read = 0;
-		char output_path[BUFSIZ];
-		strcpy(output_path, dir_name);
-		strcat(output_path, "/");
-		strcat(output_path, filename);
-		FILE* out = fopen(output_path, "w");
-
-		while ((nb_read = AAsset_read(asset, buf, BUFSIZ)) > 0)
-		{
-			fwrite(buf, nb_read, 1, out);
-		}
-
-		fclose(out);
-		AAsset_close(asset);
-	}
-
-	AAssetDir_close(assetDir);
 }
 
 void android_main(android_app* app)

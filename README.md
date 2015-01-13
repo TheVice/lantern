@@ -9,10 +9,11 @@ lantern
 * Unpack [Android SDK](http://developer.android.com/sdk/index.html).
 * It is also may require to download some addition package via SDK Manager.
 * Unpack [Android NDK](http://developer.android.com/tools/sdk/ndk/index.html).
+* Add bin directory from JDK (not from JRE) into PATHs.
 * Set environment variable ```ANDROID_HOME``` for Android SDK unpacked path.
 * Set environment variable ```ANDROID_NDK``` for Android NDK unpacked path. It is highli recomended that path do not consist any space symbols.
-* Added bin directory from Apache Ant into PATHs.
-* Added directories ```ANDROID_NDK```, ```ANDROID_HOME/platform-tools``` and ```ANDROID_HOME/tools``` into PATHs.
+* Add bin directory from Apache Ant into PATHs.
+* Add directories ```ANDROID_NDK```, ```ANDROID_HOME/platform-tools``` and ```ANDROID_HOME/tools``` into PATHs.
 * On Windows it may require to install [MinGW](http://sourceforge.net/projects/mingw) or [MinGW-w64](http://sourceforge.net/projects/mingw-w64) and set it bin directory into PATHs.
 
 ##Build and run tests
@@ -47,9 +48,13 @@ lantern
 * Application just run and exit, tests results do not displayed, even on [logcat](http://developer.android.com/tools/help/logcat.html) where be only info about application run process.
 
 ##Build rotating_car_app-debug.apk
+* Apk will support on [Android 2.3 (API Level 9)](https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels) and above.
 * In a terminal (console) locate into ```platforms/android-9/rotating_car_app```.
 * First of all, do not forgot to include resource to your apk package:
 * ```mkdir assets```
 * ```mkdir assets/resources```
 * ```copy ../../../examples/rotating_car_app/resources/car.obj assets/resources/car.obj```
-* Next steps the same like in tests apk package build descripted above.
+* Execute ```ndk-build``` to build bunaries.
+* Enter ```ant debug``` to create apk package.
+* And ```adb install -r "bin/rotating_car_app-debug.apk"```. Flag -r is make sure that if apk already installed early it will be reinstalled by new.
+* Now on your Android navigate to installed application and find ```rotating_car_app```.

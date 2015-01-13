@@ -5,8 +5,11 @@
 
 #include "bitmap_painter.h"
 #include <android_native_app_glue.h>
+#include <android/asset_manager_jni.h>
 
 void info(const char* message, ...);
+void changeDirectoryToAppCacheLocation(JNIEnv* env, JavaVM* vm, jobject clazz);
+void unpackResourcesFromApk(AAssetManager* mgr);
 
 namespace lantern
 {

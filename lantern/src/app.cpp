@@ -5,16 +5,74 @@
 using namespace lantern;
 
 #ifdef ANDROID
+
 #include <android/log.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdio.h>
 #include <stdarg.h>
 
 void info(const char* message, ...)
 {
 	va_list varArgs;
 	va_start(varArgs, message);
-	__android_log_vprint(ANDROID_LOG_INFO, "rotating_car_app", message, varArgs);
-	__android_log_print(ANDROID_LOG_INFO, "rotating_car_app", "\n");
+	__android_log_vprint(ANDROID_LOG_INFO, "lantern", message, varArgs);
+	__android_log_print(ANDROID_LOG_INFO, "lantern", "\n");
 	va_end(varArgs);
+}
+
+void changeDirectoryToAppCacheLocation(JNIEnv* env, JavaVM* vm, jobject clazz)
+{
+	vm->AttachCurrentThread(&env, NULL);
+	jclass activityClass = env->GetObjectClass(clazz);
+	// Get path to cache dir (/data/data/appPackageName/cache)
+	jmethodID getCacheDir = env->GetMethodID(activityClass, "getCacheDir",
+	                        "()Ljava/io/File;");
+	jobject file = env->CallObjectMethod(clazz, getCacheDir);
+	jclass fileClass = env->FindClass("java/io/File");
+	jmethodID getAbsolutePath = env->GetMethodID(fileClass, "getAbsolutePath",
+	                            "()Ljava/lang/String;");
+	jstring jpath = (jstring)env->CallObjectMethod(file, getAbsolutePath);
+	const char* app_dir = env->GetStringUTFChars(jpath, NULL);
+	// chdir in the application cache directory
+	info("app cache dir: %s", app_dir);
+	chdir(app_dir);
+	env->ReleaseStringUTFChars(jpath, app_dir);
+	vm->DetachCurrentThread();
+}
+
+void unpackResourcesFromApk(AAssetManager* mgr)
+{
+	const char* dir_name = "resources";
+	mkdir(dir_name, S_IRWXU | S_IRWXG);
+	AAssetDir* assetDir = AAssetManager_openDir(mgr, dir_name);
+	const char* filename = (const char*)NULL;
+
+	while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
+	{
+		char input_path[BUFSIZ];
+		strcpy(input_path, dir_name);
+		strcat(input_path, "/");
+		strcat(input_path, filename);
+		AAsset* asset = AAssetManager_open(mgr, input_path, AASSET_MODE_STREAMING);
+		char buf[BUFSIZ];
+		int nb_read = 0;
+		char output_path[BUFSIZ];
+		strcpy(output_path, dir_name);
+		strcat(output_path, "/");
+		strcat(output_path, filename);
+		FILE* out = fopen(output_path, "w");
+
+		while ((nb_read = AAsset_read(asset, buf, BUFSIZ)) > 0)
+		{
+			fwrite(buf, nb_read, 1, out);
+		}
+
+		fclose(out);
+		AAsset_close(asset);
+	}
+
+	AAssetDir_close(assetDir);
 }
 
 app::app(android_app* application) : m_painter{nullptr},
@@ -134,7 +192,7 @@ int32_t app::onStep()
 		mTime_accumulator_millis += delta_since_last_frame_millis;
 
 		// Present texture
-		//TODO: filled mWindowBuffer.bits
+		memcpy(mWindowBuffer.bits, m_painter->get_data(), 4 * mWindowBuffer.width * mWindowBuffer.height);
 
 		ANativeWindow_unlockAndPost(window);
 
