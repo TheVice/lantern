@@ -46,8 +46,9 @@ lantern
 * To install apk on Android type and execute ```adb install -r "bin/Lantern tests-debug.apk"```. Flag -r is make sure that if apk already installed early it will be reinstalled by new.
 * Now on your Android navigate to installed application and find ```Lantern tests```.
 * Application just run and exit, tests results do not displayed, even on [logcat](http://developer.android.com/tools/help/logcat.html) where be only info about application run process.
+* To uninstall apk execute ```adb uninstall com.android.lantern.tests```.
 
-##Build rotating_car_app-debug.apk
+##Build rotating_car_app
 * Apk will support on [Android 2.3 (API Level 9)](https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels) and above.
 * In a terminal (console) locate into ```platforms/android-9/rotating_car_app```.
 * First of all, do not forgot to include resource to your apk package:
@@ -58,3 +59,4 @@ lantern
 * Enter ```ant debug``` to create apk package.
 * And ```adb install -r "bin/rotating_car_app-debug.apk"```. Flag -r is make sure that if apk already installed early it will be reinstalled by new.
 * Now on your Android navigate to installed application and find ```rotating_car_app```.
+* To uninstall apk execute ```adb uninstall com.android.lantern.rotating_car_app```.

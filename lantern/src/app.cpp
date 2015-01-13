@@ -75,6 +75,13 @@ void unpackResourcesFromApk(AAssetManager* mgr)
 	AAssetDir_close(assetDir);
 }
 
+unsigned long getTimer()
+{
+	timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	return now.tv_nsec / 1000000 + now.tv_sec * 1000;
+}
+
 app::app(android_app* application) : m_painter{nullptr},
 									 mApplication{application},
 									 mEnabled{false},
@@ -84,6 +91,7 @@ app::app(android_app* application) : m_painter{nullptr},
 									 mFps{0}
 {
 	mApplication->onAppCmd = activityCallback;
+	mApplication->onInputEvent = inputCallback;
 	mApplication->userData = this;
 }
 
@@ -98,10 +106,10 @@ void app::start()
 
 	while (true)
 	{
-		int32_t events;
+		int32_t event;
 		android_poll_source* source;
 
-		while (ALooper_pollAll(mEnabled ? 0 : -1, NULL, &events, (void**)&source) >= 0)
+		while (ALooper_pollAll(mEnabled ? 0 : -1, NULL, &event, (void**)&source) >= 0)
 		{
 			if (source != NULL)
 			{
@@ -164,15 +172,17 @@ int32_t app::onActivate()
 void app::onDeactivate()
 {
 	info("Deactivating App");
-	delete m_painter;
-	m_painter = nullptr;
+	if (m_painter != nullptr)
+	{
+		delete m_painter;
+		m_painter = nullptr;
+	}
 	info("App deactivated");
 }
 
 int32_t app::onStep()
 {
 	info("App starting step");
-
 
 	ANativeWindow* window = mApplication->window;
 	if (ANativeWindow_lock(window, &mWindowBuffer, NULL) >= 0)
@@ -295,11 +305,15 @@ void app::activityCallback(android_app* application, int32_t command)
 	appClass.processingActivityEvent(command);
 }
 
-unsigned long app::getTimer()
+int32_t app::inputCallback(android_app* application, AInputEvent* event)
 {
-	timespec now;
-	clock_gettime(CLOCK_MONOTONIC, &now);
-	return now.tv_nsec / 1000000 + now.tv_sec * 1000;
+	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
+	{
+		int32_t key_val = AKeyEvent_getKeyCode(event);
+		app& appClass = *(app*)application->userData;
+		return appClass.on_key_down(key_val);
+	}
+	return 0;
 }
 
 const int32_t app::STATUS_OK = 0;

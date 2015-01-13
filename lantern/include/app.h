@@ -10,6 +10,7 @@
 void info(const char* message, ...);
 void changeDirectoryToAppCacheLocation(JNIEnv* env, JavaVM* vm, jobject clazz);
 void unpackResourcesFromApk(AAssetManager* mgr);
+unsigned long getTimer();
 
 namespace lantern
 {
@@ -26,7 +27,7 @@ namespace lantern
 		bitmap_painter& get_painter();
 
 		virtual void frame(float delta_since_last_frame) = 0;
-		virtual void on_key_down(unsigned char key) = 0;
+		virtual int32_t on_key_down(unsigned char key) = 0;
 
 		virtual int32_t onActivate();
 		virtual void onDeactivate();
@@ -64,7 +65,7 @@ namespace lantern
 		void deactivate();
 		void processingActivityEvent(int32_t command);
 		static void activityCallback(android_app* application, int32_t command);
-		static unsigned long getTimer();
+		static int32_t inputCallback(android_app* application, AInputEvent* event);
 
 	protected:
 		static const int32_t STATUS_OK;

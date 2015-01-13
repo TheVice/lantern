@@ -6,6 +6,7 @@ LOCAL_CFLAGS := -std=c++11 -fexceptions
 LOCAL_MODULE := lanterntests
 LOCAL_C_INCLUDES += ../../../lantern/include/ ../../../tests/include/
 LOCAL_SRC_FILES := main.cpp \
+				   ../../../../lantern/src/app.cpp \
 				   ../../../../lantern/src/bitmap_painter.cpp \
 				   ../../../../lantern/src/camera.cpp \
 				   ../../../../lantern/src/color.cpp \

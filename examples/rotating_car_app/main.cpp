@@ -13,7 +13,7 @@ public:
 
 protected:
 	void frame(float delta_since_last_frame) override;
-	void on_key_down(unsigned char key) override;
+	int32_t on_key_down(unsigned char key) override;
 	int32_t onActivate() override;
 	void onDeactivate() override;
 
@@ -60,9 +60,47 @@ void rotating_car_app::frame(float delta_since_last_frame)
 	m_pipeline.draw_scene(m_scene, *m_camera, get_painter());
 }
 
-void rotating_car_app::on_key_down(unsigned char key)
+int32_t rotating_car_app::on_key_down(unsigned char key)
 {
 	info("rotating_car_app::on_key_down - %c", key);
+	float const moving_speed = 0.1f;
+	float const rotation_speed = 0.05f;
+
+	// if (key.sym == SDLK_a)
+	// {
+	// 	m_camera.move_left(moving_speed);
+	// }
+	// else if (key.sym == SDLK_d)
+	// {
+	// 	m_camera.move_right(moving_speed);
+	// }
+	if (key== AKEYCODE_VOLUME_UP)
+	{
+		m_camera->move_forward(moving_speed);
+		return 1;
+	}
+	else if (key == AKEYCODE_VOLUME_DOWN)
+	{
+		m_camera->move_backward(moving_speed);
+		return 1;
+	}
+	// else if (key.sym == SDLK_r)
+	// {
+	// 	m_camera.move_up(moving_speed);
+	// }
+	// else if (key.sym == SDLK_f)
+	// {
+	// 	m_camera.move_down(moving_speed);
+	// }
+	// else if (key.sym == SDLK_q)
+	// {
+	// 	m_camera.yaw(-rotation_speed);
+	// }
+	// else if (key.sym == SDLK_e)
+	// {
+	// 	m_camera.yaw(rotation_speed);
+	// }
+	return 0;
 }
 
 int32_t rotating_car_app::onActivate()
