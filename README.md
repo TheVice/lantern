@@ -18,7 +18,7 @@ lantern
 
 ##Build and run tests
 * Connect your Android device, start emulator by ```android avd``` or ```emulator -avd <avd_name>``` to run already created emulator directly.
-~~* It is also possible to run [Android x86](http://www.android-x86.org/download) on VirtualBox.~~ To be detailed.
+* ~~It is also possible to run [Android x86](http://www.android-x86.org/download) on VirtualBox.~~ To be detailed.
 * In a terminal (console) locate into ```platforms/android-9/tests```.
 * Type and execute ```ndk-build``` to build tests bunaries.
 * Make sure ```adb devices``` see your Android device/emulator/OS on virtual.
@@ -27,12 +27,7 @@ lantern
 * Type and execute ```adb push ../../../tests/resources/unit_cube.obj /data/local/tmp/resources```
 * Type and execute ```adb push libs/armeabi/runnablelanterntests /data/local/tmp/``` to copy tests binary onto Android.
 * Type and execute ```adb shell chmod 775 /data/local/tmp/runnablelanterntests``` to make binary executabled.
-~~* Type and execute ```adb shell "LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/runnablelanterntests"``` to run tests on Android and see it result on your host OS terminal (console).~~ This variant will failed resources test.
-* Type and execute ```adb shell``` to enter into Android shell.
-* Type and execute ```cd /data/local/tmp``` for locate into folder with tests.
-* Type and execute ```LD_LIBRARY_PATH=/data/local/tmp``` for tests know where to search libgnustl_shared.so
-* Type and execute ```./runnablelanterntests``` to run tests.
-* Type and execute ```exit``` to exit from Android shell.
+* Type and execute ```adb shell "cd /data/local/tmp ; LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/runnablelanterntests"``` to run tests on Android and see it result on your host OS terminal (console).
 
 ##Build and run tests via apk package
 * It is also possible to create and run apk, that support on [Android 2.3 (API Level 9)](https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels) and above.

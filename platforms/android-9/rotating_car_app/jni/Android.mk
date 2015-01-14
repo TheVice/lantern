@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 #
 include $(CLEAR_VARS)
-LOCAL_CFLAGS := -std=c++11 -fexceptions
+LOCAL_CFLAGS := -std=c++11 -Wall -Wno-comment -Werror -fexceptions
 LOCAL_MODULE := lanternrotatingcar
 LOCAL_C_INCLUDES += ../../../lantern/include/
 LOCAL_SRC_FILES := ../../../../lantern/src/app.cpp \

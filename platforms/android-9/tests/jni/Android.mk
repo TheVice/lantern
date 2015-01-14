@@ -2,11 +2,10 @@ LOCAL_PATH := $(call my-dir)
 
 #
 include $(CLEAR_VARS)
-LOCAL_CFLAGS := -std=c++11 -fexceptions
+LOCAL_CFLAGS := -std=c++11 -Wall -Wno-comment -Werror -fexceptions -DTESTS_VIA_APK
 LOCAL_MODULE := lanterntests
 LOCAL_C_INCLUDES += ../../../lantern/include/ ../../../tests/include/
-LOCAL_SRC_FILES := main.cpp \
-				   ../../../../lantern/src/app.cpp \
+LOCAL_SRC_FILES := ../../../../lantern/src/app.cpp \
 				   ../../../../lantern/src/bitmap_painter.cpp \
 				   ../../../../lantern/src/camera.cpp \
 				   ../../../../lantern/src/color.cpp \
@@ -35,7 +34,7 @@ include $(BUILD_SHARED_LIBRARY)
 
 #
 include $(CLEAR_VARS)
-LOCAL_CFLAGS := -std=c++11 -fexceptions
+LOCAL_CFLAGS := -std=c++11 -Wall -Wno-comment -Werror -fexceptions
 LOCAL_MODULE := runnablelanterntests
 LOCAL_C_INCLUDES += ../../../lantern/include/ ../../../tests/include/
 

@@ -64,7 +64,7 @@ int32_t rotating_car_app::on_key_down(unsigned char key)
 {
 	info("rotating_car_app::on_key_down - %c", key);
 	float const moving_speed = 0.1f;
-	float const rotation_speed = 0.05f;
+	//float const rotation_speed = 0.05f;
 
 	// if (key.sym == SDLK_a)
 	// {
