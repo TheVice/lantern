@@ -195,6 +195,9 @@ int32_t app::onStep()
 		unsigned long currentTime = getTimer();
 		unsigned long delta_since_last_frame_millis = currentTime - mTimerStart;
 
+		// Save last frame time
+		mTimerStart = getTimer();
+
 		// Execute frame
 		frame(delta_since_last_frame_millis / 1000.0);
 
@@ -210,16 +213,14 @@ int32_t app::onStep()
 
 		if (mTime_accumulator_millis >= 1000)
 		{
-//#ifdef LANTERN_DEBUG_OUTPUT_FPS
+#ifdef LANTERN_DEBUG_OUTPUT_FPS
 			info("FPS: %i", mFps);
-//#endif
+#endif
 			mTime_accumulator_millis = 0;
 			mFps = 0;
 		}
 
 		info("App step done OK");
-		// Save last frame time
-		mTimerStart = getTimer();
 		return STATUS_OK;
 	}
 
