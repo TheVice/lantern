@@ -126,15 +126,15 @@ void rotating_car_app::onDeactivate()
 	app::onDeactivate();
 }
 
-void android_main(android_app* app)
+void android_main(android_app* application)
 {
 	info("android_main");
 
-	changeDirectoryToAppCacheLocation(app->activity->env, app->activity->vm,
-	                                  app->activity->clazz);
-	unpackResourcesFromApk(app->activity->assetManager);
+	changeDirectoryToAppCacheLocation(application->activity->env, application->activity->vm,
+	                                  application->activity->clazz);
+	unpackResourcesFromApk(application->activity->assetManager);
 
-	rotating_car_app{app}.start();
+	rotating_car_app{application}.start();
 }
 
 #else

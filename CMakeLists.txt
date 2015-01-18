@@ -22,12 +22,20 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
 
 # Android
 #
+
 if(ANDROID)
 
     set(NDK_PATH $ENV{ANDROID_NDK})
+    set(ANDROID_EXECUTABLE android)
+    set(ANT_EXECUTABLE ant)
+
     if(CMAKE_HOST_WIN32)
         string(REPLACE "\\" "/" NDK_PATH ${NDK_PATH})
+        set(ANDROID_EXECUTABLE android.bat)
+        set(ANT_EXECUTABLE ant.bat)
     endif(CMAKE_HOST_WIN32)
+
+    string(TOLOWER ${CMAKE_BUILD_TYPE} ant_build_type)
 
     add_library(android_native_app_glue STATIC
                 "${NDK_PATH}/sources/android/native_app_glue/android_native_app_glue.c")
@@ -87,9 +95,9 @@ set(LANTERN_HEADERS
     lantern/include/pipeline.h)
 
 add_library(
-	lantern STATIC
-	${LANTERN_SOURCES}
-	${LANTERN_HEADERS})
+    lantern STATIC
+    ${LANTERN_SOURCES}
+    ${LANTERN_HEADERS})
 
 set_target_properties(
     lantern PROPERTIES
@@ -115,10 +123,10 @@ set(TESTS_HEADERS
     tests/include/common.h)
 
 add_executable(
-	tests
-	${TESTS_SOURCES}
-	${TESTS_HEADERS}
-	${LANTERN_HEADERS})
+    tests
+    ${TESTS_SOURCES}
+    ${TESTS_HEADERS}
+    ${LANTERN_HEADERS})
 
 set_target_properties(
     tests PROPERTIES
@@ -149,21 +157,66 @@ else(ANDROID)
     add_test(lantern_tests tests)
 
 endif(ANDROID)
-if(NOT ANDROID)
+
 # Empty app example
 #
 
-add_executable(
-    empty_app
-    examples/empty_app/main.cpp
-    ${LANTERN_HEADERS})
+if(ANDROID)
+    add_library(empty_app SHARED
+        examples/empty_app/main.cpp
+        ${LANTERN_HEADERS})
+    target_include_directories(empty_app SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/android/native_app_glue")
 
-set_target_properties(
-    empty_app PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/empty_app")
+    target_link_libraries(empty_app lantern android_native_app_glue android log)
 
-target_link_libraries(empty_app lantern SDL2)
-endif(NOT ANDROID)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/examples/empty_app/resources" "${CMAKE_BINARY_DIR}/examples/empty_app/assets/resources")
+    execute_process(COMMAND ${ANDROID_EXECUTABLE} create project -n empty_app -a LaternEmptyAppNativeActivity -k com.android.lantern.empty_app -t android-${ANDROID_NATIVE_API_LEVEL} -p ${CMAKE_BINARY_DIR}/examples/empty_app)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/empty_app/res/layout)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/empty_app/src/com)
+
+    FILE(READ ${CMAKE_BINARY_DIR}/examples/empty_app/AndroidManifest.xml file_content)
+    string(REPLACE "android:versionName=\"1.0\">" "android:versionName=\"1.0\">\n    <uses-sdk\n        android:minSdkVersion=\"${ANDROID_NATIVE_API_LEVEL}\" />" file_content ${file_content})
+    string(REPLACE "<activity android:name=\"LaternEmptyAppNativeActivity\"" "<activity android:name=\"android.app.NativeActivity\"" file_content ${file_content})
+    string(REPLACE "android:label=\"@string/app_name\">" "android:label=\"@string/app_name\">\n            <meta-data android:name=\"android.app.lib_name\"\n                       android:value=\"empty_app\" />" file_content ${file_content})
+    string(REPLACE "</manifest> " "</manifest>" file_content ${file_content})
+    FILE(WRITE ${CMAKE_BINARY_DIR}/examples/empty_app/AndroidManifest.xml ${file_content})
+
+    FILE(READ ${CMAKE_BINARY_DIR}/examples/empty_app/res/values/strings.xml file_content)
+    string(REPLACE "<string name=\"app_name\">LaternEmptyAppNativeActivity</string>" "<string name=\"app_name\">empty_app</string>" file_content ${file_content})
+    FILE(WRITE ${CMAKE_BINARY_DIR}/examples/empty_app/res/values/strings.xml ${file_content})
+
+    add_custom_target(empty_app[build-apk]
+        DEPENDS empty_app
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libempty_app.so ${CMAKE_BINARY_DIR}/examples/empty_app/libs/${ANDROID_ABI}/libempty_app.so
+        COMMAND ${ANT_EXECUTABLE} ${ant_build_type} -buildfile ${CMAKE_BINARY_DIR}/examples/empty_app
+    )
+
+    add_custom_target(empty_app[install-apk]
+        DEPENDS empty_app[build-apk]
+        COMMAND adb install -r ${CMAKE_BINARY_DIR}/examples/empty_app/bin/empty_app-${ant_build_type}.apk
+    )
+
+    add_custom_target(empty_app[run-apk]
+        DEPENDS empty_app[install-apk]
+        COMMAND adb shell am start -a android.intent.action.MAIN -n com.android.lantern.empty_app/android.app.NativeActivity
+    )
+
+    add_custom_target(empty_app[uninstall-apk]
+        COMMAND adb uninstall com.android.lantern.empty_app
+    )
+else(ANDROID)
+    add_executable(
+        empty_app
+        examples/empty_app/main.cpp
+        ${LANTERN_HEADERS})
+
+    set_target_properties(
+        empty_app PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/empty_app")
+
+    target_link_libraries(empty_app lantern SDL2)
+endif(ANDROID)
+
 # Rotating car app example
 #
 
@@ -176,10 +229,6 @@ if(ANDROID)
     target_link_libraries(rotating_car_app lantern android_native_app_glue android log)
 
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/examples/rotating_car_app/resources" "${CMAKE_BINARY_DIR}/examples/rotating_car_app/assets/resources")
-    set(ANDROID_EXECUTABLE android)
-    if(CMAKE_HOST_WIN32)
-        set(ANDROID_EXECUTABLE android.bat)
-    endif(CMAKE_HOST_WIN32)
     execute_process(COMMAND ${ANDROID_EXECUTABLE} create project -n rotating_car_app -a LaternRotatingCarAppNativeActivity -k com.android.lantern.rotating_car_app -t android-${ANDROID_NATIVE_API_LEVEL} -p ${CMAKE_BINARY_DIR}/examples/rotating_car_app)
     execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/rotating_car_app/res/layout)
     execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/rotating_car_app/src/com)
@@ -195,19 +244,12 @@ if(ANDROID)
     string(REPLACE "<string name=\"app_name\">LaternRotatingCarAppNativeActivity</string>" "<string name=\"app_name\">rotating_car_app</string>" file_content ${file_content})
     FILE(WRITE ${CMAKE_BINARY_DIR}/examples/rotating_car_app/res/values/strings.xml ${file_content})
 
-    set(ANT_EXECUTABLE ant)
-    if(CMAKE_HOST_WIN32)
-        set(ANT_EXECUTABLE ant.bat)
-    endif(CMAKE_HOST_WIN32)
-
-    string(TOLOWER ${CMAKE_BUILD_TYPE} ant_build_type)
-
     add_custom_target(rotating_car_app[build-apk]
         DEPENDS rotating_car_app
         COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/librotating_car_app.so ${CMAKE_BINARY_DIR}/examples/rotating_car_app/libs/${ANDROID_ABI}/librotating_car_app.so
         COMMAND ${ANT_EXECUTABLE} ${ant_build_type} -buildfile ${CMAKE_BINARY_DIR}/examples/rotating_car_app
     )
-    
+
     # add_custom_target(rotating_car_app[build-apk]
     #     DEPENDS rotating_car_app
     #     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -232,7 +274,6 @@ if(ANDROID)
     add_custom_target(rotating_car_app[uninstall-apk]
         COMMAND adb uninstall com.android.lantern.rotating_car_app
     )
-
 else(ANDROID)
     add_executable(
         rotating_car_app

@@ -36,15 +36,15 @@ int32_t tests::onActivate()
 	return STATUS_KO;
 }
 
-void android_main(android_app* app)
+void android_main(android_app* application)
 {
 	info("android_main");
 
-	changeDirectoryToAppCacheLocation(app->activity->env, app->activity->vm,
-	                                  app->activity->clazz);
-	unpackResourcesFromApk(app->activity->assetManager);
+	changeDirectoryToAppCacheLocation(application->activity->env, application->activity->vm,
+			application->activity->clazz);
+	unpackResourcesFromApk(application->activity->assetManager);
 
-	tests{app}.start();
+	tests{application}.start();
 }
 
 #endif
