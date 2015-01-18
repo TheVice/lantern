@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 # Project name
 project(lantern)
@@ -19,6 +19,35 @@ set(COMPILER_FLAGS
 
 # Add compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
+
+# Android
+#
+if(ANDROID)
+
+    set(NDK_PATH $ENV{ANDROID_NDK})
+    if(CMAKE_HOST_WIN32)
+        string(REPLACE "\\" "/" NDK_PATH ${NDK_PATH})
+    endif(CMAKE_HOST_WIN32)
+
+    add_library(android_native_app_glue STATIC
+                "${NDK_PATH}/sources/android/native_app_glue/android_native_app_glue.c")
+
+    target_include_directories(android_native_app_glue SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/android/native_app_glue")
+
+    add_library(googletest_main STATIC 
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-death-test.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-filepath.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-port.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-printers.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-test-part.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-typed-test.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest_main.cc")
+
+    target_include_directories(googletest_main SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest/include")
+    target_include_directories(googletest_main SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest")
+
+endif(ANDROID)
 
 # Targets
 #
@@ -66,6 +95,10 @@ set_target_properties(
     lantern PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
+if(ANDROID)
+    target_include_directories(lantern SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/android/native_app_glue")
+endif(ANDROID)
+
 # Tests
 #
 
@@ -97,10 +130,26 @@ add_custom_command(
     "${PROJECT_SOURCE_DIR}/tests/resources"
     $<TARGET_FILE_DIR:tests>/resources)
 
-target_link_libraries(tests lantern gtest pthread)
+if(ANDROID)
 
-add_test(lantern_tests tests)
+    target_include_directories(tests SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest/include")
+    target_link_libraries(tests lantern googletest_main)
 
+    add_custom_target(run_tests
+        DEPENDS tests
+        COMMAND adb push ${CMAKE_BINARY_DIR}/tests /data/local/tmp
+        COMMAND adb shell chmod 775 /data/local/tmp/tests
+        COMMAND adb shell "cd /data/local/tmp ; /data/local/tmp/tests"
+    )
+
+else(ANDROID)
+
+    target_link_libraries(tests lantern gtest pthread)
+
+    add_test(lantern_tests tests)
+
+endif(ANDROID)
+if(NOT ANDROID)
 # Empty app example
 #
 
@@ -114,23 +163,91 @@ set_target_properties(
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/empty_app")
 
 target_link_libraries(empty_app lantern SDL2)
-
+endif(NOT ANDROID)
 # Rotating car app example
 #
 
-add_executable(
-    rotating_car_app
-    examples/rotating_car_app/main.cpp
-    ${LANTERN_HEADERS})
+if(ANDROID)
+    add_library(rotating_car_app SHARED
+        examples/rotating_car_app/main.cpp
+        ${LANTERN_HEADERS})
+    target_include_directories(rotating_car_app SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/android/native_app_glue")
 
-set_target_properties(
-    rotating_car_app PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/rotating_car_app")
+    target_link_libraries(rotating_car_app lantern android_native_app_glue android log)
 
-add_custom_command(
-    TARGET rotating_car_app POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${PROJECT_SOURCE_DIR}/examples/rotating_car_app/resources"
-    $<TARGET_FILE_DIR:rotating_car_app>/resources)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/examples/rotating_car_app/resources" "${CMAKE_BINARY_DIR}/examples/rotating_car_app/assets/resources")
+    set(ANDROID_EXECUTABLE android)
+    if(CMAKE_HOST_WIN32)
+        set(ANDROID_EXECUTABLE android.bat)
+    endif(CMAKE_HOST_WIN32)
+    execute_process(COMMAND ${ANDROID_EXECUTABLE} create project -n rotating_car_app -a LaternRotatingCarAppNativeActivity -k com.android.lantern.rotating_car_app -t android-${ANDROID_NATIVE_API_LEVEL} -p ${CMAKE_BINARY_DIR}/examples/rotating_car_app)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/rotating_car_app/res/layout)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/rotating_car_app/src/com)
 
-target_link_libraries(rotating_car_app lantern SDL2)
+    FILE(READ ${CMAKE_BINARY_DIR}/examples/rotating_car_app/AndroidManifest.xml file_content)
+    string(REPLACE "android:versionName=\"1.0\">" "android:versionName=\"1.0\">\n    <uses-sdk\n        android:minSdkVersion=\"${ANDROID_NATIVE_API_LEVEL}\" />" file_content ${file_content})
+    string(REPLACE "<activity android:name=\"LaternRotatingCarAppNativeActivity\"" "<activity android:name=\"android.app.NativeActivity\"" file_content ${file_content})
+    string(REPLACE "android:label=\"@string/app_name\">" "android:label=\"@string/app_name\">\n            <meta-data android:name=\"android.app.lib_name\"\n                       android:value=\"rotating_car_app\" />" file_content ${file_content})
+    string(REPLACE "</manifest> " "</manifest>" file_content ${file_content})
+    FILE(WRITE ${CMAKE_BINARY_DIR}/examples/rotating_car_app/AndroidManifest.xml ${file_content})
+
+    FILE(READ ${CMAKE_BINARY_DIR}/examples/rotating_car_app/res/values/strings.xml file_content)
+    string(REPLACE "<string name=\"app_name\">LaternRotatingCarAppNativeActivity</string>" "<string name=\"app_name\">rotating_car_app</string>" file_content ${file_content})
+    FILE(WRITE ${CMAKE_BINARY_DIR}/examples/rotating_car_app/res/values/strings.xml ${file_content})
+
+    set(ANT_EXECUTABLE ant)
+    if(CMAKE_HOST_WIN32)
+        set(ANT_EXECUTABLE ant.bat)
+    endif(CMAKE_HOST_WIN32)
+
+    string(TOLOWER ${CMAKE_BUILD_TYPE} ant_build_type)
+
+    add_custom_target(rotating_car_app[build-apk]
+        DEPENDS rotating_car_app
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/librotating_car_app.so ${CMAKE_BINARY_DIR}/examples/rotating_car_app/libs/${ANDROID_ABI}/librotating_car_app.so
+        COMMAND ${ANT_EXECUTABLE} ${ant_build_type} -buildfile ${CMAKE_BINARY_DIR}/examples/rotating_car_app
+    )
+    
+    # add_custom_target(rotating_car_app[build-apk]
+    #     DEPENDS rotating_car_app
+    #     COMMAND ${CMAKE_COMMAND} -E copy_directory
+    #     "${PROJECT_SOURCE_DIR}/examples/rotating_car_app/resources"
+    #     "${CMAKE_BINARY_DIR}/examples/rotating_car_app/assets/resources"
+    #     COMMAND android create project -n rotating_car_app -a LaternRotatingCarAppNativeActivity -k com.android.lantern.rotating_car_app -t android-${ANDROID_NATIVE_API_LEVEL} -p ${CMAKE_BINARY_DIR}/examples/rotating_car_app
+    #     COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/librotating_car_app.so ${CMAKE_BINARY_DIR}/examples/rotating_car_app/libs/${ANDROID_ABI}/librotating_car_app.so
+    #     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/rotating_car_app/res/layout
+    #     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/rotating_car_app/src/com
+    # )
+
+    add_custom_target(rotating_car_app[install-apk]
+        DEPENDS rotating_car_app[build-apk]
+        COMMAND adb install -r ${CMAKE_BINARY_DIR}/examples/rotating_car_app/bin/rotating_car_app-${ant_build_type}.apk
+    )
+
+    add_custom_target(rotating_car_app[run-apk]
+        DEPENDS rotating_car_app[install-apk]
+        COMMAND adb shell am start -a android.intent.action.MAIN -n com.android.lantern.rotating_car_app/android.app.NativeActivity
+    )
+
+    add_custom_target(rotating_car_app[uninstall-apk]
+        COMMAND adb uninstall com.android.lantern.rotating_car_app
+    )
+
+else(ANDROID)
+    add_executable(
+        rotating_car_app
+        examples/rotating_car_app/main.cpp
+        ${LANTERN_HEADERS})
+
+    set_target_properties(
+        rotating_car_app PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/rotating_car_app")
+
+    add_custom_command(
+        TARGET rotating_car_app POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/examples/rotating_car_app/resources"
+        $<TARGET_FILE_DIR:rotating_car_app>/resources)
+
+    target_link_libraries(rotating_car_app lantern SDL2)
+endif(ANDROID)
