@@ -11,7 +11,7 @@ Software renderer written for educational purposes. Uses SDL2 for rendering and 
 * Run: ```set GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target
 * Run: ```cmake -G "MinGW Makefiles" ..``` to generate makefile
 * Run: ```mingw32-make lantern``` to build library
-* Run: ```mingw32-make rotating_car_app``` to build example application
+* Run: ```mingw32-make rasterized_triangle_app``` to build example application
 * Run: ```mingw32-make tests``` to build tests executable
 
 ###Building on Windows (Visual Studio 2013)
@@ -30,7 +30,7 @@ Software renderer written for educational purposes. Uses SDL2 for rendering and 
 * Run: ```export GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target. If you installed it via apt the path is /usr/src/gtest
 * Run: ```cmake -G "Unix Makefiles" ..``` to generate makefile
 * Run: ```make lantern``` to build library
-* Run: ```make rotating_car_app``` to build example application
+* Run: ```make rasterized_triangle_app``` to build example application
 * Run: ```make tests``` to build tests executable
 
 ###Building on Mac OS X
@@ -70,6 +70,6 @@ Uses direct writing into ANativeWindow_Buffer for rendering and Google C++ Testi
 * Connect your Android device, start emulator by ```android avd``` or ```emulator -avd <avd_name>``` to run already created emulator directly
 * ~~It is also possible to run [Android x86](http://www.android-x86.org/download) on hypervisor~~ To be detailed
 * Make sure ```adb devices``` see your Android device/emulator~~/OS on virtual~~
-* Execute ```mingw32-make -j%NUMBER_OF_PROCESSORS% -s rotating_car_app[run-apk]``` on Windows or ```make -j$(nproc) -s rotating_car_app[run-apk]``` on Linux to run rotating_car_app on Android
+* Execute ```mingw32-make -j%NUMBER_OF_PROCESSORS% -s rasterized_triangle_app[run-apk]``` on Windows or ```make -j$(nproc) -s rasterized_triangle_app[run-apk]``` on Linux to run rasterized_triangle_app on Android
 * Execute ```mingw32-make -j%NUMBER_OF_PROCESSORS% -s run_tests``` on Windows or ```make -j$(nproc) -s run_tests``` on Linux to run tests on Android
 * You can also do the same from Eclipse IDE after import already exist project from ```build``` directory

@@ -82,17 +82,19 @@ unsigned long getTimer()
 	return now.tv_nsec / 1000000 + now.tv_sec * 1000;
 }
 
-app::app(android_app* application) : m_painter{nullptr},
+app::app(android_app* application) : m_target_texture{nullptr},
 									 mApplication{application},
 									 mEnabled{false},
 									 mQuit{false},
-									 mTimerStart{0},
-									 mTime_accumulator_millis{0},
-									 mFps{0}
+									 m_last_frame_time{0},
+									 m_time_accumulator{0},
+									 m_frames_accumulator{0},
+									 m_target_framerate_delay(0)
 {
 	mApplication->onAppCmd = activityCallback;
 	mApplication->onInputEvent = inputCallback;
 	mApplication->userData = this;
+	set_target_framerate(60);
 }
 
 app::~app()
@@ -135,9 +137,26 @@ void app::start()
 	}
 }
 
-bitmap_painter& app::get_painter()
+texture& app::get_target_texture()
 {
-	return *(bitmap_painter*)m_painter;
+	return *(texture*)m_target_texture;
+}
+
+pipeline& app::get_pipeline()
+{
+	return m_pipeline;
+}
+
+void app::set_target_framerate(unsigned int const fps)
+{
+	if (fps == 0)
+	{
+		m_target_framerate_delay = 0;
+	}
+	else
+	{
+		m_target_framerate_delay = 1000 / fps;
+	}
 }
 
 int32_t app::onActivate()
@@ -161,10 +180,11 @@ int32_t app::onActivate()
 		return STATUS_KO;
 	}
 
-	m_painter = new bitmap_painter{static_cast<unsigned int>(mWindowBuffer.width),
+	m_target_texture = new texture{static_cast<unsigned int>(mWindowBuffer.width),
 								   static_cast<unsigned int>(mWindowBuffer.height)};
 
-	mTimerStart = getTimer();
+	// Time when last frame was executed
+	m_last_frame_time = getTimer();
 	info("Activating App OK");
 	return STATUS_OK;
 }
@@ -172,10 +192,10 @@ int32_t app::onActivate()
 void app::onDeactivate()
 {
 	info("Deactivating App");
-	if (m_painter != nullptr)
+	if (m_target_texture != nullptr)
 	{
-		delete m_painter;
-		m_painter = nullptr;
+		delete m_target_texture;
+		m_target_texture = nullptr;
 	}
 	info("App deactivated");
 }
@@ -187,37 +207,54 @@ int32_t app::onStep()
 	ANativeWindow* window = mApplication->window;
 	if (ANativeWindow_lock(window, &mWindowBuffer, NULL) >= 0)
 	{
-		// Clear texture
-		m_painter->clear(0);
-
 		// Calculate time since last frame
 		//
 		unsigned long currentTime = getTimer();
-		unsigned long delta_since_last_frame_millis = currentTime - mTimerStart;
+		unsigned long delta_since_last_frame_millis = currentTime - m_last_frame_time;
 
 		// Save last frame time
-		mTimerStart = getTimer();
+		m_last_frame_time = getTimer();
+
+		// Clear texture with black
+		m_target_texture->clear(0);
 
 		// Execute frame
 		frame(delta_since_last_frame_millis / 1000.0);
 
 		// Sum up passed time
-		mTime_accumulator_millis += delta_since_last_frame_millis;
+		m_time_accumulator += delta_since_last_frame_millis;
 
-		// Present texture
-		memcpy(mWindowBuffer.bits, m_painter->get_data(), 4 * mWindowBuffer.width * mWindowBuffer.height);
+		// Present texture on a screen
+		//
+		memcpy(mWindowBuffer.bits, m_target_texture->get_data(), 4 * mWindowBuffer.width * mWindowBuffer.height);
 
 		ANativeWindow_unlockAndPost(window);
 
-		++mFps;
+		// Sum up passed frames
+		++m_frames_accumulator;
 
-		if (mTime_accumulator_millis >= 1000)
+		if (m_target_framerate_delay > 0)
+		{
+			// Calculate delay we must have to stick to the target framerate
+			//
+			uint32_t time_required_for_frame = getTimer() - m_last_frame_time;
+			int time_to_wait = m_target_framerate_delay - time_required_for_frame;
+
+			if (time_to_wait > 0)
+			{
+				usleep(static_cast<unsigned long>(time_to_wait / 1000.0));
+			}
+		}
+
+		// Drop frames and seconds counters to zero every second
+		//
+		if (m_time_accumulator >= 1000)
 		{
 #ifdef LANTERN_DEBUG_OUTPUT_FPS
-			info("FPS: %i", mFps);
+			info("FPS: %i", m_frames_accumulator);
 #endif
-			mTime_accumulator_millis = 0;
-			mFps = 0;
+			m_time_accumulator = 0;
+			m_frames_accumulator = 0;
 		}
 
 		info("App step done OK");
@@ -325,9 +362,13 @@ const int32_t app::STATUS_KO = -1;
 app::app(unsigned int const width, unsigned int const height)
 	: m_window{nullptr},
 	  m_renderer{nullptr},
-	  m_target_texture{nullptr},
-	  m_painter{width, height}
+	  m_sdl_target_texture{nullptr},
+	  m_target_texture{width, height},
+	  m_target_framerate_delay(0)
 {
+	// Initialize SDL library and according objects
+	//
+
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		throw std::runtime_error(SDL_GetError());
@@ -349,23 +390,28 @@ app::app(unsigned int const width, unsigned int const height)
 		throw std::runtime_error(SDL_GetError());
 	}
 
-	m_target_texture = SDL_CreateTexture(
+	m_sdl_target_texture = SDL_CreateTexture(
 		m_renderer,
 		SDL_PIXELFORMAT_ARGB8888,
 		SDL_TEXTUREACCESS_STREAMING,
 		width, height);
-	if (m_target_texture == nullptr)
+	if (m_sdl_target_texture == nullptr)
 	{
 		throw std::runtime_error(SDL_GetError());
 	}
+
+	set_target_framerate(60);
 }
 
 app::~app()
 {
-	if (m_target_texture != nullptr)
+	// Clean up SDL library
+	//
+
+	if (m_sdl_target_texture != nullptr)
 	{
-		SDL_DestroyTexture(m_target_texture);
-		m_target_texture = nullptr;
+		SDL_DestroyTexture(m_sdl_target_texture);
+		m_sdl_target_texture = nullptr;
 	}
 
 	if (m_renderer != nullptr)
@@ -392,10 +438,18 @@ int app::start()
 	Uint32 last_frame_time{0};
 
 	Uint32 time_accumulator{0};
-	unsigned int fps{0};
+	unsigned int frames_accumulator{0};
 
 	while(running)
 	{
+		// Calculate time since last frame
+		//
+		Uint32 current_time{SDL_GetTicks()};
+		Uint32 delta_since_last_frame{current_time - last_frame_time};
+
+		// Save last frame time
+		last_frame_time = SDL_GetTicks();
+
 		// Process events
 		//
 		while (SDL_PollEvent(&event))
@@ -410,16 +464,8 @@ int app::start()
 			}
 		}
 
-		// Clear texture
-		m_painter.clear(0);
-
-		// Calculate time since last frame
-		//
-		Uint32 current_time{SDL_GetTicks()};
-		Uint32 delta_since_last_frame{current_time - last_frame_time};
-
-		// Save last frame time
-		last_frame_time = SDL_GetTicks();
+		// Clear texture with black
+		m_target_texture.clear(0);
 
 		// Execute frame
 		frame(delta_since_last_frame / 1000.0f);
@@ -427,35 +473,68 @@ int app::start()
 		// Sum up passed time
 		time_accumulator += delta_since_last_frame;
 
-		// Present texture
+		// Present texture on a screen
 		//
-		SDL_UpdateTexture(m_target_texture, nullptr, m_painter.get_data(), m_painter.get_pitch());
-		SDL_RenderCopy(m_renderer, m_target_texture, nullptr, nullptr);
+		SDL_UpdateTexture(m_sdl_target_texture, nullptr, m_target_texture.get_data(), m_target_texture.get_pitch());
+		SDL_RenderCopy(m_renderer, m_sdl_target_texture, nullptr, nullptr);
 		SDL_RenderPresent(m_renderer);
 
-		++fps;
+		// Sum up passed frames
+		++frames_accumulator;
 
+		if (m_target_framerate_delay > 0)
+		{
+			// Calculate delay we must have to stick to the target framerate
+			//
+			Uint32 time_required_for_frame = SDL_GetTicks() - last_frame_time;
+			int time_to_wait = m_target_framerate_delay - time_required_for_frame;
+
+			if (time_to_wait > 0)
+			{
+				SDL_Delay(static_cast<Uint32>(time_to_wait));
+			}
+		}
+
+		// Drop frames and seconds counters to zero every second
+		//
 		if (time_accumulator >= 1000)
 		{
 #ifdef LANTERN_DEBUG_OUTPUT_FPS
-			std::cout << "FPS: " << fps << std::endl;
+			std::cout << "FPS: " << frames_accumulator << std::endl;
 #endif
 			time_accumulator = 0;
-			fps = 0;
+			frames_accumulator = 0;
 		}
 	}
 
 	return 0;
 }
 
-bitmap_painter& app::get_painter()
+texture& app::get_target_texture()
 {
-	return m_painter;
+	return m_target_texture;
 }
 
-void app::on_key_down(SDL_Keysym key)
+pipeline& app::get_pipeline()
 {
+	return m_pipeline;
+}
 
+void app::on_key_down(SDL_Keysym const)
+{
+	// Does not handle any key by default
+}
+
+void app::set_target_framerate(unsigned int const fps)
+{
+	if (fps == 0)
+	{
+		m_target_framerate_delay = 0;
+	}
+	else
+	{
+		m_target_framerate_delay = 1000 / fps;
+	}
 }
 
 #endif
