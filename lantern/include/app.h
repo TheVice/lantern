@@ -75,7 +75,7 @@ namespace lantern
 
 #else
 
-#include <SDL2/SDL.h>
+#include "SDL.h"
 #include "bitmap_painter.h"
 
 namespace lantern

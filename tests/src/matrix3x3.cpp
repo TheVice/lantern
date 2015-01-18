@@ -1,4 +1,3 @@
-#include <gtest/gtest.h>
 #include "common.h"
 #include "matrix3x3.h"
 
@@ -19,17 +18,6 @@ TEST(matrix3x3, constructors)
 	ASSERT_FLOATS_NEAR(m1.values[2][0], 90.2f);
 	ASSERT_FLOATS_NEAR(m1.values[2][1], 1.2f);
 	ASSERT_FLOATS_NEAR(m1.values[2][2], -2.2f);
-
-	matrix3x3 const m2{};
-	ASSERT_FLOATS_NEAR(m2.values[0][0], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[0][1], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[0][2], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[1][0], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[1][1], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[1][2], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[2][0], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[2][1], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[2][2], 0.0f);
 }
 
 TEST(matrix3x3, matrix_matrix_multiplication)

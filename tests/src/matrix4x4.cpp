@@ -1,4 +1,3 @@
-#include <gtest/gtest.h>
 #include "common.h"
 #include "matrix4x4.h"
 
@@ -27,24 +26,6 @@ TEST(matrix4x4, constructors)
 	ASSERT_FLOATS_NEAR(m1.values[3][1], 2.0f);
 	ASSERT_FLOATS_NEAR(m1.values[3][2], 1.0f);
 	ASSERT_FLOATS_NEAR(m1.values[3][3], -3.0f);
-
-	matrix4x4 const m2{};
-	ASSERT_FLOATS_NEAR(m2.values[0][0], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[0][1], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[0][2], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[0][3], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[1][0], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[1][1], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[1][2], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[1][3], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[2][0], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[2][1], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[2][2], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[2][3], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[3][0], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[3][1], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[3][2], 0.0f);
-	ASSERT_FLOATS_NEAR(m2.values[3][3], 0.0f);
 }
 
 TEST(matrix4x4, matrix_matrix_multiplication)

@@ -26,6 +26,15 @@
 # Doxygen
 doc
 
+# Build dir
+build/
+
+# On Mac
+.DS_Store
+
+# Do not ignore resources
+!**/resources/*
+
 ### Android ###
 # Built application files
 *.apk

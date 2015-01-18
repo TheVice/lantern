@@ -6,25 +6,29 @@ project(lantern)
 # Add testing tool
 include(CTest)
 
-# Project directories
-include_directories(
-    examples/empty_app
-    examples/rotating_car_app
-    lantern/src lantern/include
-    tests/src tests/include)
+# SDL2 look up ==============================
+if(NOT ANDROID)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+    find_package(SDL2 REQUIRED)
+endif(NOT ANDROID)
+# ===========================================
 
-# Additional compiler flags
-set(COMPILER_FLAGS
-    "-std=c++11 -Wall -Wno-comment -Werror")
+# Compiler setup ============================
+if (MSVC)
+    set(COMPILER_FLAGS
+        "")
 
-# Add compiler flags
+    add_definitions(-D_USE_MATH_DEFINES)
+else()
+    set(COMPILER_FLAGS
+        "-std=gnu++0x -Wall -Wno-comment")
+endif()
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
+# ===========================================
 
-# Android
-#
-
+# Android ===================================
 if(ANDROID)
-
     set(NDK_PATH $ENV{ANDROID_NDK})
     set(ANDROID_EXECUTABLE android)
     set(ANT_EXECUTABLE ant)
@@ -41,28 +45,10 @@ if(ANDROID)
                 "${NDK_PATH}/sources/android/native_app_glue/android_native_app_glue.c")
 
     target_include_directories(android_native_app_glue SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/android/native_app_glue")
-
-    add_library(googletest_main STATIC 
-                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-death-test.cc"
-                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-filepath.cc"
-                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-port.cc"
-                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-printers.cc"
-                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-test-part.cc"
-                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-typed-test.cc"
-                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest.cc"
-                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest_main.cc")
-
-    target_include_directories(googletest_main SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest/include")
-    target_include_directories(googletest_main SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest")
-
 endif(ANDROID)
+# ===========================================
 
-# Targets
-#
-
-# Library
-#
-
+# Library target ============================
 set(LANTERN_SOURCES
     lantern/src/vector3.cpp
     lantern/src/vector4.cpp
@@ -78,6 +64,7 @@ set(LANTERN_SOURCES
     lantern/src/scene_object.cpp
     lantern/src/scene.cpp
     lantern/src/pipeline.cpp)
+
 set(LANTERN_HEADERS
     lantern/include/vector3.h
     lantern/include/vector4.h
@@ -99,6 +86,11 @@ add_library(
     ${LANTERN_SOURCES}
     ${LANTERN_HEADERS})
 
+target_include_directories(lantern PUBLIC lantern/include)
+if(NOT ANDROID)
+    target_include_directories(lantern PRIVATE ${SDL2_INCLUDE_DIR})
+endif(NOT ANDROID)
+
 set_target_properties(
     lantern PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
@@ -106,10 +98,42 @@ set_target_properties(
 if(ANDROID)
     target_include_directories(lantern SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/android/native_app_glue")
 endif(ANDROID)
+# ===========================================
 
-# Tests
-#
+# Gooogle C++ testing framework target ======
+if(ANDROID)
+    add_library(googletest_main STATIC 
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-death-test.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-filepath.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-port.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-printers.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-test-part.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-typed-test.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest_main.cc")
 
+    target_include_directories(googletest_main SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest/include")
+    target_include_directories(googletest_main SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest")
+else(ANDROID)
+    if(DEFINED ENV{GTEST_ROOT})
+
+    string(REPLACE "\\" "/" GTEST_SOURCES "$ENV{GTEST_ROOT}/src/gtest-all.cc")
+
+    add_library(
+        gtest STATIC
+        ${GTEST_SOURCES})
+
+    target_include_directories(gtest PRIVATE $ENV{GTEST_ROOT}/include $ENV{GTEST_ROOT})
+
+    if(UNIX)
+        target_link_libraries(gtest pthread)
+    endif()
+
+    endif()
+endif(ANDROID)
+# ===========================================
+
+# Tests target ==============================
 set(TESTS_SOURCES
     tests/src/main.cpp
     tests/src/vector3.cpp
@@ -119,6 +143,7 @@ set(TESTS_SOURCES
     tests/src/camera.cpp
     tests/src/bitmap_painter.cpp
     tests/src/obj_import.cpp)
+
 set(TESTS_HEADERS
     tests/include/common.h)
 
@@ -128,9 +153,21 @@ add_executable(
     ${TESTS_HEADERS}
     ${LANTERN_HEADERS})
 
+target_include_directories(tests PRIVATE lantern/include tests/include)
+
+if(NOT ANDROID)
+    if (DEFINED ENV{GTEST_ROOT})
+        target_include_directories(tests PRIVATE $ENV{GTEST_ROOT}/include)
+    endif()
+endif(NOT ANDROID)
+
 set_target_properties(
     tests PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/")
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
+
+if(NOT ANDROID)
+    target_link_libraries(tests lantern gtest)
+endif(NOT ANDROID)
 
 add_custom_command(
     TARGET tests POST_BUILD
@@ -139,7 +176,6 @@ add_custom_command(
     $<TARGET_FILE_DIR:tests>/resources)
 
 if(ANDROID)
-
     target_include_directories(tests SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest/include")
     target_link_libraries(tests lantern googletest_main)
 
@@ -149,22 +185,13 @@ if(ANDROID)
         COMMAND adb shell chmod 775 /data/local/tmp/tests
         COMMAND adb shell "cd /data/local/tmp ; /data/local/tmp/tests"
     )
-
-else(ANDROID)
-
-    target_link_libraries(tests lantern gtest pthread)
-
-    add_test(lantern_tests tests)
-
 endif(ANDROID)
+# ===========================================
 
-# Empty app example
-#
-
+# Empty app target ==========================
 if(ANDROID)
     add_library(empty_app SHARED
-        examples/empty_app/main.cpp
-        ${LANTERN_HEADERS})
+        examples/empty_app/main.cpp)
     target_include_directories(empty_app SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/android/native_app_glue")
 
     target_link_libraries(empty_app lantern android_native_app_glue android log)
@@ -207,23 +234,31 @@ if(ANDROID)
 else(ANDROID)
     add_executable(
         empty_app
-        examples/empty_app/main.cpp
-        ${LANTERN_HEADERS})
+        examples/empty_app/main.cpp)
 
     set_target_properties(
         empty_app PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/empty_app")
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/empty_app")
 
-    target_link_libraries(empty_app lantern SDL2)
+    target_include_directories(empty_app PRIVATE lantern/include)
+    target_include_directories(empty_app PRIVATE ${SDL2_INCLUDE_DIR})
+
+    target_link_libraries(empty_app lantern ${SDL2_LIBRARY})
+
+    if (WIN32)
+        add_custom_command(
+            TARGET empty_app
+            POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+            "${SDL2_DLL}"
+            $<TARGET_FILE_DIR:empty_app>)
+    endif()
 endif(ANDROID)
+# ===========================================
 
-# Rotating car app example
-#
-
+#Rotating car app target ==========================
 if(ANDROID)
     add_library(rotating_car_app SHARED
-        examples/rotating_car_app/main.cpp
-        ${LANTERN_HEADERS})
+        examples/rotating_car_app/main.cpp)
     target_include_directories(rotating_car_app SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/android/native_app_glue")
 
     target_link_libraries(rotating_car_app lantern android_native_app_glue android log)
@@ -250,17 +285,6 @@ if(ANDROID)
         COMMAND ${ANT_EXECUTABLE} ${ant_build_type} -buildfile ${CMAKE_BINARY_DIR}/examples/rotating_car_app
     )
 
-    # add_custom_target(rotating_car_app[build-apk]
-    #     DEPENDS rotating_car_app
-    #     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    #     "${PROJECT_SOURCE_DIR}/examples/rotating_car_app/resources"
-    #     "${CMAKE_BINARY_DIR}/examples/rotating_car_app/assets/resources"
-    #     COMMAND android create project -n rotating_car_app -a LaternRotatingCarAppNativeActivity -k com.android.lantern.rotating_car_app -t android-${ANDROID_NATIVE_API_LEVEL} -p ${CMAKE_BINARY_DIR}/examples/rotating_car_app
-    #     COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/librotating_car_app.so ${CMAKE_BINARY_DIR}/examples/rotating_car_app/libs/${ANDROID_ABI}/librotating_car_app.so
-    #     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/rotating_car_app/res/layout
-    #     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/rotating_car_app/src/com
-    # )
-
     add_custom_target(rotating_car_app[install-apk]
         DEPENDS rotating_car_app[build-apk]
         COMMAND adb install -r ${CMAKE_BINARY_DIR}/examples/rotating_car_app/bin/rotating_car_app-${ant_build_type}.apk
@@ -277,18 +301,29 @@ if(ANDROID)
 else(ANDROID)
     add_executable(
         rotating_car_app
-        examples/rotating_car_app/main.cpp
-        ${LANTERN_HEADERS})
+        examples/rotating_car_app/main.cpp)
 
     set_target_properties(
         rotating_car_app PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/rotating_car_app")
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/rotating_car_app")
+
+    target_include_directories(rotating_car_app PRIVATE lantern/include)
+    target_include_directories(rotating_car_app PRIVATE ${SDL2_INCLUDE_DIR})
+
+    target_link_libraries(rotating_car_app lantern ${SDL2_LIBRARY})
+
+    if (WIN32)
+        add_custom_command(
+            TARGET rotating_car_app
+            POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+            "${SDL2_DLL}"
+            $<TARGET_FILE_DIR:rotating_car_app>)
+    endif()
 
     add_custom_command(
         TARGET rotating_car_app POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${PROJECT_SOURCE_DIR}/examples/rotating_car_app/resources"
         $<TARGET_FILE_DIR:rotating_car_app>/resources)
-
-    target_link_libraries(rotating_car_app lantern SDL2)
 endif(ANDROID)
+# ===========================================
