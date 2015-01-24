@@ -1,104 +1,62 @@
 #include <iostream>
 #include <stdexcept>
-
+#if __linux
+#include <unistd.h>
+#endif
 #include "app.h"
 
 using namespace lantern;
 
 #ifdef WIN32
 #define WINDOW_CLASS TEXT("szWindowClass")
-app::app(unsigned int const width, unsigned int const height)
-	: m_painter{width, height},
-      m_texName(0),
-      m_hwnd(HWND_DESKTOP),
-      m_hdc(0),
-      m_hglrc(0)
+
+BOOL winGlInit(HWND hWnd, HDC& hdc, HGLRC& hglrc)
 {
-	QueryPerformanceFrequency(&mFrequency);
-	HINSTANCE hInstance = GetModuleHandle(NULL);
-	if (!MyRegisterClass(hInstance))
+	PIXELFORMATDESCRIPTOR pfd;
+	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+	pfd.dwLayerMask = PFD_MAIN_PLANE;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 8;
+	pfd.cDepthBits = 16;
+	hdc = GetDC(hWnd);
+
+	int pixelFormat = ChoosePixelFormat(hdc, &pfd);
+	if (pixelFormat == 0)
 	{
-		throw std::runtime_error("app::app::MyRegisterClass");
+		return FALSE;
 	}
 
-	if (!InitInstance(hInstance, SW_SHOW, width, height, m_hwnd))
+	if (FALSE == SetPixelFormat(hdc, pixelFormat, &pfd))
 	{
-		throw std::runtime_error("app::app::InitInstance");
+		return FALSE;
 	}
 
-	if (!winGlInit(m_hwnd, m_hdc, m_hglrc))
-	{
-		throw std::runtime_error("app::app::winGlInit");
-	}
-	reshape(width, height);
+	hglrc = wglCreateContext(hdc);
+	wglMakeCurrent(hdc, hglrc);
+
+	return TRUE;
 }
 
-app::~app()
+void winGlRelease(HWND hWnd, HDC& hdc, HGLRC& hglrc)
 {
-	winGlRelease(m_hwnd, m_hdc, m_hglrc);
-}
+	wglMakeCurrent(NULL, NULL);
 
-int app::start()
-{
-	LARGE_INTEGER timerStart;
-	QueryPerformanceCounter(&timerStart);
-	double time_accumulator_millis = 0.0;
-	unsigned int fps = 0;
-	MSG msg;
-	do
+	if (hglrc != 0)
 	{
-		// Process events
-		//
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else
-		{
-			// Clear texture
-			m_painter.clear(0);
+		wglDeleteContext(hglrc);
+	}
 
-			// Calculate time since last frame
-			//
-			LARGE_INTEGER currentTime;
-			QueryPerformanceCounter(&currentTime);
-			double delta_since_last_frame_millis = ((double(
-					currentTime.LowPart - timerStart.LowPart)
-					/ double(mFrequency.LowPart)) * 1000);
+	hglrc = 0;
 
-			// Save last frame time
-			QueryPerformanceCounter(&timerStart);
+	if (hdc != 0)
+	{
+		ReleaseDC(hWnd, hdc);
+	}
 
-			// Execute frame
-			frame(delta_since_last_frame_millis / 1000.0);
-
-			// Sum up passed time
-			time_accumulator_millis += delta_since_last_frame_millis;
-
-			// Present texture
-			initTexture(&m_texName, m_painter.get_bitmap_width(), m_painter.get_bitmap_height(), m_painter.get_data());
-			dispalyTexture(m_texName);
-			SwapBuffers(m_hdc);
-
-			++fps;
-
-			if (time_accumulator_millis > 1000.0)
-			{
-#ifdef LANTERN_DEBUG_OUTPUT_FPS
-				std::cout << "FPS: " << fps << std::endl;
-#endif
-				time_accumulator_millis = 0.0;
-				fps = 0;
-			}
-		}
-		if (WM_CHAR == msg.message)
-		{
-			on_key_down((TCHAR) msg.wParam);
-		}
-	} while (WM_QUIT != msg.message);
-
-	return 0;
+	hdc = 0;
 }
 
 ATOM app::MyRegisterClass(HINSTANCE hInstance)
@@ -150,55 +108,6 @@ BOOL app::InitInstance(HINSTANCE aHinstance, int aCmdShow, UINT aWidth, UINT aHe
 	return TRUE;
 }
 
-BOOL app::winGlInit(HWND hWnd, HDC& hdc, HGLRC& hglrc)
-{
-	PIXELFORMATDESCRIPTOR pfd;
-	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
-	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-	pfd.nVersion = 1;
-	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-	pfd.dwLayerMask = PFD_MAIN_PLANE;
-	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 8;
-	pfd.cDepthBits = 16;
-	hdc = GetDC(hWnd);
-
-	int pixelFormat = ChoosePixelFormat(hdc, &pfd);
-	if (pixelFormat == 0)
-	{
-		return FALSE;
-	}
-
-	if (FALSE == SetPixelFormat(hdc, pixelFormat, &pfd))
-	{
-		return FALSE;
-	}
-
-	hglrc = wglCreateContext(hdc);
-	wglMakeCurrent(hdc, hglrc);
-
-	return TRUE;
-}
-
-void app::winGlRelease(HWND hWnd, HDC& hdc, HGLRC& hglrc)
-{
-	wglMakeCurrent(NULL, NULL);
-
-	if (hglrc != 0)
-	{
-		wglDeleteContext(hglrc);
-	}
-
-	hglrc = 0;
-
-	if (hdc != 0)
-	{
-		ReleaseDC(hWnd, hdc);
-	}
-
-	hdc = 0;
-}
-
 LRESULT CALLBACK app::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -218,9 +127,166 @@ LRESULT CALLBACK app::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	return 0;
 }
 
-#else
+app::app(unsigned int const width, unsigned int const height)
+	: m_target_texture{width, height},
+	  m_target_framerate_delay{0},
+	  m_texName{0},
+	  m_hwnd{HWND_DESKTOP},
+	  m_hdc{0},
+	  m_hglrc{0}
+{
+	QueryPerformanceFrequency(&mFrequency);
+	HINSTANCE hInstance = GetModuleHandle(NULL);
 
-app::app(unsigned int const width, unsigned int const height) : m_painter{width, height},
+	if (!MyRegisterClass(hInstance))
+	{
+		throw std::runtime_error("app::app::MyRegisterClass");
+	}
+
+	if (!InitInstance(hInstance, SW_SHOW, width, height, m_hwnd))
+	{
+		throw std::runtime_error("app::app::InitInstance");
+	}
+
+	if (!winGlInit(m_hwnd, m_hdc, m_hglrc))
+	{
+		throw std::runtime_error("app::app::winGlInit");
+	}
+
+	set_target_framerate(60);
+	reshape(width, height);
+}
+
+app::~app()
+{
+	// Release up OpenGL(WGL) library resources
+	//
+	winGlRelease(m_hwnd, m_hdc, m_hglrc);
+}
+
+int app::start()
+{
+	// Time when last frame was executed
+	LARGE_INTEGER last_frame_time;
+	QueryPerformanceCounter(&last_frame_time);
+
+	double time_accumulator{0.0};
+	unsigned int frames_accumulator{0};
+
+	MSG msg;
+	do
+	{
+		// Process events
+		//
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else
+		{
+			// Calculate time since last frame
+			//
+			LARGE_INTEGER current_time;
+			QueryPerformanceCounter(&current_time);
+			double delta_since_last_frame = ((double(
+					current_time.LowPart - last_frame_time.LowPart)
+					/ double(mFrequency.LowPart)) * 1000);
+
+			// Save last frame time
+			QueryPerformanceCounter(&last_frame_time);
+
+			// Clear texture with black
+			m_target_texture.clear(0);
+
+			// Execute frame
+			frame(delta_since_last_frame / 1000.0f);
+
+			// Sum up passed time
+			time_accumulator += delta_since_last_frame;
+
+			// Present texture on a screen
+			//
+			initTexture(&m_texName, m_target_texture.get_width(), m_target_texture.get_height(), m_target_texture.get_data());
+			dispalyTexture(m_texName);
+			SwapBuffers(m_hdc);
+
+			// Sum up passed frames
+			++frames_accumulator;
+
+			if (m_target_framerate_delay > 0)
+			{
+				// Calculate delay we must have to stick to the target framerate
+				//
+				QueryPerformanceCounter(&current_time);
+				double time_required_for_frame = ((double(
+						current_time.LowPart - last_frame_time.LowPart)
+						/ double(mFrequency.LowPart)) * 1000);
+				int time_to_wait = m_target_framerate_delay - time_required_for_frame;
+
+				if (time_to_wait > 0)
+				{
+					Sleep(time_to_wait);
+				}
+			}
+
+			// Drop frames and seconds counters to zero every second
+			//
+			if (time_accumulator >= 1000.0)
+			{
+#ifdef LANTERN_DEBUG_OUTPUT_FPS
+				std::cout << "FPS: " << frames_accumulator << std::endl;
+#endif
+				time_accumulator = 0;
+				frames_accumulator = 0;
+			}
+		}
+		// Process events
+		//
+		if (WM_CHAR == msg.message)
+		{
+			on_key_down((TCHAR) msg.wParam);
+		}
+	} while (WM_QUIT != msg.message);
+
+	return 0;
+}
+#endif
+
+texture& app::get_target_texture()
+{
+	return m_target_texture;
+}
+
+pipeline& app::get_pipeline()
+{
+	return m_pipeline;
+}
+
+void app::set_target_framerate(unsigned int const fps)
+{
+	if (fps == 0)
+	{
+		m_target_framerate_delay = 0;
+	}
+	else
+	{
+		m_target_framerate_delay = 1000 / fps;
+	}
+}
+
+#if __linux
+unsigned long getTimer()
+{
+	timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	return now.tv_nsec / 1000000 + now.tv_sec * 1000;
+}
+
+app::app(unsigned int const width, unsigned int const height) :
+		m_target_texture{width, height},
+		m_target_framerate_delay{0},
+		m_texName{0},
 		m_dpy(nullptr),
 		m_glc(nullptr),
 		m_win(0)
@@ -251,11 +317,15 @@ app::app(unsigned int const width, unsigned int const height) : m_painter{width,
 	XStoreName(m_dpy, m_win, "Title");
 	m_glc = glXCreateContext(m_dpy, vi, NULL, GL_TRUE);
 	glXMakeCurrent(m_dpy, m_win, m_glc);
+
+	set_target_framerate(60);
 	reshape(width, height);
 }
 
 app::~app()
 {
+	// Release up OpenGL(glx) library resources
+	//
 	glXMakeCurrent(m_dpy, None, NULL);
 	glXDestroyContext(m_dpy, m_glc);
 	XDestroyWindow(m_dpy, m_win);
@@ -264,9 +334,11 @@ app::~app()
 
 int app::start()
 {
-	unsigned long timerStart = getTimer();
-	unsigned long time_accumulator_millis = 0;
-	unsigned int fps = 0;
+	// Time when last frame was executed
+	unsigned long last_frame_time{getTimer()};
+	unsigned long time_accumulator{0};
+	unsigned int frames_accumulator{0};
+
 	XEvent xev;
 	XWindowAttributes gwa;
 	do
@@ -274,42 +346,61 @@ int app::start()
 		XNextEvent(m_dpy, &xev);
 		if (xev.type == Expose)
 		{
-			// Clear texture
-			m_painter.clear(0);
-
 			// Calculate time since last frame
 			//
-			unsigned long currentTime = getTimer();
-			unsigned long delta_since_last_frame_millis = currentTime - timerStart;
+			unsigned long current_time = getTimer();
+			unsigned long delta_since_last_frame{current_time - last_frame_time};
 
 			// Save last frame time
-			timerStart = getTimer();
+			last_frame_time = getTimer();
+
+			// Clear texture with black
+			m_target_texture.clear(0);
 
 			XGetWindowAttributes(m_dpy, m_win, &gwa);
 
 			// Execute frame
-			frame(delta_since_last_frame_millis / 1000.0);
+			frame(delta_since_last_frame / 1000.0);
 
 			// Sum up passed time
-			time_accumulator_millis += delta_since_last_frame_millis;
+			time_accumulator += delta_since_last_frame;
 
-			// Present texture
-			initTexture(&m_texName, m_painter.get_bitmap_width(), m_painter.get_bitmap_height(), m_painter.get_data());
+			// Present texture on a screen
+			//
+			initTexture(&m_texName, m_target_texture.get_width(), m_target_texture.get_height(), m_target_texture.get_data());
 			dispalyTexture(m_texName);
 			glXSwapBuffers(m_dpy, m_win);
 
-			++fps;
+			// Sum up passed frames
+			++frames_accumulator;
 
-			if (time_accumulator_millis >= 1000)
+			if (m_target_framerate_delay > 0)
 			{
-#ifdef LANTERN_DEBUG_OUTPUT_FPS
-				std::cout << "FPS: " << fps << std::endl;
-#endif
-				time_accumulator_millis = 0;
-				fps = 0;
+				// Calculate delay we must have to stick to the target framerate
+				//
+				uint32_t time_required_for_frame = getTimer() - last_frame_time;
+				int time_to_wait = m_target_framerate_delay - time_required_for_frame;
+
+				if (time_to_wait > 0)
+				{
+					usleep(static_cast<unsigned long>(time_to_wait / 1000.0));
+				}
+			}
+
+			// Drop frames and seconds counters to zero every second
+			//
+			if (time_accumulator >= 1000)
+			{
+	#ifdef LANTERN_DEBUG_OUTPUT_FPS
+				std::cout << "FPS: " << frames_accumulator << std::endl;
+	#endif
+				time_accumulator = 0;
+				frames_accumulator = 0;
 			}
 			XSendEvent(m_dpy, m_win, 0, 0, &xev);
 		}
+		// Process events
+		//
 		else if (xev.type == KeyPress)
 		{
 			if (xev.xkey.keycode == 0x09)
@@ -321,32 +412,15 @@ int app::start()
 	} while(1);
 	return 0;
 }
-
-unsigned long app::getTimer()
-{
-	timespec now;
-	clock_gettime(CLOCK_MONOTONIC, &now);
-	return now.tv_nsec / 1000000 + now.tv_sec * 1000;
-}
 #endif
 
-bitmap_painter& app::get_painter()
+void reshape(GLsizei width, GLsizei height)
 {
-	return m_painter;
-}
-
-void app::reshape(int w, int h)
-{
-	glViewport(0, 0, (GLsizei) w, (GLsizei) h);
+	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
-//	glLoadIdentity();
-//	gluPerspective(60.0, (GLfloat) w / (GLfloat) h, 1.0, 30.0);
-//	glMatrixMode(GL_MODELVIEW);
-//	glLoadIdentity();
-//	glTranslatef(0.0, 0.0, -3.0);
 }
 
-void app::initTexture(GLuint* texName, GLuint imageWidth, GLuint imageHeight, const GLubyte* image)
+void initTexture(GLuint* texName, GLuint imageWidth, GLuint imageHeight, const GLubyte* image)
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glGenTextures(1, texName);
@@ -359,7 +433,7 @@ void app::initTexture(GLuint* texName, GLuint imageWidth, GLuint imageHeight, co
 			imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 }
 
-void app::dispalyTexture(GLuint texName)
+void dispalyTexture(GLuint texName)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
