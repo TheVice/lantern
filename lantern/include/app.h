@@ -19,8 +19,9 @@ void winGlRelease(HWND hWnd, HDC& hdc, HGLRC& hglrc);
 unsigned long getTimer();
 #endif
 void reshape(GLsizei width, GLsizei height);
-void initTexture(GLuint* texName, GLuint imageWidth, GLuint imageHeight, const GLubyte* image);
-void dispalyTexture(GLuint texName);
+void initTexture(GLuint* texName);
+void dispalyTexture(GLuint texName, GLuint imageWidth, GLuint imageHeight, const GLubyte* image);
+void releaseTexture(GLuint* texName);
 
 namespace lantern
 {

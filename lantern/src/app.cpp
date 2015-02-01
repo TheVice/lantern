@@ -153,6 +153,7 @@ app::app(unsigned int const width, unsigned int const height)
 		throw std::runtime_error("app::app::winGlInit");
 	}
 
+	initTexture(&m_texName);
 	set_target_framerate(60);
 	reshape(width, height);
 }
@@ -161,6 +162,7 @@ app::~app()
 {
 	// Release up OpenGL(WGL) library resources
 	//
+	releaseTexture(&m_texName);
 	winGlRelease(m_hwnd, m_hdc, m_hglrc);
 }
 
@@ -207,8 +209,7 @@ int app::start()
 
 			// Present texture on a screen
 			//
-			initTexture(&m_texName, m_target_texture.get_width(), m_target_texture.get_height(), m_target_texture.get_data());
-			dispalyTexture(m_texName);
+			dispalyTexture(m_texName, m_target_texture.get_width(), m_target_texture.get_height(), m_target_texture.get_data());
 			SwapBuffers(m_hdc);
 
 			// Sum up passed frames
@@ -318,6 +319,7 @@ app::app(unsigned int const width, unsigned int const height) :
 	m_glc = glXCreateContext(m_dpy, vi, NULL, GL_TRUE);
 	glXMakeCurrent(m_dpy, m_win, m_glc);
 
+	initTexture(&m_texName);
 	set_target_framerate(60);
 	reshape(width, height);
 }
@@ -326,6 +328,7 @@ app::~app()
 {
 	// Release up OpenGL(glx) library resources
 	//
+	releaseTexture(&m_texName);
 	glXMakeCurrent(m_dpy, None, NULL);
 	glXDestroyContext(m_dpy, m_glc);
 	XDestroyWindow(m_dpy, m_win);
@@ -367,8 +370,7 @@ int app::start()
 
 			// Present texture on a screen
 			//
-			initTexture(&m_texName, m_target_texture.get_width(), m_target_texture.get_height(), m_target_texture.get_data());
-			dispalyTexture(m_texName);
+			dispalyTexture(m_texName, m_target_texture.get_width(), m_target_texture.get_height(), m_target_texture.get_data());
 			glXSwapBuffers(m_dpy, m_win);
 
 			// Sum up passed frames
@@ -420,7 +422,7 @@ void reshape(GLsizei width, GLsizei height)
 	glMatrixMode(GL_PROJECTION);
 }
 
-void initTexture(GLuint* texName, GLuint imageWidth, GLuint imageHeight, const GLubyte* image)
+void initTexture(GLuint* texName)
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glGenTextures(1, texName);
@@ -429,16 +431,17 @@ void initTexture(GLuint* texName, GLuint imageWidth, GLuint imageHeight, const G
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth,
-			imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void dispalyTexture(GLuint texName)
+void dispalyTexture(GLuint texName, GLuint imageWidth, GLuint imageHeight, const GLubyte* image)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glBindTexture(GL_TEXTURE_2D, texName);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth,
+			imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	glBegin(GL_QUADS);
 
 	glTexCoord2f(0.0, 0.0);
@@ -454,6 +457,13 @@ void dispalyTexture(GLuint texName)
 	glVertex3f(-1.0, -1.0, 0.0);
 
 	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glFlush();
 	glDisable(GL_TEXTURE_2D);
+}
+
+void releaseTexture(GLuint* texName)
+{
+	glDeleteTextures(1, texName);
+	(*texName) = 0;
 }
