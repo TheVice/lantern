@@ -81,6 +81,12 @@ set(LANTERN_HEADERS
     lantern/include/vector3.h
     lantern/include/vector4.h)
 
+if(ANDROID)
+    list(APPEND LANTERN_SOURCES platforms/android-9/androidApp.cpp)
+    list(APPEND LANTERN_HEADERS platforms/android-9/androidApp.h)
+    include_directories(platforms/android-9/)
+endif(ANDROID)
+
 add_library(
     lantern STATIC
     ${LANTERN_SOURCES}
