@@ -82,8 +82,12 @@ set(LANTERN_HEADERS
     lantern/include/vector4.h)
 
 if(ANDROID)
-    list(APPEND LANTERN_SOURCES platforms/android-9/androidApp.cpp)
-    list(APPEND LANTERN_HEADERS platforms/android-9/androidApp.h)
+    list(APPEND LANTERN_SOURCES platforms/android-9/androidApp.cpp
+                                platforms/android-9/Graphics.cpp
+                                platforms/android-9/Gles1x.cpp)
+    list(APPEND LANTERN_HEADERS platforms/android-9/androidApp.h
+                                platforms/android-9/Graphics.h
+                                platforms/android-9/Gles1x.h)
     include_directories(platforms/android-9/)
 endif(ANDROID)
 
@@ -200,7 +204,7 @@ if(ANDROID)
         examples/empty_app/main.cpp)
     target_include_directories(empty_app SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/android/native_app_glue")
 
-    target_link_libraries(empty_app lantern android_native_app_glue android log)
+    target_link_libraries(empty_app lantern android_native_app_glue android log EGL GLESv1_CM)
 
     execute_process(COMMAND ${ANDROID_EXECUTABLE} create project -n empty_app -a LaternEmptyAppNativeActivity -k com.android.lantern.empty_app -t android-${ANDROID_NATIVE_API_LEVEL} -p ${CMAKE_BINARY_DIR}/examples/empty_app)
     execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/examples/empty_app/res/layout)
@@ -266,7 +270,7 @@ if(ANDROID)
         examples/rasterized_triangle_app/main.cpp)
     target_include_directories(rasterized_triangle_app SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/android/native_app_glue")
 
-    target_link_libraries(rasterized_triangle_app lantern android_native_app_glue android log)
+    target_link_libraries(rasterized_triangle_app lantern android_native_app_glue android log EGL GLESv1_CM)
 
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/examples/rasterized_triangle_app/resources" "${CMAKE_BINARY_DIR}/examples/rasterized_triangle_app/assets/resources")
     execute_process(COMMAND ${ANDROID_EXECUTABLE} create project -n rasterized_triangle_app -a LaternRasterizedTriangleAppNativeActivity -k com.android.lantern.rasterized_triangle_app -t android-${ANDROID_NATIVE_API_LEVEL} -p ${CMAKE_BINARY_DIR}/examples/rasterized_triangle_app)

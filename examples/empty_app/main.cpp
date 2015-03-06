@@ -20,7 +20,7 @@ protected:
 	int32_t onActivate() override
 	{
 		androidApp::onActivate();
-		mLanternApp = new internel_empty_app(mWindowBuffer.width, mWindowBuffer.height);
+		mLanternApp = new internel_empty_app(mGraphics.getWidth(), mGraphics.getHeight());
 
 		info("Activating App OK");
 		return STATUS_OK;

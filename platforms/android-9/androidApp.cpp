@@ -1,5 +1,5 @@
-
 #include "androidApp.h"
+#include "Gles1x.h"
 #include <iostream>
 #include <stdexcept>
 #include <android/log.h>
@@ -8,11 +8,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-internalApp::internalApp(unsigned int const aWidth, unsigned int const aHeight)
-	: lantern::app(aWidth, aHeight),
-	  mLastFrameTime {0},
-                 mTimeAccumulator {0},
-mFramesAccumulator {0}
+internalApp::internalApp(unsigned int const aWidth,
+                         unsigned int const aHeight) :
+	lantern::app(aWidth, aHeight), mLastFrameTime { 0 },
+mTimeAccumulator { 0 }, mFramesAccumulator { 0 }
 {
 	// Time when last frame was executed
 	mLastFrameTime = getTimer();
@@ -22,7 +21,7 @@ internalApp::~internalApp()
 {
 }
 
-int internalApp::start(void* aBuffer, size_t aBufferLength)
+int internalApp::start(GLuint aTextureName)
 {
 	// Calculate time since last frame
 	//
@@ -38,7 +37,8 @@ int internalApp::start(void* aBuffer, size_t aBufferLength)
 	mTimeAccumulator += deltaSinceLastFrameMillis;
 	// Present texture on a screen
 	//
-	memcpy(aBuffer, m_target_texture.get_data(), aBufferLength);
+	dispalyTexture(aTextureName, m_target_texture.get_width(),
+	               m_target_texture.get_height(), m_target_texture.get_data());
 	// Sum up passed frames
 	++mFramesAccumulator;
 
@@ -71,8 +71,9 @@ int internalApp::start(void* aBuffer, size_t aBufferLength)
 
 internalApp* androidApp::mLanternApp = nullptr;
 
-androidApp::androidApp(android_app* aApplication)
-	: mApplication(aApplication), mEnabled(false), mQuit(false)
+androidApp::androidApp(android_app* aApplication) :
+	mApplication(aApplication), mEnabled(false), mQuit(false), mTextureName { 0 },
+             mGraphics(aApplication)
 {
 	mApplication->onAppCmd = activityCallback;
 	mApplication->onInputEvent = inputCallback;
@@ -94,7 +95,7 @@ void androidApp::start()
 	while (true)
 	{
 		while ((result = ALooper_pollAll(mEnabled ? 0 : -1, NULL, &events,
-		                                 (void**)&source)) >= 0)
+		                                 (void**) &source)) >= 0)
 		{
 			if (source != NULL)
 			{
@@ -126,20 +127,22 @@ int32_t androidApp::onActivate()
 	info("Activating App");
 	ANativeWindow* window = mApplication->window;
 
-	if (ANativeWindow_setBuffersGeometry(window, 0, 0, WINDOW_FORMAT_RGBX_8888) < 0)
+	if (ANativeWindow_setBuffersGeometry(window, 0, 0, WINDOW_FORMAT_RGBX_8888)
+	    < 0)
 	{
 		info("ANativeWindow_setBuffersGeometry - Activating App KO");
 		return STATUS_KO;
 	}
 
-	//Needs to lock the window buffer to get its properties.
-	if (ANativeWindow_lock(window, &mWindowBuffer, NULL) >= 0)
+	if (mGraphics.start() == STATUS_OK)
 	{
-		ANativeWindow_unlockAndPost(window);
+		info("mGraphicsService started");
+		reshape(mGraphics.getWidth(), mGraphics.getHeight());
+		initTexture(&mTextureName);
 	}
 	else
 	{
-		info("ANativeWindow_lock - Activating App KO");
+		info("mGraphicsService failed to start");
 		return STATUS_KO;
 	}
 
@@ -157,19 +160,18 @@ void androidApp::onDeactivate()
 		mLanternApp = nullptr;
 	}
 
+	releaseTexture(&mTextureName);
+	mGraphics.stop();
 	info("App deactivated");
 }
 
 int32_t androidApp::onStep()
 {
 	info("App starting step");
-	ANativeWindow* window = mApplication->window;
+	mLanternApp->start(mTextureName);
 
-	if (ANativeWindow_lock(window, &mWindowBuffer, NULL) >= 0)
+	if (mGraphics.update() == STATUS_OK)
 	{
-		mLanternApp->start(mWindowBuffer.bits,
-		                   4 * mWindowBuffer.width * mWindowBuffer.height);
-		ANativeWindow_unlockAndPost(window);
 		info("App step done OK");
 		return STATUS_OK;
 	}
@@ -265,7 +267,7 @@ void androidApp::processingActivityEvent(int32_t aCommand)
 
 void androidApp::activityCallback(android_app* aApplication, int32_t aCommand)
 {
-	androidApp& appClass = *(androidApp*)aApplication->userData;
+	androidApp& appClass = *(androidApp*) aApplication->userData;
 	appClass.processingActivityEvent(aCommand);
 }
 
@@ -302,7 +304,7 @@ void changeDirectoryToAppCacheLocation(JNIEnv* aEnv, JavaVM* aVm,
 	jclass fileClass = aEnv->FindClass("java/io/File");
 	jmethodID getAbsolutePath = aEnv->GetMethodID(fileClass, "getAbsolutePath",
 	                            "()Ljava/lang/String;");
-	jstring jpath = (jstring)aEnv->CallObjectMethod(file, getAbsolutePath);
+	jstring jpath = (jstring) aEnv->CallObjectMethod(file, getAbsolutePath);
 	const char* app_dir = aEnv->GetStringUTFChars(jpath, NULL);
 	// chdir in the application cache directory
 	info("app cache dir: %s", app_dir);
@@ -316,7 +318,7 @@ void unpackResourcesFromApk(AAssetManager* aManager)
 	const char* dir_name = "resources";
 	mkdir(dir_name, S_IRWXU | S_IRWXG);
 	AAssetDir* assetDir = AAssetManager_openDir(aManager, dir_name);
-	const char* filename = (const char*)NULL;
+	const char* filename = (const char*) NULL;
 
 	while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
 	{
@@ -324,7 +326,8 @@ void unpackResourcesFromApk(AAssetManager* aManager)
 		strcpy(input_path, dir_name);
 		strcat(input_path, "/");
 		strcat(input_path, filename);
-		AAsset* asset = AAssetManager_open(aManager, input_path, AASSET_MODE_STREAMING);
+		AAsset* asset = AAssetManager_open(aManager, input_path,
+		                                   AASSET_MODE_STREAMING);
 		char buf[BUFSIZ];
 		int nb_read = 0;
 		char output_path[BUFSIZ];

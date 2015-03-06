@@ -6,6 +6,8 @@ LOCAL_CFLAGS := -std=c++11 -Wall -Wno-comment -Werror -fexceptions
 LOCAL_MODULE := lanternemptyapp
 LOCAL_C_INCLUDES += ../ ../../../lantern/include/
 LOCAL_SRC_FILES := ../../androidApp.cpp \
+				   ../../Gles1x.cpp \
+				   ../../Graphics.cpp \
 				   ../../../../lantern/src/app.cpp \
 				   ../../../../lantern/src/camera.cpp \
 				   ../../../../lantern/src/color.cpp \
@@ -18,7 +20,7 @@ LOCAL_SRC_FILES := ../../androidApp.cpp \
 				   ../../../../lantern/src/vector3.cpp \
 				   ../../../../lantern/src/vector4.cpp \
 				   ../../../../examples/empty_app/main.cpp
-LOCAL_LDLIBS := -landroid -llog
+LOCAL_LDLIBS := -landroid -llog -lEGL -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := android_native_app_glue
 include $(BUILD_SHARED_LIBRARY)
 #

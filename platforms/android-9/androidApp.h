@@ -2,6 +2,8 @@
 #define ANDROID_APP_H
 
 #include "app.h"
+#include "Graphics.h"
+#include <GLES/gl.h>
 #include <android_native_app_glue.h>
 #include <android/asset_manager_jni.h>
 
@@ -22,10 +24,9 @@ public:
 
 	/** Runs main loop
 	* @returns Result error code
-	* @param aBuffer address to window buffer
-	* @param aBufferLength buffer size in bytes
+	* @param aTextureName texture on which draw
 	*/
-	int start(void* aBuffer, size_t aBufferLength);
+	int start(GLuint aTextureName);
 private:
 	unsigned long mLastFrameTime;
 	unsigned long mTimeAccumulator;
@@ -59,10 +60,11 @@ private:
 	android_app* mApplication;
 	bool mEnabled;
 	bool mQuit;
+	GLuint mTextureName;
 
 protected:
+	Graphics mGraphics;
 	static internalApp* mLanternApp;
-	ANativeWindow_Buffer mWindowBuffer;
 
 	virtual int32_t onActivate();
 

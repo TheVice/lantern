@@ -43,7 +43,7 @@ Software renderer written for educational purposes. Uses SDL2 for rendering and 
 
 ###Building for Android
 
-Uses direct writing into ANativeWindow_Buffer for rendering and Google C++ Testing Framework for tests.
+Uses [OpenGL ES 1.X](https://www.khronos.org/opengles/1_X/) for rendering and [Google C++ Testing Framework](https://code.google.com/p/googletest) for tests.
 
 ##Build requires
 * Install\unpack [Java Platform (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) version 6 or above
