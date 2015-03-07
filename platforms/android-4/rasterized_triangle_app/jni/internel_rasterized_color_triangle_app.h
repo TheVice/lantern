@@ -12,6 +12,9 @@ class internel_rasterized_color_triangle_app : public internalApp
 {
 public:
 	internel_rasterized_color_triangle_app(unsigned int const aWidth, unsigned int const aHeight);
+#if __ANDROID_API__ < 9
+	int32_t on_key_down_for_jni(unsigned char const key) { return on_key_down(key); };
+#endif
 protected:
 	void frame(float const delta_since_last_frame) override;
 	int32_t on_key_down(unsigned char const key) override;

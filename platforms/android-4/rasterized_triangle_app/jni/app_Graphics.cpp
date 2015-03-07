@@ -27,3 +27,8 @@ JNIEXPORT void JNICALL Java_com_android_lantern_rasterized_1triangle_1app_Graphi
 	info("frame");
 	gApp->start(gTextureName);
 }
+
+int on_key_down(unsigned char const key)
+{
+	return gApp->on_key_down_for_jni(key);
+}

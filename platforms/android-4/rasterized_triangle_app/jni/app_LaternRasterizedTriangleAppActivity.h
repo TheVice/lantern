@@ -31,6 +31,14 @@ JNIEXPORT void JNICALL Java_com_android_lantern_rasterized_1triangle_1app_Latern
 JNIEXPORT void JNICALL Java_com_android_lantern_rasterized_1triangle_1app_LaternRasterizedTriangleAppActivity_makeDir
   (JNIEnv *, jclass, jstring);
 
+/*
+ * Class:     com_android_lantern_rasterized_triangle_app_LaternRasterizedTriangleAppActivity
+ * Method:    onKeyDown
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_android_lantern_rasterized_1triangle_1app_LaternRasterizedTriangleAppActivity_onKeyDown
+  (JNIEnv *, jclass, jint);
+
 #ifdef __cplusplus
 }
 #endif

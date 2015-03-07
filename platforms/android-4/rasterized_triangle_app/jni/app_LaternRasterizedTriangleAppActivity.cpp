@@ -2,6 +2,8 @@
 #include "app_LaternRasterizedTriangleAppActivity.h"
 #include "misc.h"
 
+extern int on_key_down(unsigned char const key);
+
 JNIEXPORT void JNICALL Java_com_android_lantern_rasterized_1triangle_1app_LaternRasterizedTriangleAppActivity_info
   (JNIEnv *aEnv, jclass aThis, jstring aMessage)
 {
@@ -26,4 +28,10 @@ JNIEXPORT void JNICALL Java_com_android_lantern_rasterized_1triangle_1app_Latern
 	info("creating directory: %s", dirName);
 	makeDir(dirName);
 	aEnv->ReleaseStringUTFChars(aDirName, dirName);
+}
+
+JNIEXPORT jboolean JNICALL Java_com_android_lantern_rasterized_1triangle_1app_LaternRasterizedTriangleAppActivity_onKeyDown
+  (JNIEnv *aEnv, jclass aThis, jint aKey)
+{
+	return (jboolean)on_key_down((unsigned char)aKey);
 }

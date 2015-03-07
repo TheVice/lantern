@@ -8,12 +8,22 @@
 #include "camera.h"
 #include "color_shader.h"
 
+#if __ANDROID_API__ < 9
+enum {
+    AKEYCODE_VOLUME_UP       = 24,
+    AKEYCODE_VOLUME_DOWN     = 25
+};
+#endif
+
 using namespace lantern;
 
 class internel_rasterized_color_triangle_app : public internalApp
 {
 public:
 	internel_rasterized_color_triangle_app(unsigned int const aWidth, unsigned int const aHeight);
+#if __ANDROID_API__ < 9
+	int32_t on_key_down_for_jni(unsigned char const key) { return on_key_down(key); };
+#endif
 protected:
 	void frame(float const delta_since_last_frame) override;
 	int32_t on_key_down(unsigned char const key) override;
@@ -79,7 +89,7 @@ void internel_rasterized_color_triangle_app::frame(float const delta_since_last_
 int32_t internel_rasterized_color_triangle_app::on_key_down(unsigned char const key)
 {
 	int32_t ret = 0;
-#if __ANDROID_API__ > 8
+
 	float const moving_speed{0.01f};
 
 	if (key== AKEYCODE_VOLUME_UP)
@@ -92,7 +102,7 @@ int32_t internel_rasterized_color_triangle_app::on_key_down(unsigned char const 
 		m_camera.move_backward(moving_speed);
 		ret = 1;
 	}
-#endif
+
 	// Update model-view-projection according to camera changes
 	update_shader_mvp();
 

@@ -7,6 +7,8 @@ import android.opengl.GLSurfaceView;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ApplicationInfo;
+import android.view.KeyEvent;
+
 import java.util.zip.ZipFile;
 import java.io.IOException;
 import java.lang.IllegalStateException;
@@ -28,6 +30,7 @@ public class LaternRasterizedTriangleAppActivity extends Activity {
     public static native void info(String message);
     public static native void changeDir(String dirname);
     public static native void makeDir(String dirname);
+    public static native boolean onKeyDown(int key);
 
     public static void writeFile(InputStream source, String destination) {
 
@@ -214,5 +217,12 @@ public class LaternRasterizedTriangleAppActivity extends Activity {
     public void onDestroy() {
 
         super.onDestroy();
+    }
+
+    /** Called to process key events. */
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+
+        return onKeyDown(event.getKeyCode()) ? true : super.dispatchKeyEvent(event);
     }
 }
