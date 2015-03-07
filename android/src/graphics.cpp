@@ -1,4 +1,7 @@
 
+#include <android/api-level.h>
+#if __ANDROID_API__ > 8
+
 #include "graphics.h"
 #include "misc.h"
 #include <android_native_app_glue.h>
@@ -131,3 +134,5 @@ int32_t graphics::update()
 
 	return STATUS_OK;
 }
+
+#endif

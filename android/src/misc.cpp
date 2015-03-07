@@ -1,4 +1,5 @@
 
+#include <android/api-level.h>
 #include "misc.h"
 #include <stdio.h>
 #include <stdarg.h>
@@ -15,6 +16,16 @@ void info(const char* aMessage, ...)
 	va_end(varArgs);
 }
 
+void changeDir(const char* aPath)
+{
+	chdir(aPath);
+}
+
+void makeDir(const char* aPath)
+{
+	mkdir(aPath, S_IRWXU | S_IRWXG);
+}
+
 void changeDirectoryToAppCacheLocation(JNIEnv* aEnv, JavaVM* aVm,
                                        jobject aClazz)
 {
@@ -28,40 +39,40 @@ void changeDirectoryToAppCacheLocation(JNIEnv* aEnv, JavaVM* aVm,
 	jmethodID getAbsolutePath = aEnv->GetMethodID(fileClass, "getAbsolutePath",
 	                            "()Ljava/lang/String;");
 	jstring jpath = (jstring) aEnv->CallObjectMethod(file, getAbsolutePath);
-	const char* app_dir = aEnv->GetStringUTFChars(jpath, NULL);
-	// chdir in the application cache directory
-	info("app cache dir: %s", app_dir);
-	chdir(app_dir);
-	aEnv->ReleaseStringUTFChars(jpath, app_dir);
+	const char* appCacheDir = aEnv->GetStringUTFChars(jpath, NULL);
+	// change directory in the application cache directory
+	changeDir(appCacheDir);
+	aEnv->ReleaseStringUTFChars(jpath, appCacheDir);
 	aVm->DetachCurrentThread();
 }
 
+#if __ANDROID_API__ > 8
 void unpackResourcesFromApk(AAssetManager* aManager)
 {
-	const char* dir_name = "resources";
-	mkdir(dir_name, S_IRWXU | S_IRWXG);
-	AAssetDir* assetDir = AAssetManager_openDir(aManager, dir_name);
+	const char* dirName = "resources";
+	makeDir(dirName);
+	AAssetDir* assetDir = AAssetManager_openDir(aManager, dirName);
 	const char* filename = (const char*) NULL;
 
 	while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
 	{
-		char input_path[BUFSIZ];
-		strcpy(input_path, dir_name);
-		strcat(input_path, "/");
-		strcat(input_path, filename);
-		AAsset* asset = AAssetManager_open(aManager, input_path,
+		char inputPath[BUFSIZ];
+		strcpy(inputPath, dirName);
+		strcat(inputPath, "/");
+		strcat(inputPath, filename);
+		AAsset* asset = AAssetManager_open(aManager, inputPath,
 		                                   AASSET_MODE_STREAMING);
 		char buf[BUFSIZ];
-		int nb_read = 0;
-		char output_path[BUFSIZ];
-		strcpy(output_path, dir_name);
-		strcat(output_path, "/");
-		strcat(output_path, filename);
-		FILE* out = fopen(output_path, "w");
+		int nbRead = 0;
+		char outputPath[BUFSIZ];
+		strcpy(outputPath, dirName);
+		strcat(outputPath, "/");
+		strcat(outputPath, filename);
+		FILE* out = fopen(outputPath, "w");
 
-		while ((nb_read = AAsset_read(asset, buf, BUFSIZ)) > 0)
+		while ((nbRead = AAsset_read(asset, buf, BUFSIZ)) > 0)
 		{
-			fwrite(buf, nb_read, 1, out);
+			fwrite(buf, nbRead, 1, out);
 		}
 
 		fclose(out);
@@ -70,3 +81,4 @@ void unpackResourcesFromApk(AAssetManager* aManager)
 
 	AAssetDir_close(assetDir);
 }
+#endif

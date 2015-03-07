@@ -1,6 +1,9 @@
 #ifndef ANDROID_APP_H
 #define ANDROID_APP_H
 
+#include <android/api-level.h>
+#if __ANDROID_API__ > 8
+
 #include "graphics.h"
 #include <GLES/gl.h>
 #include <android_native_app_glue.h>
@@ -68,4 +71,5 @@ private:
 
 };
 
+#endif
 #endif

@@ -1,4 +1,7 @@
 
+#include <android/api-level.h>
+#if __ANDROID_API__ > 8
+
 #include "androidApp.h"
 #include "internalApp.h"
 #include "gles1x.h"
@@ -219,3 +222,5 @@ int32_t androidApp::inputCallback(android_app* aApplication,
 
 	return 0;
 }
+
+#endif

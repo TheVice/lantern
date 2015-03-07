@@ -1,5 +1,6 @@
 #ifdef ANDROID
 
+#include <android/api-level.h>
 #include "internalApp.h"
 #include "androidApp.h"
 #include "misc.h"
@@ -28,7 +29,7 @@ private:
 	camera m_camera;
 	color_shader m_color_shader;
 };
-
+#if __ANDROID_API__ > 8
 class android_rasterized_color_triangle_app : public androidApp
 {
 public:
@@ -43,7 +44,7 @@ protected:
 		return STATUS_OK;
 	}
 };
-
+#endif
 internel_rasterized_color_triangle_app::internel_rasterized_color_triangle_app(unsigned int const width, unsigned int const height)
 	: internalApp(width, height),
 	  m_triangle_position{0.0f, 0.0f, 1.5f},
@@ -78,7 +79,7 @@ void internel_rasterized_color_triangle_app::frame(float const delta_since_last_
 int32_t internel_rasterized_color_triangle_app::on_key_down(unsigned char const key)
 {
 	int32_t ret = 0;
-
+#if __ANDROID_API__ > 8
 	float const moving_speed{0.01f};
 
 	if (key== AKEYCODE_VOLUME_UP)
@@ -91,7 +92,7 @@ int32_t internel_rasterized_color_triangle_app::on_key_down(unsigned char const 
 		m_camera.move_backward(moving_speed);
 		ret = 1;
 	}
-
+#endif
 	// Update model-view-projection according to camera changes
 	update_shader_mvp();
 
@@ -132,7 +133,7 @@ void internel_rasterized_color_triangle_app::update_shader_mvp()
 
 	m_color_shader.set_mvp_matrix(local_to_clip_transform);
 }
-
+#if __ANDROID_API__ > 8
 void android_main(android_app* application)
 {
 	info("android_main");
@@ -143,7 +144,7 @@ void android_main(android_app* application)
 
 	android_rasterized_color_triangle_app{application}.start();
 }
-
+#endif
 #else
 
 #include "app.h"

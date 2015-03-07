@@ -1,6 +1,9 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
+#include <android/api-level.h>
+#if __ANDROID_API__ > 8
+
 #include <EGL/egl.h>
 
 struct android_app;
@@ -27,4 +30,5 @@ private:
 	EGLContext mContext;
 };
 
+#endif
 #endif
