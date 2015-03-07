@@ -1,6 +1,8 @@
 #ifdef ANDROID
 
+#include "internalApp.h"
 #include "androidApp.h"
+#include "misc.h"
 
 class internel_empty_app : public internalApp
 {

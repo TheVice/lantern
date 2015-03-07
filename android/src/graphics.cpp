@@ -1,7 +1,9 @@
 
-#include "androidApp.h"
+#include "graphics.h"
+#include "misc.h"
+#include <android_native_app_glue.h>
 
-Graphics::Graphics(android_app* pApplication)
+graphics::graphics(android_app* pApplication)
 	: mApplication(pApplication),
 	  mWidth(0), mHeight(0),
 	  mDisplay(EGL_NO_DISPLAY),
@@ -10,21 +12,21 @@ Graphics::Graphics(android_app* pApplication)
 {
 }
 
-Graphics::~Graphics()
+graphics::~graphics()
 {
 }
 
-int32_t Graphics::getWidth() const
+int32_t graphics::getWidth() const
 {
 	return mWidth;
 }
 
-int32_t Graphics::getHeight() const
+int32_t graphics::getHeight() const
 {
 	return mHeight;
 }
 
-int32_t Graphics::start()
+int32_t graphics::start()
 {
 	EGLint format = 0, numConfigs = 0;
 	EGLConfig config = nullptr;
@@ -94,7 +96,7 @@ int32_t Graphics::start()
 	return STATUS_OK;
 }
 
-void Graphics::stop()
+void graphics::stop()
 {
 	if (mDisplay != EGL_NO_DISPLAY)
 	{
@@ -118,7 +120,7 @@ void Graphics::stop()
 	}
 }
 
-int32_t Graphics::update()
+int32_t graphics::update()
 {
 	//onDrawFrame();
 	if (eglSwapBuffers(mDisplay, mSurface) != EGL_TRUE)

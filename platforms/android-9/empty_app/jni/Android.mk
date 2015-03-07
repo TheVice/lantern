@@ -4,10 +4,12 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_CFLAGS := -std=c++11 -Wall -Wno-comment -Werror -fexceptions
 LOCAL_MODULE := lanternemptyapp
-LOCAL_C_INCLUDES += ../ ../../../lantern/include/
-LOCAL_SRC_FILES := ../../androidApp.cpp \
-				   ../../Gles1x.cpp \
-				   ../../Graphics.cpp \
+LOCAL_C_INCLUDES += ../../../android/include/ ../../../lantern/include/
+LOCAL_SRC_FILES := ../../../../android/src/androidApp.cpp \
+				   ../../../../android/src/gles1x.cpp \
+				   ../../../../android/src/graphics.cpp \
+				   ../../../../android/src/internalApp.cpp \
+				   ../../../../android/src/misc.cpp \
 				   ../../../../lantern/src/app.cpp \
 				   ../../../../lantern/src/camera.cpp \
 				   ../../../../lantern/src/color.cpp \

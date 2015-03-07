@@ -1,9 +1,9 @@
 
-#include "Gles1x.h"
+#include "gles1x.h"
 #define GL_GLEXT_PROTOTYPES
 #include <GLES/glext.h>
 
-static GLubyte gImage[4 * 4096 * 2160] = {0};
+//static GLubyte gImage[4 * 4096 * 2160] = {0};
 
 void reshape(GLsizei aWidth, GLsizei aHeight)
 {
@@ -40,13 +40,13 @@ void initTexture(GLuint* aTextureName)
 void dispalyTexture(GLuint aTextureName, GLuint aWidth, GLuint aHeight,
                     const GLubyte* aImage)
 {
-	revertImage(aImage, 4 * aWidth * aHeight, aWidth, gImage);
+	//revertImage(aImage, 4 * aWidth * aHeight, aWidth, gImage);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glBindTexture(GL_TEXTURE_2D, aTextureName);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, aWidth,
-	             aHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, gImage);
+	             aHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, aImage);
 	GLint crop[] =
 	{
 		0,

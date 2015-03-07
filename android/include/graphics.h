@@ -1,15 +1,15 @@
-#ifndef _GRAPHICS_SERVICE_H_
-#define _GRAPHICS_SERVICE_H_
+#ifndef GRAPHICS_H
+#define GRAPHICS_H
 
 #include <EGL/egl.h>
 
 struct android_app;
 
-class Graphics
+class graphics
 {
 public:
-	Graphics(android_app* aApplication);
-	~Graphics();
+	graphics(android_app* aApplication);
+	~graphics();
 
 	int32_t getWidth() const;
 	int32_t getHeight() const;

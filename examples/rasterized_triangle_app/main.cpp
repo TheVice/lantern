@@ -1,6 +1,8 @@
 #ifdef ANDROID
 
+#include "internalApp.h"
 #include "androidApp.h"
+#include "misc.h"
 #include "obj_import.h"
 #include "camera.h"
 #include "color_shader.h"

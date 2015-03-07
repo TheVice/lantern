@@ -1,37 +1,11 @@
 #ifndef ANDROID_APP_H
 #define ANDROID_APP_H
 
-#include "app.h"
-#include "Graphics.h"
+#include "graphics.h"
 #include <GLES/gl.h>
 #include <android_native_app_glue.h>
-#include <android/asset_manager_jni.h>
 
-class androidApp;
-
-class internalApp : public lantern::app
-{
-	friend androidApp;
-public:
-	/** Initializes application so that it is ready to start running main loop
-	* @param aWidth Window and framebuffer texture width
-	* @param aHeight Window and framebuffer texture height
-	*/
-	internalApp(unsigned int const aWidth, unsigned int const aHeight);
-
-	/** Uninitializes application */
-	virtual ~internalApp();
-
-	/** Runs main loop
-	* @returns Result error code
-	* @param aTextureName texture on which draw
-	*/
-	int start(GLuint aTextureName);
-private:
-	unsigned long mLastFrameTime;
-	unsigned long mTimeAccumulator;
-	unsigned int mFramesAccumulator;
-};
+class internalApp;
 
 class androidApp
 {
@@ -63,7 +37,7 @@ private:
 	GLuint mTextureName;
 
 protected:
-	Graphics mGraphics;
+	graphics mGraphics;
 	static internalApp* mLanternApp;
 
 	virtual int32_t onActivate();
@@ -93,14 +67,5 @@ private:
 	void onLostFocus() {};
 
 };
-
-void info(const char* aMessage, ...);
-void changeDirectoryToAppCacheLocation(JNIEnv* aEnv, JavaVM* aVm,
-                                       jobject aClazz);
-void unpackResourcesFromApk(AAssetManager* aManager);
-unsigned long getTimer();
-
-static const int32_t STATUS_OK = 0;
-static const int32_t STATUS_KO = -1;
 
 #endif

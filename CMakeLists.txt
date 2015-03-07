@@ -82,13 +82,17 @@ set(LANTERN_HEADERS
     lantern/include/vector4.h)
 
 if(ANDROID)
-    list(APPEND LANTERN_SOURCES platforms/android-9/androidApp.cpp
-                                platforms/android-9/Graphics.cpp
-                                platforms/android-9/Gles1x.cpp)
-    list(APPEND LANTERN_HEADERS platforms/android-9/androidApp.h
-                                platforms/android-9/Graphics.h
-                                platforms/android-9/Gles1x.h)
-    include_directories(platforms/android-9/)
+    list(APPEND LANTERN_SOURCES android/src/androidApp.cpp
+								android/src/gles1x.cpp
+								android/src/graphics.cpp
+								android/src/internalApp.cpp
+								android/src/misc.cpp)
+    list(APPEND LANTERN_HEADERS android/include/androidApp.h
+								android/include/gles1x.h
+								android/include/graphics.h
+								android/include/internalApp.h
+								android/include/misc.h)
+    include_directories(android/include/)
 endif(ANDROID)
 
 add_library(
