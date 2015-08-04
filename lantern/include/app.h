@@ -88,6 +88,8 @@ namespace lantern
 		HDC m_hdc;
 		HGLRC m_hglrc;
 		LARGE_INTEGER mFrequency;
+		static BOOL winGlInit(HWND hWnd, HDC& hdc, HGLRC& hglrc);
+		static void winGlRelease(HWND hWnd, HDC& hdc, HGLRC& hglrc);
 		ATOM MyRegisterClass(HINSTANCE hInstance);
 		BOOL InitInstance(HINSTANCE aHinstance, int aCmdShow, UINT aWidth, UINT aHeight, HWND& aHwnd);
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -96,7 +98,10 @@ namespace lantern
 		GLXContext m_glc;
 		Window m_win;
 #endif
-
+		static void reshape(GLsizei width, GLsizei height);
+		static void initTexture(GLuint* texName);
+		static void dispalyTexture(GLuint texName, GLuint imageWidth, GLuint imageHeight, const GLubyte* image);
+		static void releaseTexture(GLuint* texName);
 	};
 }
 
