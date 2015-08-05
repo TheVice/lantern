@@ -15,7 +15,7 @@ model {
      * native build settings
      */
     android.ndk {
-        moduleName = "LaternEmptyAppNativeActivity"
+        moduleName = "EmptyAppNativeActivity"
 
         cppFlags += "-std=c++11"
         cppFlags += "-Wall"
@@ -23,7 +23,7 @@ model {
         cppFlags += "-Werror"
         cppFlags += "-fexceptions"
         ldLibs    = ["android", "log", "EGL", "GLESv1_CM"]
-        stl = "stlport_static"
+        stl = "gnustl_static"
 
         Properties properties = new Properties()
         properties.load(project.rootProject.file('local.properties').newDataInputStream())

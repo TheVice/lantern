@@ -9,7 +9,7 @@ void obj_reader::read(std::string const& path)
 {
 	// Open file
 	//
-	std::ifstream file_stream{path.c_str()};
+	std::ifstream file_stream{path};
 	if (!file_stream.is_open())
 	{
 		throw std::runtime_error("Could not open file: " + path);

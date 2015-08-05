@@ -1,0 +1,91 @@
+apply plugin: 'com.android.model.application'
+
+model {
+    android {
+        compileSdkVersion = 21
+        buildToolsVersion ="22.0.1"
+
+        defaultConfig.with {
+            applicationId = "com.android.lantern.rasterized_triangle_app"
+            minSdkVersion.apiLevel      = 9
+            targetSdkVersion.apiLevel   = 9
+        }
+    }
+    /*
+     * native build settings
+     */
+    android.ndk {
+        moduleName = "RasterizedTriangleAppNativeActivity"
+
+        cppFlags += "-std=c++11"
+        cppFlags += "-Wall"
+        cppFlags += "-Wno-comment"
+        cppFlags += "-Werror"
+        cppFlags += "-fexceptions"
+        ldLibs    = ["android", "log", "EGL", "GLESv1_CM"]
+        stl = "gnustl_static"
+
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        def ndkdir = properties.getProperty('ndk.dir', null)
+
+        cppFlags   += "-I${file("${ndkdir}/sources/android/native_app_glue")}".toString()
+        cppFlags   += "-I${file("${project.buildDir}/../../../android/include")}".toString()
+        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include")}".toString()
+      }
+    android.sources {
+        main {
+            jni {
+                source {
+                    Properties properties = new Properties()
+                    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+                    def ndkdir = properties.getProperty('ndk.dir', null)
+                    srcDirs = [
+                            "${ndkdir}/sources/android/native_app_glue",
+                            "${project.buildDir}/../../../android/src",
+                            "${project.buildDir}/../../../lantern/src",
+                            "${project.buildDir}/../../../examples/rasterized_triangle_app"
+                    ]
+                 }
+            }
+            assets {
+                source {
+                    srcDirs = ["${project.buildDir}/../../../examples/rasterized_triangle_app"]
+                }
+            }
+        }
+    }
+    android.buildTypes {
+        release {
+            minifyEnabled = false
+            proguardFiles  += file('proguard-rules.txt')
+        }
+    }
+    android.productFlavors {
+        // for detailed abiFilter descriptions, refer to "Supported ABIs" @
+        // https://developer.android.com/ndk/guides/abis.html#sa
+        create("arm") {
+            ndk.abiFilters += "armeabi"
+        }
+        create("arm7") {
+            ndk.abiFilters += "armeabi-v7a"
+        }
+        create("arm8") {
+            ndk.abiFilters += "arm64-v8a"
+        }
+        create("x86") {
+            ndk.abiFilters += "x86"
+        }
+        create("x86-64") {
+            ndk.abiFilters += "x86_64"
+        }
+        create("mips") {
+            ndk.abiFilters += "mips"
+        }
+        create("mips-64") {
+            ndk.abiFilters += "mips64"
+        }
+        // To include all cpu architectures, leaves abiFilters empty
+        create("all")
+    }
+}
