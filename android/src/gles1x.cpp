@@ -3,14 +3,8 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GLES/glext.h>
 
-//static GLubyte gImage[4 * 4096 * 2160] = {0};
-
-void reshape(GLsizei aWidth, GLsizei aHeight)
-{
-	glViewport(0, 0, aWidth, aHeight);
-	glMatrixMode(GL_PROJECTION);
-}
-
+#ifdef REVERT_IMAGE
+static GLubyte gImage[4 * 4096 * 2160] = {0};
 void revertImage(const GLubyte* aSrcImage, GLuint aLength, GLuint aWidth,
                  GLubyte* aDestImage)
 {
@@ -23,6 +17,13 @@ void revertImage(const GLubyte* aSrcImage, GLuint aLength, GLuint aWidth,
 			aDestImage[k++] = aSrcImage[j];
 		}
 	}
+}
+#endif
+
+void reshape(GLsizei aWidth, GLsizei aHeight)
+{
+	glViewport(0, 0, aWidth, aHeight);
+	glMatrixMode(GL_PROJECTION);
 }
 
 void initTexture(GLuint* aTextureName)
@@ -40,13 +41,20 @@ void initTexture(GLuint* aTextureName)
 void dispalyTexture(GLuint aTextureName, GLuint aWidth, GLuint aHeight,
                     const GLubyte* aImage)
 {
-	//revertImage(aImage, 4 * aWidth * aHeight, aWidth, gImage);
+#ifdef REVERT_IMAGE
+	revertImage(aImage, 4 * aWidth * aHeight, aWidth, gImage);
+#endif
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glBindTexture(GL_TEXTURE_2D, aTextureName);
+#ifdef REVERT_IMAGE
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, aWidth,
+	             aHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, gImage);
+#else
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, aWidth,
 	             aHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, aImage);
+#endif
 	GLint crop[] =
 	{
 		0,

@@ -73,3 +73,10 @@ Uses [OpenGL ES 1.X](https://www.khronos.org/opengles/1_X/) for rendering and [G
 * Execute ```mingw32-make -j%NUMBER_OF_PROCESSORS% -s rasterized_triangle_app[run-apk]``` on Windows or ```make -j$(nproc) -s rasterized_triangle_app[run-apk]``` on Linux to run rasterized_triangle_app on Android
 * Execute ```mingw32-make -j%NUMBER_OF_PROCESSORS% -s run_tests``` on Windows or ```make -j$(nproc) -s run_tests``` on Linux to run tests on Android
 * You can also do the same from Eclipse IDE after import already exist project from ```build``` directory
+
+##Prepare Android Studio project
+* Download [Android Studion 1.3](http://tools.android.com/download/studio/canary/1-3) or above
+* Download [gradle 2.5](https://services.gradle.org/distributions/gradle-2.5-all.zip) or above and unpack it into ```<path to android-studio>/gradle``` near with ```gradle-2.4```. Note: if folder gradle-2.5 exist, for example with later release of Android Studio, consult documentation, may be you do not need to do this step
+* Open in Android Studio sub folder android-studio in lantern folder
+* When IDE ask to download or not gradle press Cancel and set manual path to ```<path to android-studio>/gradle/gradle-2.5```. Note: in later release of Android Studio gradle version may be upper
+* Now you able to work with project
