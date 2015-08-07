@@ -2,7 +2,7 @@
 #define LANTERN_APP_H
 
 #ifndef ANDROID
-#include "SDL.h"
+#include <SDL.h>
 #else
 #define Uint32 uint32_t
 #endif

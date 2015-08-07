@@ -48,7 +48,7 @@ public:
 	empty_app(unsigned int const width, unsigned int const height);
 
 protected:
-	void frame(float delta_since_last_frame) override;
+	void frame(float const delta_since_last_frame) override;
 };
 
 empty_app::empty_app(unsigned int const width, unsigned int const height)

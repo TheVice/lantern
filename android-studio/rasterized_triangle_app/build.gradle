@@ -32,6 +32,11 @@ model {
         cppFlags   += "-I${file("${ndkdir}/sources/android/native_app_glue")}".toString()
         cppFlags   += "-I${file("${project.buildDir}/../../../android/include")}".toString()
         cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include")}".toString()
+        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include/math")}".toString()
+        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include/rendering")}".toString()
+        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include/rendering/geometry")}".toString()
+        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include/rendering/rasterizing")}".toString()
+        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include/rendering/shaders")}".toString()
       }
     android.sources {
         main {
@@ -44,7 +49,12 @@ model {
                             "${ndkdir}/sources/android/native_app_glue",
                             "${project.buildDir}/../../../android/src",
                             "${project.buildDir}/../../../lantern/src",
-                            "${project.buildDir}/../../../examples/rasterized_triangle_app"
+                            "${project.buildDir}/../../../lantern/src/math",
+                            "${project.buildDir}/../../../lantern/src/rendering",
+                            "${project.buildDir}/../../../lantern/src/rendering/geometry",
+                            "${project.buildDir}/../../../lantern/src/rendering/rasterizing",
+                            "${project.buildDir}/../../../examples/rasterized_triangle_app",
+							"${project.buildDir}/../../../build"
                     ]
                  }
             }
