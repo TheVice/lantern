@@ -1,12 +1,10 @@
 #include <iostream>
 #include <stdexcept>
-#ifndef ANDROID
 #include <SDL_image.h>
-#endif
 #include "app.h"
 
 using namespace lantern;
-#ifndef ANDROID
+
 app::app(unsigned int const width, unsigned int const height)
 	: m_window{nullptr},
 	  m_renderer{nullptr},
@@ -166,18 +164,7 @@ int app::start()
 
 	return 0;
 }
-#else
-app::app(unsigned int const width, unsigned int const height)
-	: m_target_texture{width, height},
-	  m_target_framerate_delay(0)
-{
-	set_target_framerate(60);
-}
 
-app::~app()
-{
-}
-#endif
 texture& app::get_target_texture()
 {
 	return m_target_texture;
@@ -187,12 +174,12 @@ pipeline& app::get_pipeline()
 {
 	return m_pipeline;
 }
-#ifndef ANDROID
+
 void app::on_key_down(SDL_Keysym const)
 {
 	// Does not handle any key by default
 }
-#endif
+
 void app::set_target_framerate(unsigned int const fps)
 {
 	if (fps == 0)

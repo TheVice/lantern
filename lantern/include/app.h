@@ -1,11 +1,7 @@
 #ifndef LANTERN_APP_H
 #define LANTERN_APP_H
 
-#ifndef ANDROID
-#include <SDL.h>
-#else
-#define Uint32 uint32_t
-#endif
+#include "SDL.h"
 #include "pipeline.h"
 
 namespace lantern
@@ -24,12 +20,12 @@ namespace lantern
 
 		/** Uninitializes application */
 		virtual ~app();
-#ifndef ANDROID
+
 		/** Runs main loop
 		* @returns Result error code
 		*/
 		int start();
-#endif
+
 	protected:
 		/** Gets texture used as a framebuffer
 		* @returns Target texture
@@ -54,14 +50,9 @@ namespace lantern
 		/** Handles pressed key
 		* @param key Key that was pressed
 		*/
-#ifndef ANDROID
 		virtual void on_key_down(SDL_Keysym const key);
-#else
-		virtual int32_t on_key_down(unsigned char const key) = 0;
-#endif
 
 	private:
-#ifndef ANDROID
 		/** SDL window object */
 		SDL_Window* m_window;
 
@@ -70,25 +61,15 @@ namespace lantern
 
 		/** SDL texture we are using as a framebuffer */
 		SDL_Texture* m_sdl_target_texture;
-#endif
-#ifdef ANDROID
-	protected:
-#endif
+
 		/** Texture we are using as a framebuffer, gets copied into according SDL_Texture to be shown on a screen */
 		texture m_target_texture;
-#ifdef ANDROID
-	private:
-#endif
+
 		/** Rendering pipeline */
 		pipeline m_pipeline;
-#ifdef ANDROID
-	protected:
-#endif
+
 		/** Delay between frames to stick to the target framerate */
 		Uint32 m_target_framerate_delay;
-#ifdef ANDROID
-	private:
-#endif
 	};
 }
 

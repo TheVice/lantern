@@ -31,8 +31,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
 
 # Android ===================================
 if(ANDROID)
-	string(REPLACE "\\" "/" PICO_PNG_SOURCE "$ENV{PICO_PNG_CPP}")
-
     set(ANDROID_EXECUTABLE android)
     set(ANT_EXECUTABLE ant)
     if(CMAKE_HOST_WIN32)
@@ -55,47 +53,110 @@ endif(ANDROID)
 # ===========================================
 
 # SDL2 and SDL2_image targets ===============
-# if(ANDROID)
-#     if(DEFINED ENV{SDL2SRCDIR})
-#         string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2SRCDIR}/src)
-#         string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2SRCDIR}/include)
-#     elseif(DEFINED SDL2SRCDIR)
-#         string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2SRCDIR}/src)
-#         string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2SRCDIR}/include)
-#     else()
-#         message(FATAL_ERROR "Path to SDL2 source dir not defined")
-#     endif()
+if(ANDROID)
+    if(DEFINED ENV{SDL2SRCDIR})
+        string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2SRCDIR}/src)
+        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2SRCDIR}/include)
+    elseif(DEFINED SDL2SRCDIR)
+        string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2SRCDIR}/src)
+        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2SRCDIR}/include)
+    else()
+        message(FATAL_ERROR "Path to SDL2 source dir not defined")
+    endif()
 
-#     if(DEFINED ENV{SDL2IMAGESRCDIR})
-#         string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGESRCDIR})
-#     elseif(DEFINED SDL2IMAGESRCDIR)
-#         string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGESRCDIR})
-#     else()
-#         message(FATAL_ERROR "Path to SDL2Image source dir not defined")
-#     endif()
+    if(DEFINED ENV{SDL2IMAGESRCDIR})
+        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGESRCDIR})
+    elseif(DEFINED SDL2IMAGESRCDIR)
+        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGESRCDIR})
+    else()
+        message(FATAL_ERROR "Path to SDL2Image source dir not defined")
+    endif()
 
-#     # SDL2
-#     file(GLOB C_FILES ${SDL2_SRC_DIR}/*.c)
-#     file(GLOB INC_FILES ${SDL2_INCLUDE_DIR}/*.h)
+    # SDL2
+    file(GLOB C_FILES 	${SDL2_SRC_DIR}/*.c
+                    	${SDL2_SRC_DIR}/audio/*.c
+                    	${SDL2_SRC_DIR}/audio/android/*.c
+                    	${SDL2_SRC_DIR}/audio/dummy/*.c
+                    	${SDL2_SRC_DIR}/atomic/SDL_atomic.c
+                    	${SDL2_SRC_DIR}/atomic/SDL_spinlock.c
+                    	${SDL2_SRC_DIR}/core/android/*.c
+                    	${SDL2_SRC_DIR}/cpuinfo/*.c
+                    	${SDL2_SRC_DIR}/dynapi/*.c
+                    	${SDL2_SRC_DIR}/events/*.c
+                    	${SDL2_SRC_DIR}/file/*.c
+                    	${SDL2_SRC_DIR}/haptic/*.c
+                    	${SDL2_SRC_DIR}/haptic/dummy/*.c
+                    	${SDL2_SRC_DIR}/joystick/*.c
+                    	${SDL2_SRC_DIR}/joystick/android/*.c
+                    	${SDL2_SRC_DIR}/loadso/dlopen/*.c
+                    	${SDL2_SRC_DIR}/power/*.c
+                    	${SDL2_SRC_DIR}/power/android/*.c
+                    	${SDL2_SRC_DIR}/filesystem/dummy/*.c
+                    	${SDL2_SRC_DIR}/render/*.c
+                    	${SDL2_SRC_DIR}/render/*/*.c
+                    	${SDL2_SRC_DIR}/stdlib/*.c
+                    	${SDL2_SRC_DIR}/thread/*.c
+                    	${SDL2_SRC_DIR}/thread/pthread/*.c
+                    	${SDL2_SRC_DIR}/timer/*.c
+                    	${SDL2_SRC_DIR}/timer/unix/*.c
+                    	${SDL2_SRC_DIR}/video/*.c
+                    	${SDL2_SRC_DIR}/video/android/*.c
+                        ${SDL2_SRC_DIR}/test/*.c
+    )
+  
+    file(GLOB INC_FILES ${SDL2_INCLUDE_DIR}/*.h)
 
-#     add_library(SDL2 STATIC ${INC_FILES} ${C_FILES})
-#     target_include_directories(SDL2 PRIVATE SYSTEM ${SDL2_INCLUDE_DIR})
-#     set(SDL2_LIBRARY SDL2)
-#     set_target_properties(
-#         SDL2 PROPERTIES
-#         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
+    add_library(SDL2 STATIC ${INC_FILES} ${C_FILES})
+    target_include_directories(SDL2 PRIVATE SYSTEM ${SDL2_INCLUDE_DIR})
 
-#     # SDL2_image
-#     file(GLOB C_FILES ${SDL2IMAGE_INCLUDE_DIR}/*.c)
-#     file(GLOB INC_FILES ${SDL2IMAGE_INCLUDE_DIR}/*.h)
+    add_definitions(-DGL_GLEXT_PROTOTYPES)
 
-#     add_library(SDL2_image STATIC ${INC_FILES} ${C_FILES})
-#     target_include_directories(SDL2_image PRIVATE SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR})
-#     set(SDL2IMAGE_LIBRARY SDL2_image)
-#     set_target_properties(
-#         SDL2_image PROPERTIES
-#         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
-# endif(ANDROID)
+    set_target_properties(
+        SDL2 PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
+    set(SDL2_LIBRARY SDL2)
+
+    # SDL2_image
+    file(GLOB C_FILES ${SDL2IMAGE_INCLUDE_DIR}/*.c)
+    file(GLOB INC_FILES ${SDL2IMAGE_INCLUDE_DIR}/*.h)
+
+    list(APPEND C_FILES ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/png.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngerror.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngget.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngmem.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngpread.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngread.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrio.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrtran.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrutil.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngset.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngtrans.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwio.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwrite.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwtran.c
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwutil.c
+    )
+    
+    add_library(SDL2_image STATIC ${INC_FILES} ${C_FILES})
+    target_include_directories(SDL2_image PRIVATE SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR} 
+                                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2)
+
+    add_definitions(-DLOAD_BMP)
+    add_definitions(-DLOAD_GIF)
+    add_definitions(-DLOAD_LBM)
+    add_definitions(-DLOAD_PCX)
+    add_definitions(-DLOAD_PNM)
+    add_definitions(-DLOAD_TGA)
+    add_definitions(-DLOAD_XCF)
+    add_definitions(-DLOAD_XPM)
+    add_definitions(-DLOAD_XV)
+    add_definitions(-DLOAD_PNG)
+
+    set_target_properties(
+        SDL2_image PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
+	set(SDL2IMAGE_LIBRARY SDL2_image)
+endif(ANDROID)
 # ===========================================
 
 # Library target ============================
@@ -112,8 +173,7 @@ set(LANTERN_SOURCES
     lantern/src/rendering/texture.cpp
     lantern/src/rendering/geometry/mesh.cpp
     lantern/src/rendering/geometry/obj_import.cpp
-    lantern/src/rendering/rasterizing/rasterizer_traversal_common.cpp
-	${PICO_PNG_SOURCE})
+    lantern/src/rendering/rasterizing/rasterizer_traversal_common.cpp)
 
 set(LANTERN_HEADERS
     lantern/include/app.h
@@ -158,9 +218,9 @@ add_library(
     ${LANTERN_HEADERS})
 
 target_include_directories(lantern PUBLIC ${LANTERN_INCLUDE_FOLDERS})
+target_include_directories(lantern PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR})
 
 if(NOT ANDROID)
-	target_include_directories(lantern PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR})
     set_target_properties(
         lantern PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
@@ -288,17 +348,24 @@ endif()
 
 # Empty app target ==========================
 if(ANDROID)
-    file(GLOB target_source_files examples/empty_app/*.cpp)
+    file(GLOB target_source_files examples/empty_app/*.cpp
+                                  examples/empty_app/SDL_android_main.c)
     list(APPEND target_include_dirs android/include
                                     ${LANTERN_INCLUDE_FOLDERS}
-                                    ${NDK_PATH}/sources/android/native_app_glue)
-    list(APPEND target_link_libs android_app_gate
+                                    ${NDK_PATH}/sources/android/native_app_glue
+                                    ${SDL2_INCLUDE_DIR}
+                                    ${SDL2_SRC_DIR}
+                                    ${SDL2_IMAGE_INCLUDE_DIR})
+    list(APPEND target_link_libs lantern
+                                 ${SDL2IMAGE_LIBRARY}
+                                 ${SDL2_LIBRARY}
                                  android_native_app_glue
-                                 android
-                                 log
-                                 EGL
                                  GLESv1_CM
-                                 lantern)
+                                 GLESv2
+                                 log
+                                 android
+                                 android_app_gate
+                                 z)
 
     add_Android_Project(empty_app
                         EmptyAppNativeActivity
@@ -352,17 +419,23 @@ endif(ANDROID)
 
 # Rasterized triangle app target ======
 if(ANDROID)
-    file(GLOB target_source_files examples/rasterized_triangle_app/*.cpp)
+    file(GLOB target_source_files examples/rasterized_triangle_app/*.cpp
+                                  ${SDL2_SRC_DIR}/main/android/SDL_android_main.c)
     list(APPEND target_include_dirs android/include
                                     ${LANTERN_INCLUDE_FOLDERS}
-                                    ${NDK_PATH}/sources/android/native_app_glue)
-    list(APPEND target_link_libs android_app_gate
+                                    ${NDK_PATH}/sources/android/native_app_glue
+                                    ${SDL2_INCLUDE_DIR}
+                                    ${SDL2_IMAGE_INCLUDE_DIR})
+    list(APPEND target_link_libs lantern
+                                 android_app_gate
+                                 ${SDL2IMAGE_LIBRARY}
+                                 ${SDL2_LIBRARY}
                                  android_native_app_glue
-                                 android
-                                 log
-                                 EGL
                                  GLESv1_CM
-                                 lantern)
+                                 GLESv2
+                                 log
+                                 android
+                                 z)
 
     add_Android_Project(rasterized_triangle_app
                         RasterizedTriangleAppNativeActivity

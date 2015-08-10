@@ -1,10 +1,5 @@
 #include <stdexcept>
-#ifdef ANDROID
-#include <vector>
-#include <fstream>
-#else
 #include <SDL_image.h>
-#endif
 #include "texture.h"
 
 using namespace lantern;
@@ -66,61 +61,12 @@ color texture::get_pixel_color(vector2ui const& point) const
 		m_data[pixel_first_byte_index + 1] / 255.0f,
 		m_data[pixel_first_byte_index + 0] / 255.0f};
 }
-#ifdef ANDROID
-std::streamoff readFile(const char* aFileName,
-						std::vector<char>& aFileContent)
-{
-	std::ifstream file(aFileName, std::fstream::binary);
-
-	if (file)
-	{
-		file.seekg(0, std::fstream::end);
-		const std::streamoff length = file.tellg();
-
-		if (length == 0)
-		{
-			file.close();
-			return 0;
-		}
-
-		file.seekg(0, std::fstream::beg);
-		aFileContent.reserve(static_cast<std::string::size_type>(length));
-		aFileContent.resize(static_cast<std::string::size_type>(length));
-		file.read(&aFileContent[0], length);
-		file.close();
-		return length;
-	}
-
-	return 0;
-}
-
-extern int decodePNG(std::vector<unsigned char>& out_image,
-                     unsigned long& image_width, unsigned long& image_height,
-                     const unsigned char* in_png, size_t in_size, bool convert_to_rgba32 = true);
-
+extern void info(const char* aMessage, ...);
 texture texture::load_from_file(std::string file)
 {
-	std::vector<char> fileData;
-	std::streamoff length = readFile(file.c_str(), fileData);
-	if (length)
-	{
-		std::vector<unsigned char> png_image;
-		unsigned long image_width;
-		unsigned long image_height;
-		decodePNG(png_image, image_width, image_height, reinterpret_cast<unsigned char*>(&fileData[0]), static_cast<unsigned int>(length));
-
-		texture result(image_width, image_height);
-		memcpy(result.m_data, &png_image[0], result.m_data_total_size);
-		return result;
-	}
-
-	throw std::runtime_error{"load_from_file fail"};
-}
-#else
-texture texture::load_from_file(std::string file)
-{
+	info("--------------------------> Try to load_from_file <----------------------");
 	SDL_Surface* surface = IMG_Load(file.c_str());
-	
+	info("--------------------------> File loaded <----------------------");
 	if (surface->format->format == SDL_PIXELFORMAT_ARGB8888)
 	{
 		texture result(surface->w, surface->h);
@@ -158,4 +104,3 @@ texture texture::load_from_file(std::string file)
 		throw std::runtime_error{"Unsupported format"};
 	}
 }
-#endif
