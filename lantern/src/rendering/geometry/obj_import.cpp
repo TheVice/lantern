@@ -339,12 +339,11 @@ void obj_mesh_importer::on_face_normal_def(unsigned int normal_index0, unsigned 
 
 // Helper functions
 //
-extern void info(const char* aMessage, ...);
+
 mesh lantern::load_mesh_from_obj(std::string const& path, bool const read_texcoords, bool const read_normals)
 {
-	info("--------------------------> Try to load_mesh_from_obj <----------------------");
 	obj_mesh_importer importer{read_texcoords, read_normals};
 	importer.read(path);
-	info("--------------------------> Mesh loaded <----------------------");
+
 	return importer.get_mesh();
 }

@@ -190,3 +190,4 @@ int main(int argc, char* argv[])
 {
 	return rasterized_color_triangle_app{640, 480}.start();
 }
+

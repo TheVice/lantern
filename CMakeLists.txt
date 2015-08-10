@@ -31,24 +31,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
 
 # Android ===================================
 if(ANDROID)
-    set(ANDROID_EXECUTABLE android)
-    set(ANT_EXECUTABLE ant)
     if(CMAKE_HOST_WIN32)
         set(ANDROID_EXECUTABLE android.bat)
         set(ANT_EXECUTABLE ant.bat)
+    else()
+        set(ANDROID_EXECUTABLE android)
+        set(ANT_EXECUTABLE ant)
     endif(CMAKE_HOST_WIN32)
 
-    set(NDK_PATH $ENV{ANDROID_NDK})
-    string(REPLACE "\\" "/" NDK_PATH ${NDK_PATH})
+    string(REPLACE "\\" "/" NDK_PATH $ENV{ANDROID_NDK})
     string(TOLOWER ${CMAKE_BUILD_TYPE} ant_build_type)
-
-    add_library(android_native_app_glue STATIC
-                "${NDK_PATH}/sources/android/native_app_glue/android_native_app_glue.c")
-    target_include_directories(android_native_app_glue SYSTEM PRIVATE "${NDK_PATH}/sources/android/native_app_glue")
-
-    set_target_properties(
-        android_native_app_glue PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
 endif(ANDROID)
 # ===========================================
 
@@ -73,35 +65,35 @@ if(ANDROID)
     endif()
 
     # SDL2
-    file(GLOB C_FILES 	${SDL2_SRC_DIR}/*.c
-                    	${SDL2_SRC_DIR}/audio/*.c
-                    	${SDL2_SRC_DIR}/audio/android/*.c
-                    	${SDL2_SRC_DIR}/audio/dummy/*.c
-                    	${SDL2_SRC_DIR}/atomic/SDL_atomic.c
-                    	${SDL2_SRC_DIR}/atomic/SDL_spinlock.c
-                    	${SDL2_SRC_DIR}/core/android/*.c
-                    	${SDL2_SRC_DIR}/cpuinfo/*.c
-                    	${SDL2_SRC_DIR}/dynapi/*.c
-                    	${SDL2_SRC_DIR}/events/*.c
-                    	${SDL2_SRC_DIR}/file/*.c
-                    	${SDL2_SRC_DIR}/haptic/*.c
-                    	${SDL2_SRC_DIR}/haptic/dummy/*.c
-                    	${SDL2_SRC_DIR}/joystick/*.c
-                    	${SDL2_SRC_DIR}/joystick/android/*.c
-                    	${SDL2_SRC_DIR}/loadso/dlopen/*.c
-                    	${SDL2_SRC_DIR}/power/*.c
-                    	${SDL2_SRC_DIR}/power/android/*.c
-                    	${SDL2_SRC_DIR}/filesystem/dummy/*.c
-                    	${SDL2_SRC_DIR}/render/*.c
-                    	${SDL2_SRC_DIR}/render/*/*.c
-                    	${SDL2_SRC_DIR}/stdlib/*.c
-                    	${SDL2_SRC_DIR}/thread/*.c
-                    	${SDL2_SRC_DIR}/thread/pthread/*.c
-                    	${SDL2_SRC_DIR}/timer/*.c
-                    	${SDL2_SRC_DIR}/timer/unix/*.c
-                    	${SDL2_SRC_DIR}/video/*.c
-                    	${SDL2_SRC_DIR}/video/android/*.c
-                        ${SDL2_SRC_DIR}/test/*.c
+    file(GLOB C_FILES ${SDL2_SRC_DIR}/*.c
+                      ${SDL2_SRC_DIR}/audio/*.c
+                      ${SDL2_SRC_DIR}/audio/android/*.c
+                      ${SDL2_SRC_DIR}/audio/dummy/*.c
+                      ${SDL2_SRC_DIR}/atomic/SDL_atomic.c
+                      ${SDL2_SRC_DIR}/atomic/SDL_spinlock.c
+                      ${SDL2_SRC_DIR}/core/android/*.c
+                      ${SDL2_SRC_DIR}/cpuinfo/*.c
+                      ${SDL2_SRC_DIR}/dynapi/*.c
+                      ${SDL2_SRC_DIR}/events/*.c
+                      ${SDL2_SRC_DIR}/file/*.c
+                      ${SDL2_SRC_DIR}/haptic/*.c
+                      ${SDL2_SRC_DIR}/haptic/dummy/*.c
+                      ${SDL2_SRC_DIR}/joystick/*.c
+                      ${SDL2_SRC_DIR}/joystick/android/*.c
+                      ${SDL2_SRC_DIR}/loadso/dlopen/*.c
+                      ${SDL2_SRC_DIR}/power/*.c
+                      ${SDL2_SRC_DIR}/power/android/*.c
+                      ${SDL2_SRC_DIR}/filesystem/dummy/*.c
+                      ${SDL2_SRC_DIR}/render/*.c
+                      ${SDL2_SRC_DIR}/render/*/*.c
+                      ${SDL2_SRC_DIR}/stdlib/*.c
+                      ${SDL2_SRC_DIR}/thread/*.c
+                      ${SDL2_SRC_DIR}/thread/pthread/*.c
+                      ${SDL2_SRC_DIR}/timer/*.c
+                      ${SDL2_SRC_DIR}/timer/unix/*.c
+                      ${SDL2_SRC_DIR}/video/*.c
+                      ${SDL2_SRC_DIR}/video/android/*.c
+                      ${SDL2_SRC_DIR}/test/*.c
     )
   
     file(GLOB INC_FILES ${SDL2_INCLUDE_DIR}/*.h)
@@ -136,7 +128,7 @@ if(ANDROID)
                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwtran.c
                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwutil.c
     )
-    
+
     add_library(SDL2_image STATIC ${INC_FILES} ${C_FILES})
     target_include_directories(SDL2_image PRIVATE SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR} 
                                                          ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2)
@@ -155,7 +147,7 @@ if(ANDROID)
     set_target_properties(
         SDL2_image PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
-	set(SDL2IMAGE_LIBRARY SDL2_image)
+    set(SDL2IMAGE_LIBRARY SDL2_image)
 endif(ANDROID)
 # ===========================================
 
@@ -231,20 +223,6 @@ else()
 endif(NOT ANDROID)
 # ===========================================
 
-# Android app gate target ===================
-if(ANDROID)
-    file(GLOB CPP_FILES android/src/*.cpp)
-    file(GLOB INC_FILES android/include/*.h)
-    add_library(android_app_gate STATIC ${INC_FILES} ${CPP_FILES})
-    target_include_directories(android_app_gate SYSTEM PRIVATE "${NDK_PATH}/sources/android/native_app_glue")
-    target_include_directories(android_app_gate PRIVATE android/include ${LANTERN_INCLUDE_FOLDERS})
-
-    set_target_properties(
-        android_app_gate PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
-endif(ANDROID)
-# ===========================================
-
 # Gooogle C++ testing framework target ======
 if(DEFINED ENV{GTEST_ROOT})
 
@@ -311,6 +289,14 @@ add_custom_command(
     $<TARGET_FILE_DIR:tests>/resources)
 
 if(ANDROID)
+    target_link_libraries(tests lantern
+                                ${SDL2_LIBRARY}
+                                ${SDL2IMAGE_LIBRARY}
+                                GLESv1_CM
+                                GLESv2
+                                log
+                                android
+                                z)
     add_custom_target(run_tests
         DEPENDS tests
         COMMAND adb push ${CMAKE_BINARY_DIR}/tests /data/local/tmp
@@ -350,21 +336,17 @@ endif()
 if(ANDROID)
     file(GLOB target_source_files examples/empty_app/*.cpp
                                   examples/empty_app/SDL_android_main.c)
-    list(APPEND target_include_dirs android/include
-                                    ${LANTERN_INCLUDE_FOLDERS}
-                                    ${NDK_PATH}/sources/android/native_app_glue
+    list(APPEND target_include_dirs ${LANTERN_INCLUDE_FOLDERS}
                                     ${SDL2_INCLUDE_DIR}
                                     ${SDL2_SRC_DIR}
                                     ${SDL2_IMAGE_INCLUDE_DIR})
     list(APPEND target_link_libs lantern
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
-                                 android_native_app_glue
                                  GLESv1_CM
                                  GLESv2
                                  log
                                  android
-                                 android_app_gate
                                  z)
 
     add_Android_Project(empty_app
@@ -420,17 +402,14 @@ endif(ANDROID)
 # Rasterized triangle app target ======
 if(ANDROID)
     file(GLOB target_source_files examples/rasterized_triangle_app/*.cpp
-                                  ${SDL2_SRC_DIR}/main/android/SDL_android_main.c)
-    list(APPEND target_include_dirs android/include
-                                    ${LANTERN_INCLUDE_FOLDERS}
-                                    ${NDK_PATH}/sources/android/native_app_glue
+                                  examples/rasterized_triangle_app/SDL_android_main.c)
+    list(APPEND target_include_dirs ${LANTERN_INCLUDE_FOLDERS}
                                     ${SDL2_INCLUDE_DIR}
+                                    ${SDL2_SRC_DIR}
                                     ${SDL2_IMAGE_INCLUDE_DIR})
     list(APPEND target_link_libs lantern
-                                 android_app_gate
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
-                                 android_native_app_glue
                                  GLESv1_CM
                                  GLESv2
                                  log

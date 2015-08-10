@@ -61,12 +61,11 @@ color texture::get_pixel_color(vector2ui const& point) const
 		m_data[pixel_first_byte_index + 1] / 255.0f,
 		m_data[pixel_first_byte_index + 0] / 255.0f};
 }
-extern void info(const char* aMessage, ...);
+
 texture texture::load_from_file(std::string file)
 {
-	info("--------------------------> Try to load_from_file <----------------------");
 	SDL_Surface* surface = IMG_Load(file.c_str());
-	info("--------------------------> File loaded <----------------------");
+	
 	if (surface->format->format == SDL_PIXELFORMAT_ARGB8888)
 	{
 		texture result(surface->w, surface->h);
