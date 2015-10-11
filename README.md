@@ -84,10 +84,24 @@ Software renderer written for educational purposes. Uses SDL2 for rendering and 
 
 ##~~Prepare Android Studio project~~
 * ~~At lantern folder create build folder~~
-* ~~Download [Android Studion 1.3](http://tools.android.com/download/studio/canary/1-3) or above~~
+* ~~Download [Android Studion 1.4](http://tools.android.com/download/studio/builds/1-4-0) or above~~
 * ~~Download [gradle 2.5](https://services.gradle.org/distributions/gradle-2.5-all.zip) or above and unpack it into ```<path to android-studio>/gradle``` near with ```gradle-2.4```. Note: if folder gradle-2.5 exist, for example with later release of Android Studio, consult documentation, may be you do not need to do this step~~
 * ~~Open in Android Studio sub folder android-studio in lantern folder~~
-* ~~When IDE ask to download or not gradle press ```Cancel``` and set manual path to ```<path to android-studio>/gradle/gradle-2.5```. Note: in later release of Android Studio gradle version may be upper~~
+* ~~When IDE ask 
+
+%
+
+Gradle settings for this project are not configured yet.
+
+Would you like the project to use the Gradle wrapper?
+(The wrapper will automatically download the latest supported Gradle version).
+
+Click 'OK' to use the Gradle wrapper, or 'Cancel' to manually set the path of a local Gradle distribution.
+
+%
+
+
+to download or not gradle press ```Cancel``` and set manual path to ```<path to android-studio>/gradle/gradle-2.5```. Note: in later release of Android Studio gradle version may be upper~~
 * ~~Now you able to work with project~~
 * ~~If IDE unable to find NDK or/and SDK please set it manual at generated file ```android-studio/local.properties```. Something like this:~~
 ```
@@ -96,3 +110,5 @@ sdk.dir=<Path to android-sdk>
 ```
 * ~~If you install and using JDK 8 and above, gradle engine may need [set to compile like 7 version](http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Using-sourceCompatibility-1.7) or you can install/unpack latest from 7 version of JDK ([Java SE Development Kit 7u80](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html) at the moment when this wrote) and set it like compiler for gradle. Android Studio still can be running under JDK 8 and above~~
 * ~~Known issue: in created ```apk file``` at ```assert folder``` may present not only ```resources folder``` but also ```cpp file(s)``` and all files and folders placed in ```examples/<example name>``` at the moment when apk start to create~~
+
+```gradlew compileX86DebugSources -q --daemon```
