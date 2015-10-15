@@ -22,7 +22,7 @@ Note that because it doesn't use GPU, it is much slower comparing to DirectX or 
 
 Lantern uses [Gradle](http://gradle.org/) as its build system.
 
-Simple scripts were created to simplify building process a little, though (output goes to `<lantern>/build` folder):
+Simple scripts were created by `gradle wrapper` command to simplify building process a little, though (output goes to `<lantern>/build` folder):
 * `gradlew` - for processing project tasks on Unix like OS
 * `gradlew.bat` - for processing project tasks on Windows OS
 
@@ -40,5 +40,6 @@ You also have to have all the dependencies and tools installed (obviously). As a
  * ~~`SDL2IMAGESRCDIR` - path to SDL2_Image development library~~
  * ~~`FREETYPESRCDIR` - path to a folder containing FreeType's headers and library~~
 
-For build lantern library type and execute: `gradlew lanternStaticLibrary --daemon -PSDL2SRCDIR=<Path to SDL2 source directory> -PSDL2IMAGESRCDIR=<Path to SDL2 image source directory> -PFREETYPESRCDIR=<Path to FreeType source directory>`
-`daemon` switch is optional and only provide timesaving in regular building for example at developing process.
+* For build lantern library type and execute: `gradlew lanternStaticLibrary --daemon -PSDL2SRCDIR=<Path to SDL2 source directory> -PSDL2IMAGESRCDIR=<Path to SDL2 image source directory> -PFREETYPESRCDIR=<Path to FreeType source directory>`
+* For build SDL2_Image library type and execute: `gradlew sDL2_imageStaticLibrary --daemon -PSDL2SRCDIR=<Path to SDL2 source directory> -PSDL2IMAGESRCDIR=<Path to SDL2 image source directory> -PFREETYPESRCDIR=<Path to FreeType source directory>`
+Please note `daemon` switch is optional and only provide timesaving in regular building at developing process.

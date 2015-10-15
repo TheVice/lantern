@@ -3,10 +3,58 @@
  * For more details take a look at the Gradle user guide
  */
 
+apply plugin: 'c'
 apply plugin: 'cpp'
 
 model {
   components {
+    //SDL2(NativeLibrarySpec) {
+    //  sources {
+    //    c {
+    //      source {
+    //        srcDir file(SDL2SRCDIR.toString() + '/src')
+    //        include '**/*.c'
+    //        exclude '*/coreaudio/', '*/xaudio2/', '*/psp/', '*/pthread/', '*/opengles2/', '*/render/direct3d/', '*/video/SDL_egl_c.h'
+    //      }
+    //      exportedHeaders {
+    //        srcDir file(SDL2SRCDIR.toString() + '/include')
+    //      }
+    //    }
+    //  }
+    //}
+    SDL2_image(NativeLibrarySpec) {
+      sources {
+        c {
+          source {
+            srcDir file(SDL2IMAGESRCDIR.toString())
+            include '*.c'
+          }
+          exportedHeaders {
+            srcDirs file(SDL2SRCDIR.toString() + '/include'), file(SDL2IMAGESRCDIR.toString())
+          }
+        }
+      }
+    }
+    //freetype(NativeLibrarySpec) {
+    //  sources {
+    //    c {
+    //      source {
+    //        file(FREETYPESRCDIR.toString() + '/src/autofit/autofit.c')
+    //        //println getFiles()
+    //        //file(FREETYPESRCDIR.toString() + '/src/autofit/autofit.c')
+    //        //println getFiles()
+    //      	//getFiles() 
+    //        //srcDir file(FREETYPESRCDIR.toString() + '/src')
+    //        //include '**/*.c'
+    //        //add file(FREETYPESRCDIR.toString() + '/src/autofit/autofit.c').toString()
+    //        //, file(FREETYPESRCDIR.toString() + '/src/base/ftbase.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftbbox.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftbdf.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftbitmap.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftcid.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftfntfmt.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftfstype.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftgasp.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftglyph.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftgxval.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftinit.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftlcdfil.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftmm.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftotval.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftpatent.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftpfr.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftstroke.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftsynth.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftsystem.c'), file(FREETYPESRCDIR.toString() + '/src/base/fttype1.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftwinfnt.c'), file(FREETYPESRCDIR.toString() + '/src/bdf/bdf.c'), file(FREETYPESRCDIR.toString() + '/src/bzip2/ftbzip2.c'), file(FREETYPESRCDIR.toString() + '/src/cache/ftcache.c'), file(FREETYPESRCDIR.toString() + '/src/cff/cff.c'), file(FREETYPESRCDIR.toString() + '/src/cid/type1cid.c'), file(FREETYPESRCDIR.toString() + '/src/gzip/ftgzip.c'), file(FREETYPESRCDIR.toString() + '/src/lzw/ftlzw.c'), file(FREETYPESRCDIR.toString() + '/src/pcf/pcf.c'), file(FREETYPESRCDIR.toString() + '/src/pfr/pfr.c'), file(FREETYPESRCDIR.toString() + '/src/psaux/psaux.c'), file(FREETYPESRCDIR.toString() + '/src/pshinter/pshinter.c'), file(FREETYPESRCDIR.toString() + '/src/psnames/psnames.c'), file(FREETYPESRCDIR.toString() + '/src/raster/raster.c'), file(FREETYPESRCDIR.toString() + '/src/sfnt/sfnt.c'), file(FREETYPESRCDIR.toString() + '/src/smooth/smooth.c'), file(FREETYPESRCDIR.toString() + '/src/truetype/truetype.c'), file(FREETYPESRCDIR.toString() + '/src/type1/type1.c'), file(FREETYPESRCDIR.toString() + '/src/type42/type42.c'), file(FREETYPESRCDIR.toString() + '/src/winfonts/winfnt.c')
+    //      }
+    //      exportedHeaders {
+    //        srcDir file(FREETYPESRCDIR.toString() + '/include')
+    //      }
+    //    }
+    //  }
+    //}
     lantern(NativeLibrarySpec) {
       sources {
         cpp {
@@ -21,29 +69,53 @@ model {
         }
       }
     }
+    //empty_app(NativeExecutableSpec) {
+    //  sources {
+    //    cpp {
+    //      source {
+    //        srcDir 'examples/empty_app'
+    //        include '**/*.cpp'
+    //      }
+    //      exportedHeaders {
+    //        srcDir 'lantern/include'
+    //        srcDirs file(SDL2SRCDIR.toString() + '/include'), file(SDL2IMAGESRCDIR.toString()), file(FREETYPESRCDIR.toString() + '/include')
+    //      }
+    //      lib library: 'lantern'
+    //    }
+    //  }
+    //}
   }
 }
 
 binaries.all {
+  //cppCompiler.define "GL_GLEXT_PROTOTYPES" //Android
   if (toolChain in Gcc) {
     cppCompiler.args '-std=gnu++0x', '-Wall', '-Wno-comment'
   }
   if (toolChain in VisualCpp) {
     cppCompiler.define '_USE_MATH_DEFINES'
     cppCompiler.define 'NOMINMAX'
+    cCompiler.define '_USE_MATH_DEFINES'
+    cCompiler.define 'NOMINMAX'
 
     // <--
     if (file(System.getenv('ProgramFiles').toString() + '/Windows Kits/10/Include/10.0.10150.0/ucrt').exists()) {
       println('ProgramFiles')
+      cCompiler.args '/I' + file(System.getenv('ProgramFiles').toString() + '/Windows Kits/10/Include/10.0.10150.0/ucrt').toString()
       cppCompiler.args '/I' + file(System.getenv('ProgramFiles').toString() + '/Windows Kits/10/Include/10.0.10150.0/ucrt').toString()
+      linker.args '/LIBPATH:' + file(System.getenv('ProgramFiles').toString() + '/Windows Kits/10/Lib/10.0.10150.0/ucrt/x86').toString()
     }
     else if (file(System.getenv('ProgramFiles(x86)').toString() + '/Windows Kits/10/Include/10.0.10150.0/ucrt').exists()) {
       println('ProgramFiles(x86)')
+      cCompiler.args '/I' + file(System.getenv('ProgramFiles(x86)').toString() + '/Windows Kits/10/Include/10.0.10150.0/ucrt').toString()
       cppCompiler.args '/I' + file(System.getenv('ProgramFiles(x86)').toString() + '/Windows Kits/10/Include/10.0.10150.0/ucrt').toString()
+      linker.args '/LIBPATH:' + file(System.getenv('ProgramFiles(x86)').toString() + '/Windows Kits/10/Lib/10.0.10150.0/ucrt/x86').toString()
     }
     else if (file(System.getenv('ProgramW6432').toString() + '/Windows Kits/10/Include/10.0.10150.0/ucrt').exists()) {
       println('ProgramW6432')
+      cCompiler.args '/I' + file(System.getenv('ProgramW6432').toString() + '/Windows Kits/10/Include/10.0.10150.0/ucrt').toString()
       cppCompiler.args '/I' + file(System.getenv('ProgramW6432').toString() + '/Windows Kits/10/Include/10.0.10150.0/ucrt').toString()
+      linker.args '/LIBPATH:' + file(System.getenv('ProgramW6432').toString() + '/Windows Kits/10/Lib/10.0.10150.0/ucrt/x86').toString()
     }
 
     /*println toolChain.DEFAULT_NAME
