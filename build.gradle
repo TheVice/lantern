@@ -8,20 +8,153 @@ apply plugin: 'cpp'
 
 model {
   components {
-    //SDL2(NativeLibrarySpec) {
-    //  sources {
-    //    c {
-    //      source {
-    //        srcDir file(SDL2SRCDIR.toString() + '/src')
-    //        include '**/*.c'
-    //        exclude '*/coreaudio/', '*/xaudio2/', '*/psp/', '*/pthread/', '*/opengles2/', '*/render/direct3d/', '*/video/SDL_egl_c.h'
-    //      }
-    //      exportedHeaders {
-    //        srcDir file(SDL2SRCDIR.toString() + '/include')
-    //      }
-    //    }
-    //  }
-    //}
+    SDL2(NativeLibrarySpec) {
+      sources {
+        c {
+          source {
+            srcDir file(SDL2SRCDIR.toString() + '/src')
+            include '**/SDL.c'
+            include '**/SDL_assert.c'
+            include '**/SDL_error.c'
+            include '**/SDL_hints.c'
+            include '**/SDL_log.c'
+            include '**/atomic/SDL_atomic.c'
+            include '**/atomic/SDL_spinlock.c'
+            include '**/audio/SDL_audio.c'
+            include '**/audio/SDL_audiocvt.c'
+            include '**/audio/SDL_audiodev.c'
+            include '**/audio/SDL_audiotypecvt.c'
+            include '**/audio/SDL_mixer.c'
+            include '**/audio/SDL_wave.c'
+            include '**/audio/disk/SDL_diskaudio.c'
+            include '**/audio/dummy/SDL_dummyaudio.c'
+            include '**/audio/winmm/SDL_winmm.c'
+            include '**/core/windows/SDL_windows.c'
+            include '**/cpuinfo/SDL_cpuinfo.c'
+            include '**/dynapi/SDL_dynapi.c'
+            include '**/events/SDL_clipboardevents.c'
+            include '**/events/SDL_dropevents.c'
+            include '**/events/SDL_events.c'
+            include '**/events/SDL_gesture.c'
+            include '**/events/SDL_keyboard.c'
+            include '**/events/SDL_mouse.c'
+            include '**/events/SDL_quit.c'
+            include '**/events/SDL_touch.c'
+            include '**/events/SDL_windowevents.c'
+            include '**/file/SDL_rwops.c'
+            include '**/filesystem/windows/SDL_sysfilesystem.c'
+            include '**/haptic/SDL_haptic.c'
+            include '**/haptic/dummy/SDL_syshaptic.c'
+            include '**/joystick/SDL_gamecontroller.c'
+            include '**/joystick/SDL_joystick.c'
+            include '**/joystick/windows/SDL_mmjoystick.c'
+            include '**/libm/e_atan2.c'
+            include '**/libm/e_log.c'
+            include '**/libm/e_pow.c'
+            include '**/libm/e_rem_pio2.c'
+            include '**/libm/e_sqrt.c'
+            include '**/libm/k_cos.c'
+            include '**/libm/k_rem_pio2.c'
+            include '**/libm/k_sin.c'
+            include '**/libm/s_atan.c'
+            include '**/libm/s_copysign.c'
+            include '**/libm/s_cos.c'
+            include '**/libm/s_fabs.c'
+            include '**/libm/s_floor.c'
+            include '**/libm/s_scalbn.c'
+            include '**/libm/s_sin.c'
+            include '**/loadso/windows/SDL_sysloadso.c'
+            include '**/power/SDL_power.c'
+            include '**/power/windows/SDL_syspower.c'
+            include '**/render/SDL_d3dmath.c'
+            include '**/render/SDL_render.c'
+            include '**/render/SDL_yuv_mmx.c'
+            include '**/render/SDL_yuv_sw.c'
+            include '**/render/direct3d/SDL_render_d3d.c'
+            include '**/render/direct3d11/SDL_render_d3d11.c'
+            include '**/render/opengl/SDL_render_gl.c'
+            include '**/render/opengl/SDL_shaders_gl.c'
+            include '**/render/opengles/SDL_render_gles.c'
+            include '**/render/opengles2/SDL_render_gles2.c'
+            include '**/render/opengles2/SDL_shaders_gles2.c'
+            include '**/render/psp/SDL_render_psp.c'
+            include '**/render/software/SDL_blendfillrect.c'
+            include '**/render/software/SDL_blendline.c'
+            include '**/render/software/SDL_blendpoint.c'
+            include '**/render/software/SDL_drawline.c'
+            include '**/render/software/SDL_drawpoint.c'
+            include '**/render/software/SDL_render_sw.c'
+            include '**/render/software/SDL_rotate.c'
+            include '**/stdlib/SDL_getenv.c'
+            include '**/stdlib/SDL_iconv.c'
+            include '**/stdlib/SDL_malloc.c'
+            include '**/stdlib/SDL_qsort.c'
+            include '**/stdlib/SDL_stdlib.c'
+            include '**/stdlib/SDL_string.c'
+            include '**/thread/SDL_thread.c'
+            include '**/thread/generic/SDL_syscond.c'
+            include '**/thread/windows/SDL_sysmutex.c'
+            include '**/thread/windows/SDL_syssem.c'
+            include '**/thread/windows/SDL_systhread.c'
+            include '**/thread/windows/SDL_systls.c'
+            include '**/timer/SDL_timer.c'
+            include '**/timer/windows/SDL_systimer.c'
+            include '**/video/SDL_RLEaccel.c'
+            include '**/video/SDL_blit.c'
+            include '**/video/SDL_blit_0.c'
+            include '**/video/SDL_blit_1.c'
+            include '**/video/SDL_blit_A.c'
+            include '**/video/SDL_blit_N.c'
+            include '**/video/SDL_blit_auto.c'
+            include '**/video/SDL_blit_copy.c'
+            include '**/video/SDL_blit_slow.c'
+            include '**/video/SDL_bmp.c'
+            include '**/video/SDL_clipboard.c'
+            include '**/video/SDL_egl.c'
+            include '**/video/SDL_fillrect.c'
+            include '**/video/SDL_pixels.c'
+            include '**/video/SDL_rect.c'
+            include '**/video/SDL_shape.c'
+            include '**/video/SDL_stretch.c'
+            include '**/video/SDL_surface.c'
+            include '**/video/SDL_video.c'
+            include '**/video/dummy/SDL_nullevents.c'
+            include '**/video/dummy/SDL_nullframebuffer.c'
+            include '**/video/dummy/SDL_nullvideo.c'
+            include '**/video/windows/SDL_windowsclipboard.c'
+            include '**/video/windows/SDL_windowsevents.c'
+            include '**/video/windows/SDL_windowsframebuffer.c'
+            include '**/video/windows/SDL_windowskeyboard.c'
+            include '**/video/windows/SDL_windowsmessagebox.c'
+            include '**/video/windows/SDL_windowsmodes.c'
+            include '**/video/windows/SDL_windowsmouse.c'
+            include '**/video/windows/SDL_windowsopengl.c'
+            include '**/video/windows/SDL_windowsopengles.c'
+            include '**/video/windows/SDL_windowsshape.c'
+            include '**/video/windows/SDL_windowsvideo.c'
+            include '**/video/windows/SDL_windowswindow.c'
+
+            //println 'files - ' + getFiles()
+          }
+          exportedHeaders {
+            srcDirs file('SDL2/include'), file(SDL2SRCDIR.toString() + '/include')
+          }
+        }
+      }
+    }
+    SDL2main(NativeLibrarySpec) {
+      sources {
+        c {
+          source {
+            srcDir file(SDL2SRCDIR.toString() + '/src')
+            include '**/main/windows/SDL_windows_main.c'
+          }
+          exportedHeaders {
+            srcDirs file('SDL2/include'), file(SDL2SRCDIR.toString() + '/include')
+          }
+        }
+      }
+    }
     SDL2_image(NativeLibrarySpec) {
       sources {
         c {
@@ -33,28 +166,77 @@ model {
             srcDirs file(SDL2SRCDIR.toString() + '/include'), file(SDL2IMAGESRCDIR.toString())
           }
         }
+        c.lib library: 'SDL2', linkage: 'static'
       }
     }
-    //freetype(NativeLibrarySpec) {
-    //  sources {
-    //    c {
-    //      source {
-    //        file(FREETYPESRCDIR.toString() + '/src/autofit/autofit.c')
-    //        //println getFiles()
-    //        //file(FREETYPESRCDIR.toString() + '/src/autofit/autofit.c')
-    //        //println getFiles()
-    //      	//getFiles() 
-    //        //srcDir file(FREETYPESRCDIR.toString() + '/src')
-    //        //include '**/*.c'
-    //        //add file(FREETYPESRCDIR.toString() + '/src/autofit/autofit.c').toString()
-    //        //, file(FREETYPESRCDIR.toString() + '/src/base/ftbase.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftbbox.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftbdf.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftbitmap.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftcid.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftfntfmt.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftfstype.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftgasp.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftglyph.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftgxval.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftinit.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftlcdfil.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftmm.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftotval.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftpatent.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftpfr.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftstroke.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftsynth.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftsystem.c'), file(FREETYPESRCDIR.toString() + '/src/base/fttype1.c'), file(FREETYPESRCDIR.toString() + '/src/base/ftwinfnt.c'), file(FREETYPESRCDIR.toString() + '/src/bdf/bdf.c'), file(FREETYPESRCDIR.toString() + '/src/bzip2/ftbzip2.c'), file(FREETYPESRCDIR.toString() + '/src/cache/ftcache.c'), file(FREETYPESRCDIR.toString() + '/src/cff/cff.c'), file(FREETYPESRCDIR.toString() + '/src/cid/type1cid.c'), file(FREETYPESRCDIR.toString() + '/src/gzip/ftgzip.c'), file(FREETYPESRCDIR.toString() + '/src/lzw/ftlzw.c'), file(FREETYPESRCDIR.toString() + '/src/pcf/pcf.c'), file(FREETYPESRCDIR.toString() + '/src/pfr/pfr.c'), file(FREETYPESRCDIR.toString() + '/src/psaux/psaux.c'), file(FREETYPESRCDIR.toString() + '/src/pshinter/pshinter.c'), file(FREETYPESRCDIR.toString() + '/src/psnames/psnames.c'), file(FREETYPESRCDIR.toString() + '/src/raster/raster.c'), file(FREETYPESRCDIR.toString() + '/src/sfnt/sfnt.c'), file(FREETYPESRCDIR.toString() + '/src/smooth/smooth.c'), file(FREETYPESRCDIR.toString() + '/src/truetype/truetype.c'), file(FREETYPESRCDIR.toString() + '/src/type1/type1.c'), file(FREETYPESRCDIR.toString() + '/src/type42/type42.c'), file(FREETYPESRCDIR.toString() + '/src/winfonts/winfnt.c')
-    //      }
-    //      exportedHeaders {
-    //        srcDir file(FREETYPESRCDIR.toString() + '/include')
-    //      }
-    //    }
-    //  }
-    //}
+    freetype(NativeLibrarySpec) {
+      sources {
+        c {
+          source {
+            srcDirs file(FREETYPESRCDIR.toString() + '/src'), file(FREETYPESRCDIR.toString())
+            include '**/builds/windows/ftdebug.c'
+
+            include '**/autofit/autofit.c'
+            include '**/base/ftbbox.c'
+            include '**/base/ftbdf.c'
+            include '**/base/ftbitmap.c'
+            include '**/base/ftcid.c'
+            include '**/base/ftfntfmt.c'
+            include '**/base/ftfstype.c'
+            include '**/base/ftgasp.c'
+            include '**/base/ftglyph.c'
+            include '**/base/ftgxval.c'
+            include '**/base/ftinit.c'
+            include '**/base/ftlcdfil.c'
+            include '**/base/ftmm.c'
+            include '**/base/ftotval.c'
+            include '**/base/ftpatent.c'
+            include '**/base/ftpfr.c'
+            include '**/base/ftstroke.c'
+            include '**/base/ftsynth.c'
+            include '**/base/ftsystem.c'
+            include '**/base/fttype1.c'
+            include '**/base/ftwinfnt.c'
+            include '**/bdf/bdf.c'
+            include '**/bzip2/ftbzip2.c'
+            include '**/cache/ftcache.c'
+            include '**/cff/cff.c'
+            include '**/cid/type1cid.c'
+            include '**/gzip/ftgzip.c'
+            include '**/lzw/ftlzw.c'
+            include '**/pcf/pcf.c'
+            include '**/pfr/pfr.c'
+            include '**/psaux/psaux.c'
+            include '**/pshinter/pshinter.c'
+            include '**/psnames/psnames.c'
+            include '**/raster/raster.c'
+            include '**/sfnt/sfnt.c'
+            include '**/smooth/smooth.c'
+            include '**/truetype/truetype.c'
+            include '**/type1/type1.c'
+            include '**/type42/type42.c'
+            include '**/winfonts/winfnt.c'
+
+            exclude '**/amiga/**/*.c'
+
+            include '**/src/base/ftadvanc.c'
+            include '**/src/base/ftutil.c'
+            include '**/src/base/ftcalc.c'
+            include '**/src/base/ftgloadr.c'
+            include '**/src/base/ftobjs.c'
+            include '**/src/base/ftstream.c'
+            include '**/src/base/ftoutln.c'
+            include '**/src/base/ftrfork.c'
+            include '**/src/base/fttrigon.c'
+
+            //println 'files - ' + getFiles()
+          }
+          exportedHeaders {
+            srcDir file(FREETYPESRCDIR.toString() + '/include')
+          }
+        }
+      }
+    }
     lantern(NativeLibrarySpec) {
       sources {
         cpp {
@@ -67,36 +249,50 @@ model {
             srcDirs file(SDL2SRCDIR.toString() + '/include'), file(SDL2IMAGESRCDIR.toString()), file(FREETYPESRCDIR.toString() + '/include')
           }
         }
+        cpp.lib library: 'SDL2', linkage: 'static'
+        cpp.lib library: 'SDL2main', linkage: 'static'
+        cpp.lib library: 'SDL2_image', linkage: 'static'
+        cpp.lib library: 'freetype', linkage: 'static'
       }
     }
-    //empty_app(NativeExecutableSpec) {
-    //  sources {
-    //    cpp {
-    //      source {
-    //        srcDir 'examples/empty_app'
-    //        include '**/*.cpp'
-    //      }
-    //      exportedHeaders {
-    //        srcDir 'lantern/include'
-    //        srcDirs file(SDL2SRCDIR.toString() + '/include'), file(SDL2IMAGESRCDIR.toString()), file(FREETYPESRCDIR.toString() + '/include')
-    //      }
-    //      lib library: 'lantern'
-    //    }
-    //  }
-    //}
+    // empty_app(NativeExecutableSpec) {
+    //   sources {
+    //     cpp {
+    //       source {
+    //         srcDir 'examples/empty_app'
+    //         include '**/*.cpp'
+    //       }
+    //       exportedHeaders {
+    //         srcDir 'lantern/include'
+    //         srcDirs file(SDL2SRCDIR.toString() + '/include'), file(SDL2IMAGESRCDIR.toString()), file(FREETYPESRCDIR.toString() + '/include')
+    //       }
+    //       println libs
+    //     }
+    //     cpp.lib library: 'lantern', linkage: 'static'
+    //     cpp.lib library: 'SDL2', linkage: 'static'//'shared'
+    //     cpp.lib library: 'SDL2main', linkage: 'static'
+    //     cpp.lib library: 'SDL2_image', linkage: 'static'//'shared'
+    //     cpp.lib library: 'freetype', linkage: 'static'//'shared'
+    //   }
+    // }
   }
 }
 
 binaries.all {
   //cppCompiler.define "GL_GLEXT_PROTOTYPES" //Android
+
+  cCompiler.define 'FT2_BUILD_LIBRARY'
+  cCompiler.define '_USE_MATH_DEFINES'
+  cppCompiler.define '_USE_MATH_DEFINES'
+
   if (toolChain in Gcc) {
-    cppCompiler.args '-std=gnu++0x', '-Wall', '-Wno-comment'
+    cCompiler.args '-std=c11', '-Wall', '-Wno-comment', '-Wl,--subsystem,windows'
+    cppCompiler.args '-std=gnu++0x', '-Wall', '-Wno-comment', '-Wl,--subsystem,windows'
+    linker.args '-mwindows', '-lkernel32', '-luser32', '-lgdi32', '-lwinmm', '-limm32', '-lversion', '-lole32', '-luuid', '-loleaut32'
   }
   if (toolChain in VisualCpp) {
-    cppCompiler.define '_USE_MATH_DEFINES'
-    cppCompiler.define 'NOMINMAX'
-    cCompiler.define '_USE_MATH_DEFINES'
     cCompiler.define 'NOMINMAX'
+    cppCompiler.define 'NOMINMAX'
 
     // <--
     if (file(System.getenv('ProgramFiles').toString() + '/Windows Kits/10/Include/10.0.10150.0/ucrt').exists()) {

@@ -41,5 +41,6 @@ You also have to have all the dependencies and tools installed (obviously). As a
  * ~~`FREETYPESRCDIR` - path to a folder containing FreeType's headers and library~~
 
 * For build lantern library type and execute: `gradlew lanternStaticLibrary --daemon -PSDL2SRCDIR=<Path to SDL2 source directory> -PSDL2IMAGESRCDIR=<Path to SDL2 image source directory> -PFREETYPESRCDIR=<Path to FreeType source directory>`
-* For build SDL2_Image library type and execute: `gradlew sDL2_imageStaticLibrary --daemon -PSDL2SRCDIR=<Path to SDL2 source directory> -PSDL2IMAGESRCDIR=<Path to SDL2 image source directory> -PFREETYPESRCDIR=<Path to FreeType source directory>`
+* For list all avaliable tasks of this project type and execute: `gradlew tasks --daemon -PSDL2SRCDIR=<Path to SDL2 source directory> -PSDL2IMAGESRCDIR=<Path to SDL2 image source directory> -PFREETYPESRCDIR=<Path to FreeType source directory>`
+
 Please note `daemon` switch is optional and only provide timesaving in regular building at developing process.
