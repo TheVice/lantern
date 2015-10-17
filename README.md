@@ -1,51 +1,55 @@
-lantern
-=======
+Lantern is a cross-plaftorm 3D software renderer written for educational purposes. It depends of multiple libraries (full list is given below) but it doesn't use them for rendering (except using FreeType library for getting glyphs bitmaps), only for common tasks (such as presenting color buffer on a screen, handling input, loading textures from disk etc.). The aim is to create feature-full renderer from scratch, only using ability to set texture's pixel color.
 
-Software renderer written for educational purposes. Uses OpenGL for rendering and Google C++ Testing Framework for tests.
+Note that because it doesn't use GPU, it is much slower comparing to DirectX or OpenGL, and, obviously, is not intended for using in real projects (unless you're targeting users without video cards!).
 
-###Building on Windows (MinGW)
-* Download [PicoPng](http://lodev.org/lodepng/picopng.cpp)
-* If you want to build tests you must download Google C++ Testing Framework source code ([https://code.google.com/p/googletest/downloads/list](https://code.google.com/p/googletest/downloads/list))
-* Open cmd.exe, move to lantern folder
-* Run: ```mkdir build && cd build``` to create build folder and move to it
-* Run: ```set PICO_PNG_CPP=<path to picopng.cpp>``` so cmake include this file into build process
-* Run: ```set GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target
-* Run: ```cmake -G "MinGW Makefiles" ..``` to generate makefile
-* Run: ```mingw32-make lantern``` to build library
-* Run: ```mingw32-make rasterized_triangle_app``` to build example application
-* Run: ```mingw32-make tests``` to build tests executable
+###Implemented features
 
-###Building on Windows (Visual Studio 2013 / 2015)
-* Download [PicoPng](http://lodev.org/lodepng/picopng.cpp)
-* If you want to build tests you must download Google C++ Testing Framework source code ([https://code.google.com/p/googletest/downloads/list](https://code.google.com/p/googletest/downloads/list))
-* Open cmd.exe, move to lantern folder
-* Run: ```mkdir build && cd build``` to create build folder and move to it
-* Run: ```set PICO_PNG_CPP=<path to picopng.cpp>``` so cmake include this file into build process
-* Run: ```set GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target
-* Run: ```cmake -G "Visual Studio 12" ..``` for VS 2013 (or ```cmake -G "Visual Studio 14" ..``` for VS 2015) to generate VS solution
-* Visual Studio solution is ready now
+* Loading .obj files
+* Rasterization using three different algorithms: inversed slope, traversal (and its subtypes: aabb, backtracking, zigzag), homogeneous
+* Programmable vertex and pixel shaders
+* Perspective-correct attributes interpolation
+* Texture mapping
+* Alpha-blending
+* Truetype fonts rendering
 
-###Building on Linux
-* Download [PicoPng](http://lodev.org/lodepng/picopng.cpp)
-* If you want to build tests you must download Google C++ Testing Framework ([https://code.google.com/p/googletest/downloads/list](https://code.google.com/p/googletest/downloads/list) or just ```sudo apt-get install libgtest-dev``` for apt)
-* Open terminal, move to lantern folder
-* Run: ```mkdir build && cd build``` to create build folder and move to it
-* Run: ```export PICO_PNG_CPP=<path to picopng.cpp>``` so cmake include this file into build process
-* Run: ```export GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target. If you installed it via apt the path is ```/usr/src/gtest```
-* Run: ```cmake -G "Unix Makefiles" ..``` to generate makefile
-* Run: ```make lantern``` to build library
-* Run: ```make rasterized_triangle_app``` to build example application
-* Run: ```make tests``` to build tests executable
+###Dependencies
 
-###Building on Mac OS X
-* Download [PicoPng](http://lodev.org/lodepng/picopng.cpp)
-* If you want to build tests you must download Google C++ Testing Framework ([https://code.google.com/p/googletest/downloads/list](https://code.google.com/p/googletest/downloads/list))
-* Open terminal, move to lantern folder
-* Run: ```mkdir build && cd build``` to create build folder and move to it
-* Run: ```export PICO_PNG_CPP=<path to picopng.cpp>``` so cmake include this file into build process
-* Run: ```export GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target
-* Run: ```cmake -G Xcode ..``` to generate project
-* XCode project is ready now
+* SDL2 - used for creating windows, copying resulting texture data to a screen, handling input and system events
+* SDL2_Image - used for loading images files
+* FreeType - used for loading truetype fonts, calculating their metrics and rendering glyphs bitmaps
+* Google C++ Tests - used for testing
+
+###Building
+
+Lantern uses CMake as its build system.
+
+~~Simple scripts were created to simplify building process a little, though (output goes to `<lantern>/build` folder):~~
+* ~~`build_vs14.bat` - creates VS solution for Visual Studio 2015~~
+* ~~`build_vs12.bat` - creates VS solution for Visual Studio 2013~~
+* ~~`build_mingw_make.bat` - creates MinGW makefiles~~
+* ~~`build_make.sh` - creates Linux makefiles~~
+* ~~`build_xcode.sh` - creates XCode project~~
+
+~~On Linux and MacOS you probably have to `chmod +x build_*.sh` before running them.~~
+
+You also have to have all the dependencies and tools installed (obviously). As an example for Ubuntu, here are the commands for installing all of them (just skip what you don't need):
+ * `sudo apt-get install cmake`
+ * `sudo apt-get install g++`
+ * `sudo apt-get install libsdl2-dev`
+ * `sudo apt-get install libsdl2-image-dev`
+ * `sudo apt-get install libfreetype6-dev`
+ * `sudo apt-get install libgtest-dev`
+
+On Windows you have to specify a few environment variables for dependencies so that CMake's `find_package` will be able to find them:
+ * `SDL2DIR` - path to SDL2 development library
+ * `SDL2IMAGEDIR` - path to SDL2_Image development library
+ * `FREETYPEDIR` - path to a folder containing FreeType's headers and library
+ * `GTEST_ROOT` - path to Google Tests source code folder (required only if you're going to build tests target)
+
+~~Note for Windows FreeType library: if you're building it by yourself, make sure that output library's name is `freetype2.lib` and not `freetype26.lib` (that's what bundled FindFreeType.cmake looks for).~~
 
 ###Known issues
-* Lantern might fail loading resources when running from directory different then the one where the executable is
+
+* If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 by yourself using VS 2015, or just download SDL2 build bot package here: https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/
+
+* Lantern fails loading resources when running from a directory different than the one where the executable is

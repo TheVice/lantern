@@ -1,8 +1,10 @@
+#include <sstream>
 #include "app.h"
 #include "obj_import.h"
 #include "camera.h"
 #include "color_shader.h"
 #include "texture_shader.h"
+#include "ui_label.h"
 
 using namespace lantern;
 
@@ -20,7 +22,7 @@ public:
 
 protected:
 	void frame(float const delta_since_last_frame) override;
-	void on_key_down(unsigned char const key) override;
+	void on_key_down(SDL_Keysym const key) override;
 
 private:
 	/** Updates view-model-projection matrix and gives it to the shader */
@@ -37,6 +39,13 @@ private:
 	shader_option m_shader_option;
 
 	texture m_texture;
+
+	font m_ui_font;
+	ui_label m_fps_label;
+	ui_label m_controls_description_label;
+	ui_label m_modes_description_label;
+
+	unsigned int m_last_fps;
 };
 
 rasterized_color_triangle_app::rasterized_color_triangle_app(unsigned int const width, unsigned int const height)
@@ -53,7 +62,12 @@ rasterized_color_triangle_app::rasterized_color_triangle_app(unsigned int const 
 		  0.01f,
 		  20.0f},
 	  m_shader_option{shader_option::color},
-	  m_texture{texture::load_from_file("resources/chess.png")}
+	  m_texture{texture::load_from_file("resources/chess.png")},
+	  m_ui_font{"resources/Ubuntu-L.ttf", 15},
+	  m_fps_label{m_ui_font, get_target_texture()},
+	  m_controls_description_label{m_ui_font, get_target_texture()},
+	  m_modes_description_label{m_ui_font, get_target_texture()}
+
 {
 	// Update model-view-projection matrix for the first time
 	update_shader_mvp();
@@ -62,7 +76,7 @@ rasterized_color_triangle_app::rasterized_color_triangle_app(unsigned int const 
 
 	// Add color attribute to triangle mesh
 	//
-	std::vector<color> const colors{color::GREEN, color::RED, color::BLUE};
+	std::vector<color> const colors{color::GREEN.with_alpha(0.0f), color::RED.with_alpha(0.0f), color::BLUE.with_alpha(1.0f)};
 	mesh_attribute_info<color> const color_info{COLOR_ATTR_ID, colors, indices, attribute_interpolation_option::linear};
 	m_triangle_mesh.get_color_attributes().push_back(color_info);
 
@@ -75,110 +89,100 @@ rasterized_color_triangle_app::rasterized_color_triangle_app(unsigned int const 
 	// Setup texture shader
 	//
 	m_texture_shader.set_texture(&m_texture);
+
+	// Setup UI labels
+	//
+
+	m_fps_label.set_position(vector2f{-0.95f, 0.9f});
+	m_controls_description_label.set_position(vector2f{-0.95f, -0.85f});
+	m_modes_description_label.set_position(vector2f{-0.95f, -0.95f});
+
+	m_controls_description_label.set_text("Controls: WASD. R or F to move along Y-axis");
+	m_modes_description_label.set_text("Shaders: 1 - color shader, 2 - texture mapping");
+
+	m_controls_description_label.set_color(color{0.5f, 0.5f, 0.5f});
+	m_modes_description_label.set_color(color{0.5f, 0.5f, 0.5f});
+
+	// This enables alpha blending
+	//
+	// get_pipeline().get_merger().set_alpha_blending_enabled(true);
 };
 
 void rasterized_color_triangle_app::frame(float const delta_since_last_frame)
 {
+	if (m_last_fps != get_last_fps())
+	{
+		m_last_fps = get_last_fps();
+
+		std::ostringstream output_stream;
+		output_stream << "Framerate is: " << m_last_fps;
+		m_fps_label.set_text(output_stream.str());
+	}
+
 	// Draw the triangle
 	//
 
 	if (m_shader_option == shader_option::color)
 	{
-		get_pipeline().draw(m_triangle_mesh, m_color_shader, get_target_texture());
+		get_renderer().render_mesh(m_triangle_mesh, m_color_shader, get_target_texture());
 	}
 	else if (m_shader_option == shader_option::texture)
 	{
-		get_pipeline().draw(m_triangle_mesh, m_texture_shader, get_target_texture());
+		get_renderer().render_mesh(m_triangle_mesh, m_texture_shader, get_target_texture());
 	}
+
+	m_fps_label.draw(get_renderer(), get_target_texture());
+	m_controls_description_label.draw(get_renderer(), get_target_texture());
+	m_modes_description_label.draw(get_renderer(), get_target_texture());
 }
 
-void rasterized_color_triangle_app::on_key_down(unsigned char const key)
+void rasterized_color_triangle_app::on_key_down(SDL_Keysym const key)
 {
+	app::on_key_down(key);
+
 	float const moving_speed{0.01f};
 	float const rotation_speed{0.05f};
-#ifdef WIN32
-	if (key == 'a')
+
+	if (key.sym == SDLK_a)
 	{
 		m_camera.move_left(moving_speed);
 	}
-	else if (key == 'd')
+	else if (key.sym == SDLK_d)
 	{
 		m_camera.move_right(moving_speed);
 	}
-	else if (key == 'w')
+	else if (key.sym == SDLK_w)
 	{
 		m_camera.move_forward(moving_speed);
 	}
-	else if (key == 's')
+	else if (key.sym == SDLK_s)
 	{
 		m_camera.move_backward(moving_speed);
 	}
-	else if (key == 'r')
+	else if (key.sym == SDLK_r)
 	{
 		m_camera.move_up(moving_speed);
 	}
-	else if (key == 'f')
+	else if (key.sym == SDLK_f)
 	{
 		m_camera.move_down(moving_speed);
 	}
-	else if (key == 'q')
+	else if (key.sym == SDLK_q)
 	{
 		m_camera.yaw(-rotation_speed);
 	}
-	else if (key == 'e')
+	else if (key.sym == SDLK_e)
 	{
 		m_camera.yaw(rotation_speed);
 	}
-	else if (key == '1')
+	else if (key.sym == SDLK_1)
 	{
 		m_shader_option = shader_option::color;
 	}
-	else if (key == '2')
+	else if (key.sym == SDLK_2)
 	{
 		m_shader_option = shader_option::texture;
 	}
-#else
-	if (key == 0x26)
-	{
-		m_camera.move_left(moving_speed);
-	}
-	else if (key == 0x28)
-	{
-		m_camera.move_right(moving_speed);
-	}
-	else if (key == 0x19)
-	{
-		m_camera.move_forward(moving_speed);
-	}
-	else if (key == 0x27)
-	{
-		m_camera.move_backward(moving_speed);
-	}
-	else if (key == 0x1b)
-	{
-		m_camera.move_up(moving_speed);
-	}
-	else if (key == 0x29)
-	{
-		m_camera.move_down(moving_speed);
-	}
-	else if (key == 0x18)
-	{
-		m_camera.yaw(-rotation_speed);
-	}
-	else if (key == 0x1a)
-	{
-		m_camera.yaw(rotation_speed);
-	}
-	else if (key == 0xA)
-	{
-		m_shader_option = shader_option::color;
-	}
-	else if (key == 0xB)
-	{
-		m_shader_option = shader_option::texture;
-	}
-#endif
 
 	// Update model-view-projection according to camera changes
 	update_shader_mvp();

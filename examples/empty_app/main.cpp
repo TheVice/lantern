@@ -9,7 +9,6 @@ public:
 
 protected:
 	void frame(float const delta_since_last_frame) override;
-	void on_key_down(unsigned char key) override;
 };
 
 empty_app::empty_app(unsigned int const width, unsigned int const height)
@@ -18,10 +17,6 @@ empty_app::empty_app(unsigned int const width, unsigned int const height)
 }
 
 void empty_app::frame(float delta_since_last_frame)
-{
-}
-
-void empty_app::on_key_down(unsigned char key)
 {
 }
 

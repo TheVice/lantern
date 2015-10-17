@@ -14,15 +14,20 @@ namespace lantern
 	{
 	public:
 		/** Constructs texture with given width and height
-		* @param width Texture width
-		* @param height Texture height
+		* @param width Texture's width
+		* @param height Texture's height
 		*/
 		texture(unsigned int const width, unsigned int const height);
 
-		/** Moving data from other texture to the new one
-		* @param other Texture to move data from
+		/** Copies texture from another instance
+		* @param another Texture to copy data from
 		*/
-		texture(texture&& other);
+		texture(texture const& another);
+
+		/** Moving data from other texture to the new one
+		* @param another Texture to move data from
+		*/
+		texture(texture&& another);
 
 		/** Frees memory used by the texture */
 		~texture();
@@ -84,6 +89,17 @@ namespace lantern
 		unsigned int m_pitch;
 	};
 
+	inline color texture::get_pixel_color(vector2ui const& point) const
+	{
+		unsigned int const pixel_first_byte_index{m_pitch * point.y + point.x * 4};
+
+		return color{
+			m_data[pixel_first_byte_index + 2] / 255.0f,
+			m_data[pixel_first_byte_index + 1] / 255.0f,
+			m_data[pixel_first_byte_index + 0] / 255.0f,
+			m_data[pixel_first_byte_index + 3] / 255.0f};
+	}
+
 	inline void texture::set_pixel_color(vector2ui const& point, color const& color)
 	{
 		unsigned int const pixel_first_byte_index{m_pitch * point.y + point.x * 4};
@@ -91,7 +107,7 @@ namespace lantern
 		m_data[pixel_first_byte_index + 0] = static_cast<unsigned char>(color.b * 255);
 		m_data[pixel_first_byte_index + 1] = static_cast<unsigned char>(color.g * 255);
 		m_data[pixel_first_byte_index + 2] = static_cast<unsigned char>(color.r * 255);
-		// m_data[pixel_first_byte_index + 3] is alpha, we don't use it for now
+		m_data[pixel_first_byte_index + 3] = static_cast<unsigned char>(color.a * 255);
 	}
 
 	inline void texture::clear(unsigned char const bytes_value)

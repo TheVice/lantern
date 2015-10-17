@@ -2,8 +2,6 @@
 #define LANTERN_VECTOR2_H
 
 #include "math_common.h"
-#include "vector3.h"
-#include "vector2.h"
 
 namespace lantern
 {
@@ -199,7 +197,7 @@ namespace lantern
 	{
 		float const length_reciprocal{1.0f / this->length()};
 
-		return vector3<T>{this->x * length_reciprocal, this->y * length_reciprocal};
+		return vector2<T>{this->x * length_reciprocal, this->y * length_reciprocal};
 	}
 
 	template<typename T>
