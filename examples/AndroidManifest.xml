@@ -24,8 +24,7 @@
                  android:hardwareAccelerated="true" >
         <activity android:name="libsdlActivity"
                   android:label="@string/app_name"
-                  android:configChanges="keyboardHidden|orientation"
-                  >
+                  android:configChanges="keyboardHidden|orientation" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
