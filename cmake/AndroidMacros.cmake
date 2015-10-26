@@ -32,23 +32,23 @@ macro(add_Android_Project target_name activity_name package_name project_directo
     string(REPLACE "<string name=\"app_name\">${activity_name}</string>" "<string name=\"app_name\">${target_name}</string>" file_content "${file_content}")
     FILE(WRITE ${project_directory}/res/values/strings.xml "${file_content}")
 
-    add_custom_target(${target_name}[build-apk]
+    add_custom_target(${target_name}_build-apk
         DEPENDS ${target_name}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${LIBRARY_OUTPUT_PATH_ROOT}/libs ${project_directory}/libs
         COMMAND ${ANT_EXECUTABLE} ${ant_build_type} -buildfile ${project_directory}
     )
 
-    add_custom_target(${target_name}[install-apk]
-        DEPENDS ${target_name}[build-apk]
+    add_custom_target(${target_name}_install-apk
+        DEPENDS ${target_name}_build-apk
         COMMAND adb install -r ${project_directory}/bin/${target_name}-${ant_build_type}.apk
     )
 
-    add_custom_target(${target_name}[run-apk]
-        DEPENDS ${target_name}[install-apk]
+    add_custom_target(${target_name}_run-apk
+        DEPENDS ${target_name}_install-apk
         COMMAND adb shell am start -a android.intent.action.MAIN -n org.libsdl/.libsdlActivity
     )
 
-    add_custom_target(${target_name}[uninstall-apk]
+    add_custom_target(${target_name}_uninstall-apk
         COMMAND adb uninstall org.libsdl
     )
 endmacro(add_Android_Project target_name activity_name package_name project_directory target_source_files target_include_dirs target_link_libs)

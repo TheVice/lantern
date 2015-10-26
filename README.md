@@ -62,17 +62,17 @@ Software renderer written for educational purposes. Uses SDL2 for rendering and 
 * Add bin directory from Apache Ant into PATHs (Only for build through CMake/Eclipse)
 * Add directories ```ANDROID_NDK```, ```ANDROID_HOME/platform-tools``` and ```ANDROID_HOME/tools``` into PATHs
 * Get [android.toolchain.cmake](https://github.com/taka-no-me/android-cmake/blob/master/android.toolchain.cmake) (mirror [1](https://code.google.com/p/android-cmake/source/browse/toolchain/android.toolchain.cmake), [2](http://code.opencv.org/projects/opencv/repository/revisions/master/changes/platforms/android/android.toolchain.cmake)) and save to any place you want
-* Device or emulator that running [Android 2.3.3 (API Level 10)](https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels) or above
+* Device or emulator that running [Android 3.1.x (API Level 12)](https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels) or above
 
 ##Prepare Eclipse project
 * Open terminal, move to lantern folder
 * Run: ```set SDL2SRCDIR=<path to source of SDL2>``` on Windows or ```export SDL2SRCDIR=<path to source of SDL2>``` on Linux
 * Run: ```set SDL2IMAGESRCDIR=<path to source of SDL2 image>``` on Windows or ```export SDL2IMAGESRCDIR=<path to source of SDL2 image>``` on Linux
 * Run: ```mkdir build && cd build``` to create build folder and move to it
-* On Windows execute ```cmake .. -G "Eclipse CDT4 - MinGW Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="<path to>android.toolchain.cmake" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="10" -DANDROID_ABI="armeabi"```
-* On Linux execute ```cmake .. -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j$(nproc) -s" -DCMAKE_TOOLCHAIN_FILE="<path to>android.toolchain.cmake" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="10" -DANDROID_ABI="armeabi"```
+* On Windows execute ```cmake .. -G "Eclipse CDT4 - MinGW Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="<path to>android.toolchain.cmake" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="12" -DANDROID_ABI="armeabi"```
+* On Linux execute ```cmake .. -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j$(nproc) -s" -DCMAKE_TOOLCHAIN_FILE="<path to>android.toolchain.cmake" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="12" -DANDROID_ABI="armeabi"```
 * ```CMAKE_BUILD_TYPE``` also can be set to ```Release``` or ```RelWithDebInfo```. Tested in ```Debug``` mode
-* ```ANDROID_NATIVE_API_LEVEL``` can be great than ```10```, but not lower. Tested only with ```10```
+* ```ANDROID_NATIVE_API_LEVEL``` can be great than ```12```, but not lower. Tested only with ```12```
 * ```ANDROID_ABI``` dependence on NDK version can be set to: ```armeabi-v7a```, ```x86```, ```mips``` and also 64 version of various CPU architecture. With set ```armeabi``` almost all ARM devices emulator can to execute. Check your emulator setting, device configuration to determinate what type of CPU architecture you have
 * You can also do not do steps with addeding SDL2SRCDIR and SDL2IMAGESRCDIR to enviroment variable and pass it like defines for cmake script: ```-DSDL2SRCDIR=<path to source of SDL2> -DSDL2IMAGESRCDIR=<path to source of SDL2 image>```
 * Connect your Android device, start emulator by ```android avd``` or ```emulator -avd <avd_name>``` to run already created emulator directly
