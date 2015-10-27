@@ -63,6 +63,7 @@ namespace lantern
 		face_culling_option face_culling,
 		TShader& shader,
 		texture& target_texture,
+		merger const& merger,
 		binded_mesh_attributes& attributes)
 	{
 		// p = ax + by + cw
@@ -243,7 +244,7 @@ namespace lantern
 						pc,
 						w_value);
 
-					target_texture.set_pixel_color(p, shader.process_pixel(p));
+					merger.merge(target_texture, p, shader.process_pixel(p));
 				}
 
 				edge0_v += edge0_abc.x;
