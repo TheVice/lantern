@@ -18,7 +18,7 @@ model {
 
         defaultConfig.with {
             applicationId = "com.android.lantern.empty_app"
-            minSdkVersion.apiLevel = 10
+            minSdkVersion.apiLevel = 12
             targetSdkVersion.apiLevel = 12
         }
     }
@@ -57,8 +57,6 @@ model {
         cppFlags += "-I${file("../../lantern/include/rendering/rasterizing")}".toString()
         cppFlags += "-I${file("../../lantern/include/rendering/shaders")}".toString()
         cppFlags += "-I${file("../../examples/empty_app")}".toString()
-
-        //println file('../../lantern/include').toString()
       }
     android.sources {
         main {

@@ -1,66 +1,201 @@
 apply plugin: 'com.android.model.application'
 
+if (System.env.SDL2SRCDIR == null) {
+    throw new GradleException('Path to SDL2 source directory not set')
+}
+
+if (System.env.SDL2IMAGESRCDIR == null) {
+    throw new GradleException('Path to SDL2 image source directory not set')
+}
+
+def sdl2 = file(System.env.SDL2SRCDIR)
+def sdl2image = file(System.env.SDL2IMAGESRCDIR)
+
 model {
     android {
         compileSdkVersion = 21
-        buildToolsVersion ="22.0.1"
+        buildToolsVersion = "22.0.1"
 
         defaultConfig.with {
             applicationId = "com.android.lantern.rasterized_triangle_app"
-            minSdkVersion.apiLevel      = 9
-            targetSdkVersion.apiLevel   = 9
+            minSdkVersion.apiLevel = 12
+            targetSdkVersion.apiLevel = 12
         }
     }
-    /*
-     * native build settings
-     */
     android.ndk {
-        moduleName = "RasterizedTriangleAppNativeActivity"
+        moduleName = "rasterized_triangle_app"
+
+        CFlags += "-std=c11"
+        //CFlags += "-Wall"
+        //CFlags += "-Wno-comment"
+        //CFlags += "-Werror"
+        CFlags += "-fexceptions"
+        CFlags += "-DGL_GLEXT_PROTOTYPES"
 
         cppFlags += "-std=c++11"
         cppFlags += "-Wall"
         cppFlags += "-Wno-comment"
         cppFlags += "-Werror"
         cppFlags += "-fexceptions"
-        ldLibs    = ["android", "log", "EGL", "GLESv1_CM"]
+        cppFlags += "-DGL_GLEXT_PROTOTYPES"
+
+        ldLibs = ["android", "log", "z", "GLESv1_CM", "GLESv2"]
         stl = "gnustl_static"
 
-        Properties properties = new Properties()
-        properties.load(project.rootProject.file('local.properties').newDataInputStream())
-        def ndkdir = properties.getProperty('ndk.dir', null)
+        CFlags += "-I${file("${sdl2}/src")}".toString()
+        CFlags += "-I${file("${sdl2}/include")}".toString()
+        CFlags += "-I${file("${sdl2image}")}".toString()
 
-        cppFlags   += "-I${file("${ndkdir}/sources/android/native_app_glue")}".toString()
-        cppFlags   += "-I${file("${project.buildDir}/../../../android/include")}".toString()
-        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include")}".toString()
-        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include/math")}".toString()
-        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include/rendering")}".toString()
-        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include/rendering/geometry")}".toString()
-        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include/rendering/rasterizing")}".toString()
-        cppFlags   += "-I${file("${project.buildDir}/../../../lantern/include/rendering/shaders")}".toString()
+        cppFlags += "-I${file("${sdl2}/src")}".toString()
+        cppFlags += "-I${file("${sdl2}/include")}".toString()
+        cppFlags += "-I${file("${sdl2image}")}".toString()
+
+        cppFlags += "-I${file("../../lantern/include")}".toString()
+        cppFlags += "-I${file("../../lantern/include/math")}".toString()
+        cppFlags += "-I${file("../../lantern/include/rendering")}".toString()
+        cppFlags += "-I${file("../../lantern/include/rendering/geometry")}".toString()
+        cppFlags += "-I${file("../../lantern/include/rendering/rasterizing")}".toString()
+        cppFlags += "-I${file("../../lantern/include/rendering/shaders")}".toString()
+        cppFlags += "-I${file("../../examples/rasterized_triangle_app")}".toString()
       }
     android.sources {
         main {
             jni {
                 source {
-                    Properties properties = new Properties()
-                    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-                    def ndkdir = properties.getProperty('ndk.dir', null)
-                    srcDirs = [
-                            "${ndkdir}/sources/android/native_app_glue",
-                            "${project.buildDir}/../../../android/src",
-                            "${project.buildDir}/../../../lantern/src",
-                            "${project.buildDir}/../../../lantern/src/math",
-                            "${project.buildDir}/../../../lantern/src/rendering",
-                            "${project.buildDir}/../../../lantern/src/rendering/geometry",
-                            "${project.buildDir}/../../../lantern/src/rendering/rasterizing",
-                            "${project.buildDir}/../../../examples/rasterized_triangle_app",
-							"${project.buildDir}/../../../build"
-                    ]
+                    srcDirs file('../../lantern/src'), file('../../examples/rasterized_triangle_app'), file(sdl2.toString() + '/src'), sdl2image
+
+                    include '**/*.c'
+                    include '**/*.cpp'
+
+                    // <== sdl2 excludes
+                    exclude '**/test/*'
+
+                    exclude '**/audio/alsa/*'
+                    exclude '**/audio/arts/*'
+                    exclude '**/audio/bsd/*'
+                    exclude '**/audio/coreaudio/*'
+                    exclude '**/audio/directsound/*'
+                    exclude '**/audio/disk/*'
+                    exclude '**/audio/dsp/*'
+                    exclude '**/audio/esd/*'
+                    exclude '**/audio/fusionsound/*'
+                    exclude '**/audio/haiku/*'
+                    exclude '**/audio/nas/*'
+                    exclude '**/audio/paudio/*'
+                    exclude '**/audio/psp/*'
+                    exclude '**/audio/pulseaudio/*'
+                    exclude '**/audio/qsa/*'
+                    exclude '**/audio/sndio/*'
+                    exclude '**/audio/sun/*'
+                    exclude '**/audio/winmm/*'
+                    exclude '**/audio/xaudio2/*'
+
+                    exclude '**/audio/core/linux/*'
+                    exclude '**/audio/core/windows/*'
+                    exclude '**/audio/core/winrt/*'
+
+                    exclude '**/core/linux/*'
+                    exclude '**/core/windows/*'
+                    exclude '**/core/winrt/*'
+
+                    exclude '**/file/cocoa/*'
+
+                    exclude '**/filesystem/cocoa/*'
+                    //exclude '**/filesystem/dummy/*'
+                    exclude '**/filesystem/haiku/*'
+                    exclude '**/filesystem/unix/*'
+                    exclude '**/filesystem/windows/*'
+                    exclude '**/filesystem/winrt/*'
+
+                    exclude '**/haptic/darwin/*'
+                    //exclude '**/haptic/dummy/*'
+                    exclude '**/haptic/linux/*'
+                    exclude '**/haptic/windows/*'
+
+                    //exclude '**/joystick/android/*'
+                    exclude '**/joystick/bsd/*'
+                    exclude '**/joystick/darwin/*'
+                    exclude '**/joystick/dummy/*'
+                    exclude '**/joystick/haiku/*'
+                    exclude '**/joystick/iphoneos/*'
+                    exclude '**/joystick/linux/*'
+                    exclude '**/joystick/psp/*'
+                    exclude '**/joystick/windows/*'
+                    exclude '**/joystick/winrt/*'
+
+                    //exclude '**/loadso/dlopen/*'
+                    exclude '**/loadso/dummy/*'
+                    exclude '**/loadso/haiku/*'
+                    exclude '**/loadso/windows/*'
+
+                    exclude '**/main/android/*'
+                    exclude '**/main/dummy/*'
+                    exclude '**/main/haiku/*'
+                    exclude '**/main/psp/*'
+                    exclude '**/main/windows/*'
+                    exclude '**/main/winrt/*'
+
+                    //exclude '**/power/android/*'
+                    exclude '**/power/haiku/*'
+                    exclude '**/power/linux/*'
+                    exclude '**/power/macosx/*'
+                    exclude '**/power/psp/*'
+                    exclude '**/power/uikit/*'
+                    exclude '**/power/windows/*'
+                    exclude '**/power/winrt/*'
+
+                    exclude '**/render/direct3d/*'
+                    exclude '**/render/direct3d11/*'
+                    exclude '**/render/opengl/*'
+                    //exclude '**/render/opengles/*'
+                    //exclude '**/render/opengles2/*'
+                    exclude '**/render/psp/*'
+                    //exclude '**/render/software/*'
+                    exclude '**/thread/generic/*'
+                    exclude '**/thread/psp/*'
+                    //exclude '**/thread/pthread/*'
+                    exclude '**/thread/stdcpp/*'
+                    exclude '**/thread/windows/*'
+                    exclude '**/timer/dummy/*'
+                    exclude '**/timer/haiku/*'
+                    exclude '**/timer/psp/*'
+                    //exclude '**/timer/unix/*'
+                    exclude '**/timer/windows/*'
+
+                    //exclude '**/video/android/*'
+
+                    exclude '**/video/cocoa/*'
+                    exclude '**/video/directfb/*'
+                    exclude '**/video/dummy/*'
+                    exclude '**/video/haiku/*'
+                    exclude '**/video/mir/*'
+                    exclude '**/video/pandora/*'
+                    exclude '**/video/psp/*'
+                    exclude '**/video/raspberry/*'
+                    exclude '**/video/uikit/*'
+                    exclude '**/video/wayland/*'
+                    exclude '**/video/windows/*'
+                    exclude '**/video/winrt/*'
+                    exclude '**/video/x11/*'
+                    // ==> sdl2 excludes
+
+                    // <== sdl2_image excludes
+                    exclude '**/acinclude/*'
+                    exclude '**/debian/*'
+                    exclude '**/external/*'
+                    exclude '**/VisualC/*'
+                    exclude '**/VisualCE/*'
+                    exclude '**/Xcode/*'
+                    exclude '**/Xcode-iOS/*'
+                    exclude '**/showimage.c'
+                    // ==> sdl2_image excludes
+
+                    println getFiles()
                  }
             }
             assets {
                 source {
-                    srcDirs = ["${project.buildDir}/../../../examples/rasterized_triangle_app"]
+                    srcDir file('../../examples/rasterized_triangle_app') //srcDirs = ["${project.buildDir}/../../../examples/rasterized_triangle_app"]
                 }
             }
         }
