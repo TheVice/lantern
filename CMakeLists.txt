@@ -6,12 +6,41 @@ project(lantern)
 # Add testing tool
 include(CTest)
 
-# SDL2 look up ==============================
+# SDL2, SDL2_image and FreeType look up ====
 if(NOT ANDROID)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
     find_package(SDL2 REQUIRED)
     find_package(SDL2IMAGE REQUIRED)
-endif(NOT ANDROID)
+    find_package(Freetype REQUIRED)
+else()
+    if(DEFINED ENV{SDL2SRCDIR})
+        string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2SRCDIR}/src)
+        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2SRCDIR}/include)
+    elseif(DEFINED SDL2SRCDIR)
+        string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2SRCDIR}/src)
+        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2SRCDIR}/include)
+    else()
+        message(FATAL_ERROR "Path to SDL2 source dir not defined")
+    endif()
+
+    if(DEFINED ENV{SDL2IMAGESRCDIR})
+        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGESRCDIR})
+    elseif(DEFINED SDL2IMAGESRCDIR)
+        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGESRCDIR})
+    else()
+        message(FATAL_ERROR "Path to SDL2Image source dir not defined")
+    endif()
+
+    if(DEFINED ENV{FREETYPESRCDIR})
+        string(REPLACE "\\" "/" FREETYPE_SRC_DIR $ENV{FREETYPESRCDIR}/src)
+        string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS $ENV{FREETYPESRCDIR}/include)
+    elseif(DEFINED FREETYPESRCDIR)
+        string(REPLACE "\\" "/" FREETYPE_SRC_DIR ${FREETYPESRCDIR}/src)
+        string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS ${FREETYPESRCDIR}/include)
+    else()
+        message(FATAL_ERROR "Path to FreeType source dir not defined")
+    endif()
+endif()
 # ===========================================
 
 # Compiler setup ============================
@@ -37,33 +66,15 @@ if(ANDROID)
     else()
         set(ANDROID_EXECUTABLE android)
         set(ANT_EXECUTABLE ant)
-    endif(CMAKE_HOST_WIN32)
+    endif()
 
     string(REPLACE "\\" "/" NDK_PATH $ENV{ANDROID_NDK})
     string(TOLOWER ${CMAKE_BUILD_TYPE} ant_build_type)
-endif(ANDROID)
+endif()
 # ===========================================
 
-# SDL2 and SDL2_image targets ===============
+# SDL2, SDL2_image and FreeType targets =====
 if(ANDROID)
-    if(DEFINED ENV{SDL2SRCDIR})
-        string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2SRCDIR}/src)
-        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2SRCDIR}/include)
-    elseif(DEFINED SDL2SRCDIR)
-        string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2SRCDIR}/src)
-        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2SRCDIR}/include)
-    else()
-        message(FATAL_ERROR "Path to SDL2 source dir not defined")
-    endif()
-
-    if(DEFINED ENV{SDL2IMAGESRCDIR})
-        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGESRCDIR})
-    elseif(DEFINED SDL2IMAGESRCDIR)
-        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGESRCDIR})
-    else()
-        message(FATAL_ERROR "Path to SDL2Image source dir not defined")
-    endif()
-
     # SDL2
     file(GLOB C_FILES ${SDL2_SRC_DIR}/*.c
                       ${SDL2_SRC_DIR}/audio/*.c
@@ -148,55 +159,70 @@ if(ANDROID)
         SDL2_image PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
     set(SDL2IMAGE_LIBRARY SDL2_image)
-endif(ANDROID)
+
+    # FreeType
+    set(C_FILES ${FREETYPE_SRC_DIR}/autofit/autofit.c
+                ${FREETYPE_SRC_DIR}/base/ftadvanc.c
+                ${FREETYPE_SRC_DIR}/base/ftbbox.c
+                ${FREETYPE_SRC_DIR}/base/ftbdf.c
+                ${FREETYPE_SRC_DIR}/base/ftbitmap.c
+                ${FREETYPE_SRC_DIR}/base/ftcalc.c
+                ${FREETYPE_SRC_DIR}/base/ftfntfmt.c
+                ${FREETYPE_SRC_DIR}/base/ftfstype.c
+                ${FREETYPE_SRC_DIR}/base/ftgasp.c
+                ${FREETYPE_SRC_DIR}/base/ftgloadr.c
+                ${FREETYPE_SRC_DIR}/base/ftglyph.c
+                ${FREETYPE_SRC_DIR}/base/ftgxval.c
+                ${FREETYPE_SRC_DIR}/base/ftinit.c
+                ${FREETYPE_SRC_DIR}/base/ftlcdfil.c
+                ${FREETYPE_SRC_DIR}/base/ftmm.c
+                ${FREETYPE_SRC_DIR}/base/ftobjs.c
+                ${FREETYPE_SRC_DIR}/base/ftotval.c
+                ${FREETYPE_SRC_DIR}/base/ftoutln.c
+                ${FREETYPE_SRC_DIR}/base/ftpatent.c
+                ${FREETYPE_SRC_DIR}/base/ftpfr.c
+                ${FREETYPE_SRC_DIR}/base/ftrfork.c
+                ${FREETYPE_SRC_DIR}/base/ftstream.c
+                ${FREETYPE_SRC_DIR}/base/ftstroke.c
+                ${FREETYPE_SRC_DIR}/base/ftsynth.c
+                ${FREETYPE_SRC_DIR}/base/ftsystem.c
+                ${FREETYPE_SRC_DIR}/base/fttrigon.c
+                ${FREETYPE_SRC_DIR}/base/fttype1.c
+                ${FREETYPE_SRC_DIR}/base/ftutil.c
+                ${FREETYPE_SRC_DIR}/base/ftwinfnt.c
+                ${FREETYPE_SRC_DIR}/bdf/bdf.c
+                ${FREETYPE_SRC_DIR}/cache/ftcache.c
+                ${FREETYPE_SRC_DIR}/cff/cff.c
+                ${FREETYPE_SRC_DIR}/cid/type1cid.c
+                ${FREETYPE_SRC_DIR}/gzip/ftgzip.c
+                ${FREETYPE_SRC_DIR}/gzip/zutil.c
+                ${FREETYPE_SRC_DIR}/lzw/ftlzw.c
+                ${FREETYPE_SRC_DIR}/pcf/pcf.c
+                ${FREETYPE_SRC_DIR}/pfr/pfr.c
+                ${FREETYPE_SRC_DIR}/psaux/psaux.c
+                ${FREETYPE_SRC_DIR}/pshinter/pshinter.c
+                ${FREETYPE_SRC_DIR}/psnames/psnames.c
+                ${FREETYPE_SRC_DIR}/raster/raster.c
+                ${FREETYPE_SRC_DIR}/sfnt/sfnt.c
+                ${FREETYPE_SRC_DIR}/smooth/smooth.c
+                ${FREETYPE_SRC_DIR}/truetype/truetype.c
+                ${FREETYPE_SRC_DIR}/type1/type1.c
+                ${FREETYPE_SRC_DIR}/type42/type42.c
+                ${FREETYPE_SRC_DIR}/winfonts/winfnt.c
+                ${FREETYPE_SRC_DIR}/bzip2/ftbzip2.c
+                ${FREETYPE_SRC_DIR}/pcf/pcf.c
+            ${SDL2IMAGE_INCLUDE_DIR}/external/zlib-1.2.8/zutil.c)
+
+    add_library(FreeType STATIC ${C_FILES})
+    target_include_directories(FreeType PRIVATE SYSTEM ${FREETYPE_INCLUDE_DIRS})
+    add_definitions(-DFT2_BUILD_LIBRARY)
+endif()
 # ===========================================
 
 # Library target ============================
-set(LANTERN_SOURCES
-    lantern/src/app.cpp
-    lantern/src/math/line.cpp
-    lantern/src/math/math_common.cpp
-    lantern/src/math/matrix3x3.cpp
-    lantern/src/math/matrix4x4.cpp
-    lantern/src/math/vector4.cpp
-    lantern/src/rendering/texture.cpp
-    lantern/src/rendering/pipeline.cpp
-    lantern/src/rendering/merger.cpp
-    lantern/src/rendering/color.cpp
-    lantern/src/rendering/camera.cpp
-    lantern/src/rendering/geometry/mesh.cpp
-    lantern/src/rendering/geometry/obj_import.cpp
-    lantern/src/rendering/rasterizing/rasterizer_traversal_common.cpp)
+file(GLOB LANTERN_HEADERS "lantern/include/*.h")
 
-set(LANTERN_HEADERS
-    lantern/include/app.h
-    lantern/include/math/aabb.h
-    lantern/include/math/line.h
-    lantern/include/math/math_common.h
-    lantern/include/math/matrix3x3.h
-    lantern/include/math/matrix4x4.h
-    lantern/include/math/vector2.h
-    lantern/include/math/vector3.h
-    lantern/include/math/vector4.h
-    lantern/include/rendering/texture.h
-    lantern/include/rendering/rendering_options.h
-    lantern/include/rendering/pipeline.h
-    lantern/include/rendering/merger.h
-    lantern/include/rendering/color.h
-    lantern/include/rendering/camera.h
-    lantern/include/rendering/shaders/shader.h
-    lantern/include/rendering/shaders/color_shader.h
-    lantern/include/rendering/shaders/texture_shader.h
-    lantern/include/rendering/rasterizing/rasterizer_common.h
-    lantern/include/rendering/rasterizing/rasterizer_homogeneous.h
-    lantern/include/rendering/rasterizing/rasterizer_inversed_slope.h
-    lantern/include/rendering/rasterizing/rasterizer_traversal_aabb.h
-    lantern/include/rendering/rasterizing/rasterizer_traversal_backtracking.h
-    lantern/include/rendering/rasterizing/rasterizer_traversal_common.h
-    lantern/include/rendering/rasterizing/rasterizer_traversal_zigzag.h
-    lantern/include/rendering/geometry/obj_import.h
-    lantern/include/rendering/geometry/mesh_attribute_info.h
-    lantern/include/rendering/geometry/mesh.h)
+file(GLOB LANTERN_SOURCES "lantern/src/*.cpp")
 
 set(LANTERN_INCLUDE_FOLDERS
     lantern/include
@@ -204,7 +230,8 @@ set(LANTERN_INCLUDE_FOLDERS
     lantern/include/rendering
     lantern/include/rendering/shaders
     lantern/include/rendering/rasterizing
-    lantern/include/rendering/geometry)
+    lantern/include/rendering/geometry
+    lantern/include/rendering/ui)
 
 add_library(
     lantern STATIC
@@ -212,7 +239,7 @@ add_library(
     ${LANTERN_HEADERS})
 
 target_include_directories(lantern PUBLIC ${LANTERN_INCLUDE_FOLDERS})
-target_include_directories(lantern PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR})
+target_include_directories(lantern PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS})
 
 if(NOT ANDROID)
     set_target_properties(
@@ -222,31 +249,46 @@ else()
     set_target_properties(
         lantern PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
-endif(NOT ANDROID)
+endif()
 # ===========================================
 
 # Gooogle C++ testing framework target ======
-if(DEFINED ENV{GTEST_ROOT})
+if(ANDROID)
+    add_library(googletest_main STATIC 
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-death-test.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-filepath.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-port.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-printers.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-test-part.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest-typed-test.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest.cc"
+                "${NDK_PATH}/sources/third_party/googletest/googletest/src/gtest_main.cc")
 
-    string(REPLACE "\\" "/" GTEST_SOURCES "$ENV{GTEST_ROOT}/src/gtest-all.cc")
+    target_include_directories(googletest_main SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest/include")
+    target_include_directories(googletest_main SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest")
+else()
+    if(DEFINED ENV{GTEST_ROOT})
 
-    add_library(
-        gtest STATIC
-        ${GTEST_SOURCES})
+        string(REPLACE "\\" "/" GTEST_SOURCES "$ENV{GTEST_ROOT}/src/gtest-all.cc")
 
-    target_include_directories(gtest PRIVATE $ENV{GTEST_ROOT}/include $ENV{GTEST_ROOT})
+        add_library(
+            gtest STATIC
+            ${GTEST_SOURCES})
 
-    if(UNIX AND NOT ANDROID)
-        target_link_libraries(gtest pthread)
+        target_include_directories(gtest PRIVATE $ENV{GTEST_ROOT}/include $ENV{GTEST_ROOT})
+
+        if(UNIX)
+            target_link_libraries(gtest pthread)
+        endif()
+
     endif()
-
 endif()
 # ===========================================
 
 # Android macros ============================
 if(ANDROID)
     include(cmake/AndroidMacros.cmake)
-endif(ANDROID)
+endif()
 # ===========================================
 
 # Tests target ==============================
@@ -256,7 +298,7 @@ set(TESTS_SOURCES
     tests/src/matrix3x3.cpp
     tests/src/matrix4x4.cpp
     tests/src/obj_import.cpp
-    tests/src/pipeline.cpp
+    #tests/src/pipeline.cpp
     tests/src/vector3.cpp
     tests/src/vector4.cpp)
 
@@ -271,18 +313,19 @@ add_executable(
 
 target_include_directories(tests PRIVATE lantern/include tests/include)
 
-if (DEFINED ENV{GTEST_ROOT})
-    target_include_directories(tests PRIVATE $ENV{GTEST_ROOT}/include)
+if(NOT ANDROID)
+    if (DEFINED ENV{GTEST_ROOT})
+        target_include_directories(tests PRIVATE $ENV{GTEST_ROOT}/include)
+    endif()
 endif()
 
 set_target_properties(
     tests PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
 
-target_link_libraries(tests lantern gtest)
 if(NOT ANDROID)
-    target_link_libraries(tests lantern ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY})
-endif(NOT ANDROID)
+    target_link_libraries(tests lantern gtest ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY})
+endif()
 
 add_custom_command(
     TARGET tests POST_BUILD
@@ -291,21 +334,14 @@ add_custom_command(
     $<TARGET_FILE_DIR:tests>/resources)
 
 if(ANDROID)
-    target_link_libraries(tests lantern
-                                ${SDL2_LIBRARY}
-                                ${SDL2IMAGE_LIBRARY}
-                                GLESv1_CM
-                                GLESv2
-                                log
-                                android
-                                z)
+    target_include_directories(tests SYSTEM PRIVATE "$ENV{ANDROID_NDK}/sources/third_party/googletest/googletest/include")
+    target_link_libraries(tests lantern googletest_main)
     add_custom_target(run_tests
         DEPENDS tests
         COMMAND adb push ${CMAKE_BINARY_DIR}/tests /data/local/tmp
         COMMAND adb shell chmod 775 /data/local/tmp/tests
-        COMMAND adb shell "cd /data/local/tmp ; /data/local/tmp/tests"
-    )
-endif(ANDROID)
+        COMMAND adb shell "cd /data/local/tmp ; /data/local/tmp/tests")
+endif()
 
 if (WIN32)
     add_custom_command(
@@ -320,13 +356,13 @@ if (WIN32)
         "${SDL2IMAGE_DLL}"
         $<TARGET_FILE_DIR:tests>)
 
-	add_custom_command(
+    add_custom_command(
         TARGET tests
         POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "${SDL2IMAGE_LIBPNG_DLL}"
         $<TARGET_FILE_DIR:tests>)
 
-	add_custom_command(
+    add_custom_command(
         TARGET tests
         POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "${SDL2IMAGE_ZLIB_DLL}"
@@ -341,10 +377,12 @@ if(ANDROID)
     list(APPEND target_include_dirs ${LANTERN_INCLUDE_FOLDERS}
                                     ${SDL2_INCLUDE_DIR}
                                     ${SDL2_SRC_DIR}
-                                    ${SDL2_IMAGE_INCLUDE_DIR})
+                                    ${SDL2_IMAGE_INCLUDE_DIR}
+                                    ${FREETYPE_INCLUDE_DIRS})
     list(APPEND target_link_libs lantern
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
+                                 FreeType
                                  GLESv1_CM
                                  GLESv2
                                  log
@@ -357,11 +395,10 @@ if(ANDROID)
                         ${CMAKE_BINARY_DIR}/examples/empty_app
                         "${target_source_files}"
                         "${target_include_dirs}"
-                        "${target_link_libs}"
-    )
+                        "${target_link_libs}")
 else()
     add_executable(
-        empty_app
+        empty_app WIN32
         examples/empty_app/main.cpp)
 
     set_target_properties(
@@ -369,9 +406,9 @@ else()
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/empty_app")
 
     target_include_directories(empty_app PRIVATE lantern/include)
-    target_include_directories(empty_app PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR})
+    target_include_directories(empty_app PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS})
 
-    target_link_libraries(empty_app ${SDL2IMAGE_LIBRARY} ${SDL2_LIBRARY} lantern)
+    target_link_libraries(empty_app lantern ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${FREETYPE_LIBRARIES})
 
     if (WIN32)
         add_custom_command(
@@ -386,19 +423,19 @@ else()
             "${SDL2IMAGE_DLL}"
             $<TARGET_FILE_DIR:empty_app>)
 
-    	add_custom_command(
+        add_custom_command(
             TARGET empty_app
             POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             "${SDL2IMAGE_LIBPNG_DLL}"
             $<TARGET_FILE_DIR:empty_app>)
 
-    	add_custom_command(
+        add_custom_command(
             TARGET empty_app
             POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             "${SDL2IMAGE_ZLIB_DLL}"
             $<TARGET_FILE_DIR:empty_app>)
     endif()
-endif(ANDROID)
+endif()
 # ===========================================
 
 # Rasterized triangle app target ======
@@ -408,10 +445,12 @@ if(ANDROID)
     list(APPEND target_include_dirs ${LANTERN_INCLUDE_FOLDERS}
                                     ${SDL2_INCLUDE_DIR}
                                     ${SDL2_SRC_DIR}
-                                    ${SDL2_IMAGE_INCLUDE_DIR})
+                                    ${SDL2_IMAGE_INCLUDE_DIR}
+                                    ${FREETYPE_INCLUDE_DIRS})
     list(APPEND target_link_libs lantern
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
+                                 FreeType
                                  GLESv1_CM
                                  GLESv2
                                  log
@@ -424,12 +463,11 @@ if(ANDROID)
                         ${CMAKE_BINARY_DIR}/examples/rasterized_triangle_app
                         "${target_source_files}"
                         "${target_include_dirs}"
-                        "${target_link_libs}"
-    )
+                        "${target_link_libs}")
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/examples/rasterized_triangle_app/resources" "${CMAKE_BINARY_DIR}/examples/rasterized_triangle_app/assets/resources")
 else()
     add_executable(
-        rasterized_triangle_app
+        rasterized_triangle_app WIN32
         examples/rasterized_triangle_app/main.cpp)
 
     set_target_properties(
@@ -437,9 +475,9 @@ else()
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples/rasterized_triangle_app")
 
     target_include_directories(rasterized_triangle_app PRIVATE lantern/include)
-    target_include_directories(rasterized_triangle_app PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR})
+    target_include_directories(rasterized_triangle_app PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS})
 
-    target_link_libraries(rasterized_triangle_app lantern ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY})
+    target_link_libraries(rasterized_triangle_app lantern ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${FREETYPE_LIBRARIES})
 
     if (WIN32)
         add_custom_command(
@@ -454,13 +492,13 @@ else()
             "${SDL2IMAGE_DLL}"
             $<TARGET_FILE_DIR:rasterized_triangle_app>)
 
-    	add_custom_command(
+        add_custom_command(
             TARGET rasterized_triangle_app
             POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             "${SDL2IMAGE_LIBPNG_DLL}"
             $<TARGET_FILE_DIR:rasterized_triangle_app>)
 
-    	add_custom_command(
+        add_custom_command(
             TARGET rasterized_triangle_app
             POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             "${SDL2IMAGE_ZLIB_DLL}"
@@ -472,5 +510,5 @@ else()
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${PROJECT_SOURCE_DIR}/examples/rasterized_triangle_app/resources"
         $<TARGET_FILE_DIR:rasterized_triangle_app>/resources)
-endif(ANDROID)
+endif()
 # ===========================================

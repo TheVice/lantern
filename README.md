@@ -1,57 +1,28 @@
-lantern
-=======
+Lantern is a cross-plaftorm 3D software renderer written for educational purposes. It depends of multiple libraries (full list is given below) but it doesn't use them for rendering (except using FreeType library for getting glyphs bitmaps), only for common tasks (such as presenting color buffer on a screen, handling input, loading textures from disk etc.). The aim is to create feature-full renderer from scratch, only using ability to set texture's pixel color.
 
-Software renderer written for educational purposes. Uses SDL2 for rendering and Google C++ Testing Framework for tests.
+Note that because it doesn't use GPU, it is much slower comparing to DirectX or OpenGL, and, obviously, is not intended for using in real projects (unless you're targeting users without video cards!).
 
-###Building on Windows (MinGW)
-* Download SDL ([https://www.libsdl.org/download-2.0.php](https://www.libsdl.org/download-2.0.php)), select MinGW version of development library). Download SDL2Image ([https://www.libsdl.org/projects/SDL_image/](https://www.libsdl.org/projects/SDL_image/)). If you want to build tests you must also download Google C++ Testing Framework source code ([https://code.google.com/p/googletest/downloads/list](https://code.google.com/p/googletest/downloads/list))
-* Open cmd.exe, move to lantern folder
-* Run: ```mkdir build && cd build``` to create build folder and move to it
-* Run: ```set SDL2DIR=<path to SDL2>```. Note that it should be either i686-w64-mingw32 (for 32-bit) or x86_64-w64-mingw32 (for 64-bit) folder
-* Run: ```set SDL2IMAGEDIR=<path to SDL2>```
-* Run: ```set GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target
-* Run: ```cmake -G "MinGW Makefiles" ..``` to generate makefile
-* Run: ```mingw32-make lantern``` to build library
-* Run: ```mingw32-make rasterized_triangle_app``` to build example application
-* Run: ```mingw32-make tests``` to build tests executable
+###Implemented features
 
-###Building on Windows (Visual Studio 2013 / 2015)
-* Download SDL2 ([https://www.libsdl.org/download-2.0.php](https://www.libsdl.org/download-2.0.php), select VC++ version of development library). Download SDL2Image ([https://www.libsdl.org/projects/SDL_image/](https://www.libsdl.org/projects/SDL_image/)). If you want to build tests you must also download Google C++ Testing Framework source code ([https://code.google.com/p/googletest/downloads/list](https://code.google.com/p/googletest/downloads/list))
-* Open cmd.exe, move to lantern folder
-* Run: ```mkdir build && cd build``` to create build folder and move to it
-* Run: ```set SDL2DIR=<path to SDL2>```
-* Run: ```set SDL2IMAGEDIR=<path to SDL2>```
-* Run: ```set GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target
-* Run: ```cmake -G "Visual Studio 12" ..``` for VS 2013 (or ```cmake -G "Visual Studio 14" ..``` for VS 2015) to generate VS solution
-* Visual Studio solution is ready now
-* If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 by yourself using VS 2015, or just download SDL2 build bot package here: [https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/](https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/)
+* Loading .obj files
+* Rasterization using three different algorithms: inversed slope, traversal (and its subtypes: aabb, backtracking, zigzag), homogeneous
+* Programmable vertex and pixel shaders
+* Perspective-correct attributes interpolation
+* Texture mapping
+* Alpha-blending
+* Truetype fonts rendering
 
-###Building on Linux
-* Install SDL2 ([https://www.libsdl.org/download-2.0.php](https://www.libsdl.org/download-2.0.php), or just ```sudo apt-get install libsdl2-dev``` for apt). Install SDL2_Image  ([https://www.libsdl.org/projects/SDL_image/](https://www.libsdl.org/projects/SDL_image/), or just ```sudo apt-get install libsdl2-image-dev``` for apt). If you want to build tests you must also download Google C++ Testing Framework ([https://code.google.com/p/googletest/downloads/list](https://code.google.com/p/googletest/downloads/list) or just ```sudo apt-get install libgtest-dev``` for apt)
-* Open terminal, move to lantern folder
-* Run: ```mkdir build && cd build``` to create build folder and move to it
-* Run: ```export GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target. If you installed it via apt the path is ```/usr/src/gtest```
-* Run: ```cmake -G "Unix Makefiles" ..``` to generate makefile
-* Run: ```make lantern``` to build library
-* Run: ```make rasterized_triangle_app``` to build example application
-* Run: ```make tests``` to build tests executable
+###Dependencies
 
-###Building on Mac OS X
-* Install SDL2 ([https://www.libsdl.org/download-2.0.php](https://www.libsdl.org/download-2.0.php)) to ```/Library/Frameworks/``` or ```~/Library/Frameworks/```. Install SDL2Image ([https://www.libsdl.org/projects/SDL_image/](https://www.libsdl.org/projects/SDL_image/)). If you want to build tests you must also download Google C++ Testing Framework ([https://code.google.com/p/googletest/downloads/list](https://code.google.com/p/googletest/downloads/list))
-* Open terminal, move to lantern folder
-* Run: ```mkdir build && cd build``` to create build folder and move to it
-* Run: ```export GTEST_ROOT=<path to gtest src>```. You need this only if you want to build tests target
-* Run: ```cmake -G Xcode ..``` to generate project
-* XCode project is ready now
-
-###Known issues
-* Lantern might fail loading resources when running from directory different then the one where the executable is
-
+* SDL2 - used for creating windows, copying resulting texture data to a screen, handling input and system events
+* SDL2_Image - used for loading images files
+* FreeType - used for loading truetype fonts, calculating their metrics and rendering glyphs bitmaps
+* Google C++ Tests - used for testing
 
 ###Building for Android
 
 ##Build requires
-* Download source of SDL2 ([https://www.libsdl.org/download-2.0.php](https://www.libsdl.org/download-2.0.php)) and SDL2Image ([https://www.libsdl.org/projects/SDL_image/](https://www.libsdl.org/projects/SDL_image/))
+* Download source of SDL2 ([https://www.libsdl.org/download-2.0.php](https://www.libsdl.org/download-2.0.php)), SDL2Image ([https://www.libsdl.org/projects/SDL_image/](https://www.libsdl.org/projects/SDL_image/)) and [FreeType](http://www.freetype.org/download.html)
 * Install\unpack [Java Platform (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) version 6 or above
 * Unpack [Apache Ant](http://ant.apache.org/bindownload.cgi) (Only for build through CMake/Eclipse)
 * Unpack [Android SDK](http://developer.android.com/sdk/index.html). It is also may require to download some addition package via SDK Manager
@@ -68,23 +39,26 @@ Software renderer written for educational purposes. Uses SDL2 for rendering and 
 * Open terminal, move to lantern folder
 * Run: ```set SDL2SRCDIR=<path to source of SDL2>``` on Windows or ```export SDL2SRCDIR=<path to source of SDL2>``` on Linux
 * Run: ```set SDL2IMAGESRCDIR=<path to source of SDL2 image>``` on Windows or ```export SDL2IMAGESRCDIR=<path to source of SDL2 image>``` on Linux
+* Run: ```set FREETYPESRCDIR=<path to source of FreeType>``` on Windows or ```export FREETYPESRCDIR=<path to source of FreeType>``` on Linux
 * Run: ```mkdir build && cd build``` to create build folder and move to it
 * On Windows execute ```cmake .. -G "Eclipse CDT4 - MinGW Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="<path to>android.toolchain.cmake" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="12" -DANDROID_ABI="armeabi"```
 * On Linux execute ```cmake .. -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j$(nproc) -s" -DCMAKE_TOOLCHAIN_FILE="<path to>android.toolchain.cmake" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="12" -DANDROID_ABI="armeabi"```
 * ```CMAKE_BUILD_TYPE``` also can be set to ```Release``` or ```RelWithDebInfo```. Tested in ```Debug``` mode
 * ```ANDROID_NATIVE_API_LEVEL``` can be great than ```12```, but not lower. Tested only with ```12```
 * ```ANDROID_ABI``` dependence on NDK version can be set to: ```armeabi-v7a```, ```x86```, ```mips``` and also 64 version of various CPU architecture. With set ```armeabi``` almost all ARM devices emulator can to execute. Check your emulator setting, device configuration to determinate what type of CPU architecture you have
-* You can also do not do steps with addeding SDL2SRCDIR and SDL2IMAGESRCDIR to enviroment variable and pass it like defines for cmake script: ```-DSDL2SRCDIR=<path to source of SDL2> -DSDL2IMAGESRCDIR=<path to source of SDL2 image>```
+* You can also do not do steps with addeding SDL2SRCDIR, SDL2IMAGESRCDIR and FREETYPESRCDIR to enviroment variable and pass it like defines for cmake script: ```-DSDL2SRCDIR=<path to source of SDL2> -DSDL2IMAGESRCDIR=<path to source of SDL2 image> -DFREETYPESRCDIR=<path to source of FreeType>```
 * Connect your Android device, start emulator by ```android avd``` or ```emulator -avd <avd_name>``` to run already created emulator directly
 * It is also possible to run [Android x86](http://www.android-x86.org/download) on hypervisor, see [instuction](http://www.android-x86.org/documents/debug-howto) for detail
 * Make sure ```adb devices``` see your Android device/emulator/OS on virtual
-* Execute ```mingw32-make -j%NUMBER_OF_PROCESSORS% -s rasterized_triangle_app[run-apk]``` on Windows or ```make -j$(nproc) -s rasterized_triangle_app[run-apk]``` on Linux to run rasterized_triangle_app on Android
+* Execute ```mingw32-make -j%NUMBER_OF_PROCESSORS% -s rasterized_triangle_app_run-apk``` on Windows or ```make -j$(nproc) -s rasterized_triangle_app_run-apk``` on Linux to run rasterized_triangle_app on Android
 * Execute ```mingw32-make -j%NUMBER_OF_PROCESSORS% -s run_tests``` on Windows or ```make -j$(nproc) -s run_tests``` on Linux to run tests on Android
 * You can also do the same from Eclipse IDE after import already exist project from ```build``` directory
 
-##~~Prepare Android Studio project~~
+##Prepare Android Studio project
 * ~~Download [Android Studion 1.5](http://tools.android.com/download/studio/builds/1-5-preview-1) or above~~
 * ~~If you install and using JDK 8 and above, gradle engine may need [set to compile like 7 version](http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Using-sourceCompatibility-1.7) or you can install/unpack latest from 7 version of JDK ([Java SE Development Kit 7u80](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html) at the moment when this wrote) and set it like compiler for gradle. Android Studio still can be running under JDK 8 and above~~
 * ~~Known issue: in created ```apk file``` at ```assert folder``` may present not only ```resources folder``` but also ```cpp file(s)``` and all files and folders placed in ```examples/<example name>``` at the moment when apk start to create~~
 
-```gradlew compileX86DebugSources -q --daemon```
+###Known issues
+* Apk faile to run: only blank screen and exit after few seconds. At logcat can be found message from libEGL: ```error opening cache file /data/data/org.libsdl/cache/com.android.opengl.shaders_cache: Permission denied (13)```
+* From Android Studio running of apk on device do not support during some bug at one of developer tools - [experimental gradle plugin doesn't use the right platform version for ndk modules](https://code.google.com/p/android/issues/detail?id=177530)

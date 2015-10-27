@@ -157,6 +157,7 @@ public class libsdlActivity extends SDLActivity {
         String apkPath = getPathToApk();
         extractZipInto(apkPath, "assets/resources/triangle.obj", cacheDir + "/resources/triangle.obj");
         extractZipInto(apkPath, "assets/resources/chess.png", cacheDir + "/resources/chess.png");
+        extractZipInto(apkPath, "assets/resources/Ubuntu-L.ttf", cacheDir + "/resources/Ubuntu-L.ttf");
 
 		super.onCreate(savedInstanceState);
 
