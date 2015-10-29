@@ -59,6 +59,5 @@ Note that because it doesn't use GPU, it is much slower comparing to DirectX or 
 * ~~If you install and using JDK 8 and above, gradle engine may need [set to compile like 7 version](http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Using-sourceCompatibility-1.7) or you can install/unpack latest from 7 version of JDK ([Java SE Development Kit 7u80](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html) at the moment when this wrote) and set it like compiler for gradle. Android Studio still can be running under JDK 8 and above~~
 * ~~Known issue: in created ```apk file``` at ```assert folder``` may present not only ```resources folder``` but also ```cpp file(s)``` and all files and folders placed in ```examples/<example name>``` at the moment when apk start to create~~
 
-###Known issues
-* Apk faile to run: only blank screen and exit after few seconds. At logcat can be found message from libEGL: ```error opening cache file /data/data/org.libsdl/cache/com.android.opengl.shaders_cache: Permission denied (13)```
+###Known issue
 * From Android Studio running of apk on device do not support during some bug at one of developer tools - [experimental gradle plugin doesn't use the right platform version for ndk modules](https://code.google.com/p/android/issues/detail?id=177530)

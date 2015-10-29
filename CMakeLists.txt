@@ -137,8 +137,7 @@ if(ANDROID)
                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwio.c
                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwrite.c
                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwtran.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwutil.c
-    )
+                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwutil.c)
 
     add_library(SDL2_image STATIC ${INC_FILES} ${C_FILES})
     target_include_directories(SDL2_image PRIVATE SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR} 
@@ -250,6 +249,12 @@ else()
         lantern PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
 endif()
+# ===========================================
+
+# Android misc library ======================
+if(ANDROID)
+    add_library(misc STATIC examples/misc.c)
+endif(ANDROID)
 # ===========================================
 
 # Gooogle C++ testing framework target ======
@@ -383,6 +388,7 @@ if(ANDROID)
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
                                  FreeType
+                                 misc
                                  GLESv1_CM
                                  GLESv2
                                  log
@@ -451,6 +457,7 @@ if(ANDROID)
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
                                  FreeType
+                                 misc
                                  GLESv1_CM
                                  GLESv2
                                  log
