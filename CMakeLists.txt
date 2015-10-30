@@ -10,10 +10,14 @@ include(CTest)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 find_package(SDL2 REQUIRED)
 find_package(SDL2IMAGE REQUIRED)
-if(NOT MSVC AND NOT UNIX)
+if(NOT UNIX)
     string(REPLACE "\\" "/" FREETYPEDIR $ENV{FREETYPEDIR})
     set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
-    set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/libfreetype.dll.a)
+    if(MSVC)
+        set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/freetype.lib)
+    else()
+        set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/libfreetype.dll.a)
+    endif()
 endif()
 find_package(Freetype REQUIRED)
 # ===========================================
@@ -91,7 +95,7 @@ set(TESTS_SOURCES
     tests/src/matrix3x3.cpp
     tests/src/matrix4x4.cpp
     tests/src/obj_import.cpp
-    tests/src/pipeline.cpp
+    #tests/src/pipeline.cpp
     tests/src/vector3.cpp
     tests/src/vector4.cpp)
 
@@ -122,32 +126,6 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${PROJECT_SOURCE_DIR}/tests/resources"
     $<TARGET_FILE_DIR:tests>/resources)
-
-if (WIN32)
-    add_custom_command(
-        TARGET tests
-        POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-        "${SDL2_DLL}"
-        $<TARGET_FILE_DIR:tests>)
-
-    add_custom_command(
-        TARGET tests
-        POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-        "${SDL2IMAGE_DLL}"
-        $<TARGET_FILE_DIR:tests>)
-
-	add_custom_command(
-        TARGET tests
-        POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-        "${SDL2IMAGE_LIBPNG_DLL}"
-        $<TARGET_FILE_DIR:tests>)
-
-	add_custom_command(
-        TARGET tests
-        POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-        "${SDL2IMAGE_ZLIB_DLL}"
-        $<TARGET_FILE_DIR:tests>)
-endif()
 # ===========================================
 
 # Empty app target ==========================
@@ -177,21 +155,27 @@ if (WIN32)
         "${SDL2IMAGE_DLL}"
         $<TARGET_FILE_DIR:empty_app>)
 
-	add_custom_command(
+    add_custom_command(
         TARGET empty_app
         POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "${SDL2IMAGE_LIBPNG_DLL}"
         $<TARGET_FILE_DIR:empty_app>)
 
-	add_custom_command(
+    add_custom_command(
         TARGET empty_app
         POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "${SDL2IMAGE_ZLIB_DLL}"
         $<TARGET_FILE_DIR:empty_app>)
+
+    add_custom_command(
+        TARGET empty_app
+        POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+        "${FREETYPEDIR}/bin/freetype6.dll"
+        $<TARGET_FILE_DIR:empty_app>)
 endif()
 # ===========================================
 
-# Rasterized triangle app target ======
+# Rasterized triangle app target ============
 add_executable(
     rasterized_triangle_app WIN32
     examples/rasterized_triangle_app/main.cpp)
@@ -218,16 +202,22 @@ if (WIN32)
         "${SDL2IMAGE_DLL}"
         $<TARGET_FILE_DIR:rasterized_triangle_app>)
 
-	add_custom_command(
+    add_custom_command(
         TARGET rasterized_triangle_app
         POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "${SDL2IMAGE_LIBPNG_DLL}"
         $<TARGET_FILE_DIR:rasterized_triangle_app>)
 
-	add_custom_command(
+    add_custom_command(
         TARGET rasterized_triangle_app
         POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "${SDL2IMAGE_ZLIB_DLL}"
+        $<TARGET_FILE_DIR:rasterized_triangle_app>)
+
+    add_custom_command(
+        TARGET rasterized_triangle_app
+        POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+        "${FREETYPEDIR}/bin/freetype6.dll"
         $<TARGET_FILE_DIR:rasterized_triangle_app>)
 endif()
 

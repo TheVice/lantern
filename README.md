@@ -23,14 +23,13 @@ Note that because it doesn't use GPU, it is much slower comparing to DirectX or 
 
 Lantern uses CMake as its build system.
 
-~~Simple scripts were created to simplify building process a little, though (output goes to `<lantern>/build` folder):~~
-* ~~`build_vs14.bat` - creates VS solution for Visual Studio 2015~~
-* ~~`build_vs12.bat` - creates VS solution for Visual Studio 2013~~
-* ~~`build_mingw_make.bat` - creates MinGW makefiles~~
-* ~~`build_make.sh` - creates Linux makefiles~~
-* ~~`build_xcode.sh` - creates XCode project~~
+Simple scripts `configure.cmd` and `configure.sh` were created to simplify building process a little, though (output goes to `<lantern>/build` folder). Using:
+* `configure.cmd MSVC18` - creates VS solution for Visual Studio 2013
+* `configure.cmd MSVC19` - creates VS solution for Visual Studio 2015
+* `configure.cmd MinGW` - creates MinGW makefiles
+* `configure.sh gcc` - creates Linux makefiles
 
-~~On Linux and MacOS you probably have to `chmod +x build_*.sh` before running them.~~
+On Linux you probably have to `chmod +x configure.sh` before running them or run it directly by bash: `bash configure.sh gcc`
 
 You also have to have all the dependencies and tools installed (obviously). As an example for Ubuntu, here are the commands for installing all of them (just skip what you don't need):
  * `sudo apt-get install cmake`
@@ -50,6 +49,6 @@ On Windows you have to specify a few environment variables for dependencies so t
 
 ###Known issues
 
-* If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 by yourself using VS 2015, or just download SDL2 build bot package here: https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/
+* If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 by yourself using VS 2015, or just download SDL2 build both package here: https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/
 
 * Lantern fails loading resources when running from a directory different than the one where the executable is
