@@ -49,6 +49,8 @@ On Windows you have to specify a few environment variables for dependencies so t
 
 ###Known issues
 
-* If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 by yourself using VS 2015, or just download SDL2 build both package here: https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/
+* If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 using VS 2015 - just download source package and after unpack source directory set to `SDL2DIR` path to that folder, just the same you do for binary package, or just download SDL2 build both package here: https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/
 
 * Lantern fails loading resources when running from a directory different than the one where the executable is
+
+* On VS 2015 if SDL created from source - samples at start-up twice show that window creating
