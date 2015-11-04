@@ -7,36 +7,38 @@ project(lantern)
 include(CTest)
 
 set(SDL2FROMSOURCE 0)
-# set(SDL2IMAGEFROMSOURCE 0)
+set(SDL2IMAGEFROMSOURCE 0)
 # set(FREETYPEFROMSOURCE 0)
 
+if(MSVC)
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 19.0) # Visual Studio 2015 and above
-    if(DEFINED ENV{SDL2DIR})
-        string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2DIR}/src)
-        if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
-            string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2DIR}/include)
-            set(SDL2FROMSOURCE 1)
-        endif()
-    elseif(DEFINED SDL2DIR)
-        string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2DIR}/src)
-        if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
-            string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2DIR}/include)
-            set(SDL2FROMSOURCE 1)
-        endif()
+if(DEFINED ENV{SDL2DIR})
+    string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2DIR}/src)
+    if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
+        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2DIR}/include)
+        set(SDL2FROMSOURCE 1)
+    endif()
+elseif(DEFINED SDL2DIR)
+    string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2DIR}/src)
+    if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
+        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2DIR}/include)
+        set(SDL2FROMSOURCE 1)
     endif()
 endif()
+endif()
 
-# if(DEFINED ENV{SDL2IMAGEDIR})
-#     string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGEDIR})
-#     if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
-#         set(SDL2IMAGEFROMSOURCE 1)
-#     endif()
-# elseif(DEFINED SDL2IMAGEDIR)
-#     string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGEDIR})
-#     if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
-#         set(SDL2IMAGEFROMSOURCE 1)
-#     endif()
-# endif()
+if(DEFINED ENV{SDL2IMAGEDIR})
+    string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGEDIR})
+    if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
+        set(SDL2IMAGEFROMSOURCE 1)
+    endif()
+elseif(DEFINED SDL2IMAGEDIR)
+    string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGEDIR})
+    if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
+        set(SDL2IMAGEFROMSOURCE 1)
+    endif()
+endif()
+endif()
 
 if(DEFINED ENV{FREETYPEDIR})
 #     string(REPLACE "\\" "/" FREETYPE_SRC_DIR $ENV{FREETYPEDIR}/src)
@@ -179,22 +181,78 @@ if(SDL2FROMSOURCE)
                            ${SDL2_SRC_DIR}/video/windows/SDL_windowsvideo.c
                            ${SDL2_SRC_DIR}/video/windows/SDL_windowswindow.c)
         add_library(SDL2 SHARED ${SDL2_SRC_FILES})
-        target_include_directories(SDL2 SYSTEM PRIVATE "SDL2/include" ${SDL2_INCLUDE_DIR})
+        set(SDL2_INCLUDE_DIR "SDL2/include" ${SDL2_INCLUDE_DIR})
+        target_include_directories(SDL2 SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
         target_link_libraries(SDL2 winmm imm32 version vcruntime ucrtd) # libucrt
         # SDL2main
         add_library(SDL2main STATIC ${SDL2_SRC_DIR}/main/windows/SDL_windows_main.c)
-        target_include_directories(SDL2main SYSTEM PRIVATE "SDL2/include" ${SDL2_INCLUDE_DIR})
+        target_include_directories(SDL2main SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
 
         set(SDL2_LIBRARY SDL2 SDL2main)
     endif()
 else()
     find_package(SDL2 REQUIRED)
 endif()
-# if(SDL2IMAGEFROMSOURCE)
-#     message("SDL2 image from source - ${SDL2IMAGEFROMSOURCE}")
-# else()
-find_package(SDL2IMAGE REQUIRED)
-# endif()
+if(SDL2IMAGEFROMSOURCE)
+    message("SDL2_image will making from source")
+    if(MSVC)
+        set(SDL2_IMAGE_SRC_FILES ${SDL2IMAGE_INCLUDE_DIR}/IMG.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_bmp.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_gif.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_jpg.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_lbm.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_pcx.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_png.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_pnm.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_tga.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_tif.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_webp.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xcf.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xpm.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xv.c
+                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xxx.c)
+        add_library(SDL2_image SHARED ${SDL2_IMAGE_SRC_FILES})
+
+        target_compile_definitions(SDL2_image PRIVATE LOAD_BMP)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_GIF)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_JPG)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_JPG_DYNAMIC="libjpeg-9.dll")
+        target_compile_definitions(SDL2_image PRIVATE LOAD_LBM)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_PCX)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_PNG)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_PNG_DYNAMIC="libpng16-16.dll")
+        target_compile_definitions(SDL2_image PRIVATE LOAD_PNM)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_TGA)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_TIF)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_TIF_DYNAMIC="libtiff-5.dll")
+        target_compile_definitions(SDL2_image PRIVATE LOAD_WEBP)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_WEBP_DYNAMIC="libwebp-4.dll")
+        target_compile_definitions(SDL2_image PRIVATE LOAD_XPM)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_XV)
+        target_compile_definitions(SDL2_image PRIVATE PNG_USE_DLL)
+        target_compile_definitions(SDL2_image PRIVATE ZLIB_DLL)
+
+        target_include_directories(SDL2_image SYSTEM PRIVATE ${SDL2_INCLUDE_DIR}
+                                                             ${SDL2IMAGE_INCLUDE_DIR}
+                                                             ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/include
+                                                             ${SDL2IMAGE_INCLUDE_DIR}/external/tiff-4.0.3/libtiff
+                                                             ${SDL2IMAGE_INCLUDE_DIR}/external/libwebp-0.3.0/src
+                                                             ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2
+                                                             ${SDL2IMAGE_INCLUDE_DIR}/external/jpeg-9)
+
+        target_link_libraries(SDL2_image ${SDL2_LIBRARY})
+        set(SDL2IMAGE_LIBRARY SDL2_image)
+        if(CMAKE_CL_64)
+            set(SDL2IMAGE_LIBPNG_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x64/libpng16-16.dll)
+            set(SDL2IMAGE_ZLIB_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x64/zlib1.dll)
+        else()
+            set(SDL2IMAGE_LIBPNG_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x86/libpng16-16.dll)
+            set(SDL2IMAGE_ZLIB_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x86/zlib1.dll)
+        endif()
+    endif()
+else()
+    find_package(SDL2IMAGE REQUIRED)
+endif()
 # if(FREETYPEFROMSOURCE)
 #     message("FreeType image from source - ${FREETYPEFROMSOURCE}")
 #     set(FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/../builds/windows/ftdebug.c
@@ -384,7 +442,7 @@ target_link_libraries(empty_app lantern ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${F
 
 if (WIN32)
     if(SDL2FROMSOURCE)
-      add_custom_command(
+        add_custom_command(
           TARGET empty_app
           POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
           $<TARGET_FILE:SDL2>
@@ -397,11 +455,19 @@ if (WIN32)
         $<TARGET_FILE_DIR:empty_app>)
     endif()
 
+    if(SDL2IMAGEFROMSOURCE)
+        add_custom_command(
+          TARGET empty_app
+          POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+          $<TARGET_FILE:SDL2_image>
+          $<TARGET_FILE_DIR:empty_app>)
+    else()
     add_custom_command(
         TARGET empty_app
         POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "${SDL2IMAGE_DLL}"
         $<TARGET_FILE_DIR:empty_app>)
+    endif()
 
     add_custom_command(
         TARGET empty_app
@@ -439,7 +505,7 @@ target_link_libraries(rasterized_triangle_app lantern ${SDL2_LIBRARY} ${SDL2IMAG
 
 if (WIN32)
     if(SDL2FROMSOURCE)
-      add_custom_command(
+        add_custom_command(
           TARGET rasterized_triangle_app
           POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
           $<TARGET_FILE:SDL2>
@@ -452,11 +518,19 @@ if (WIN32)
         $<TARGET_FILE_DIR:rasterized_triangle_app>)
     endif()
 
+    if(SDL2IMAGEFROMSOURCE)
+        add_custom_command(
+          TARGET rasterized_triangle_app
+          POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+          $<TARGET_FILE:SDL2_image>
+          $<TARGET_FILE_DIR:rasterized_triangle_app>)
+    else()
     add_custom_command(
         TARGET rasterized_triangle_app
         POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
         "${SDL2IMAGE_DLL}"
         $<TARGET_FILE_DIR:rasterized_triangle_app>)
+    endif()
 
     add_custom_command(
         TARGET rasterized_triangle_app

@@ -40,8 +40,8 @@ You also have to have all the dependencies and tools installed (obviously). As a
  * `sudo apt-get install libgtest-dev`
 
 On Windows you have to specify a few environment variables for dependencies so that CMake's `find_package` will be able to find them:
- * `SDL2DIR` - path to SDL2 development library
- * `SDL2IMAGEDIR` - path to SDL2_Image development library
+ * `SDL2DIR` - path to SDL2 development library or source of this library (only for Visual Studio 2015)
+ * `SDL2IMAGEDIR` - path to SDL2_Image development library or source of this library (only for Visual Studio)
  * `FREETYPEDIR` - path to a folder containing FreeType's headers and library
  * `GTEST_ROOT` - path to Google Tests source code folder (required only if you're going to build tests target)
 
@@ -52,5 +52,3 @@ On Windows you have to specify a few environment variables for dependencies so t
 * If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 using VS 2015 - just download source package and after unpack source directory set to `SDL2DIR` path to that folder, just the same you do for binary package, or just download SDL2 build both package here: https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/
 
 * Lantern fails loading resources when running from a directory different than the one where the executable is
-
-* On VS 2015 if SDL created from source - samples at start-up twice show that window creating
