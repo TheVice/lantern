@@ -40,12 +40,10 @@ You also have to have all the dependencies and tools installed (obviously). As a
  * `sudo apt-get install libgtest-dev`
 
 On Windows you have to specify a few environment variables for dependencies so that CMake's `find_package` will be able to find them:
- * `SDL2DIR` - path to SDL2 development library or source of this library (only for Visual Studio 2015)
- * `SDL2IMAGEDIR` - path to SDL2_Image development library or source of this library (only for Visual Studio)
- * `FREETYPEDIR` - path to a folder containing FreeType's headers and library or source of this library (only for Visual Studio)
+ * `SDL2DIR` - path to SDL2 development library or source of this library (only for MinGW and Visual Studio)
+ * `SDL2IMAGEDIR` - path to SDL2_Image development library or source of this library (only for MinGW and Visual Studio)
+ * `FREETYPEDIR` - path to a folder containing FreeType's headers and library or source of this library (only for MinGW and Visual Studio)
  * `GTEST_ROOT` - path to Google Tests source code folder (required only if you're going to build tests target)
-
-~~Note for Windows FreeType library: if you're building it by yourself, make sure that output library's name is `freetype2.lib` and not `freetype26.lib` (that's what bundled FindFreeType.cmake looks for).~~
 
 ###Known issues
 

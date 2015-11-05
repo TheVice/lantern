@@ -10,8 +10,7 @@ set(SDL2FROMSOURCE 0)
 set(SDL2IMAGEFROMSOURCE 0)
 set(FREETYPEFROMSOURCE 0)
 
-if(MSVC)
-if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 19.0) # Visual Studio 2015 and above
+if(CMAKE_HOST_WIN32)
 if(DEFINED ENV{SDL2DIR})
     string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2DIR}/src)
     if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
@@ -24,7 +23,6 @@ elseif(DEFINED SDL2DIR)
         string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2DIR}/include)
         set(SDL2FROMSOURCE 1)
     endif()
-endif()
 endif()
 
 if(DEFINED ENV{SDL2IMAGEDIR})
@@ -45,18 +43,14 @@ if(DEFINED ENV{FREETYPEDIR})
         string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS $ENV{FREETYPEDIR}/include)
         set(FREETYPEFROMSOURCE 1)
     endif()
-    if(NOT UNIX)
-        string(REPLACE "\\" "/" FREETYPEDIR $ENV{FREETYPEDIR})
-    endif()
+    string(REPLACE "\\" "/" FREETYPEDIR $ENV{FREETYPEDIR})
 elseif(DEFINED FREETYPEDIR)
     string(REPLACE "\\" "/" FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
     if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
         string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
         set(FREETYPEFROMSOURCE 1)
     endif()
-    if(NOT UNIX)
-        string(REPLACE "\\" "/" FREETYPEDIR ${FREETYPEDIR})
-    endif()
+    string(REPLACE "\\" "/" FREETYPEDIR ${FREETYPEDIR})
 # else()
 #     if(NOT UNIX)
 #         message(FATAL_ERROR "Path to FreeType source or binary directory not set or not defined")
@@ -183,7 +177,12 @@ if(SDL2FROMSOURCE)
         add_library(SDL2 SHARED ${SDL2_SRC_FILES})
         set(SDL2_INCLUDE_DIR "SDL2/include" ${SDL2_INCLUDE_DIR})
         target_include_directories(SDL2 SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
-        target_link_libraries(SDL2 winmm imm32 version vcruntime ucrtd) # libucrt
+        target_link_libraries(SDL2 winmm imm32 version)
+        if(MSVC)
+            if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 19.0) # Visual Studio 2015 and above
+                target_link_libraries(SDL2 winmm imm32 version vcruntime ucrtd) # libucrt
+            endif()
+        endif()
         # SDL2main
         add_library(SDL2main STATIC ${SDL2_SRC_DIR}/main/windows/SDL_windows_main.c)
         target_include_directories(SDL2main SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
@@ -195,7 +194,7 @@ else()
 endif()
 if(SDL2IMAGEFROMSOURCE)
     message("SDL2_image will making from source")
-    if(MSVC)
+    if(CMAKE_HOST_WIN32)
         set(SDL2_IMAGE_SRC_FILES ${SDL2IMAGE_INCLUDE_DIR}/IMG.c
                                  ${SDL2IMAGE_INCLUDE_DIR}/IMG_bmp.c
                                  ${SDL2IMAGE_INCLUDE_DIR}/IMG_gif.c
@@ -255,7 +254,7 @@ else()
 endif()
 if(FREETYPEFROMSOURCE)
     message("freetype will making from source")
-    if(MSVC)
+    if(CMAKE_HOST_WIN32)
         set(FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/../builds/windows/ftdebug.c
                                ${FREETYPE_SRC_DIR}/autofit/autofit.c
                                ${FREETYPE_SRC_DIR}/base/ftbase.c
@@ -416,7 +415,6 @@ set_target_properties(
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
 
 target_link_libraries(tests lantern gtest)
-target_link_libraries(tests lantern ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY})
 
 add_custom_command(
     TARGET tests POST_BUILD
@@ -436,6 +434,12 @@ set_target_properties(
 
 target_include_directories(empty_app PRIVATE lantern/include)
 target_include_directories(empty_app PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS})
+
+if(SDL2FROMSOURCE)
+    if(MINGW)
+        target_compile_definitions(empty_app PRIVATE SDL_MAIN_HANDLED)
+    endif()
+endif()
 
 target_link_libraries(empty_app lantern ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${FREETYPE_LIBRARIES})
 
@@ -507,6 +511,12 @@ set_target_properties(
 
 target_include_directories(rasterized_triangle_app PRIVATE lantern/include)
 target_include_directories(rasterized_triangle_app PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS})
+
+if(SDL2FROMSOURCE)
+    if(MINGW)
+        target_compile_definitions(rasterized_triangle_app PRIVATE SDL_MAIN_HANDLED)
+    endif()
+endif()
 
 target_link_libraries(rasterized_triangle_app lantern ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${FREETYPE_LIBRARIES})
 
