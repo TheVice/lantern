@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 2.8.12.2)
 
 # Project name
 project(lantern)
@@ -312,9 +312,13 @@ else()
         else()
             set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/libfreetype.dll.a)
         endif()
+    else()
+        set(FREETYPE_INCLUDE_DIRS /usr/include/freetype2)
     endif()
     find_package(Freetype REQUIRED)
-    set(FREETYPE_DLL "${FREETYPEDIR}/bin/freetype6.dll")
+    if(NOT UNIX)
+        set(FREETYPE_DLL "${FREETYPEDIR}/bin/freetype6.dll")
+    endif()
 endif()
 # ===========================================
 
@@ -368,17 +372,28 @@ set_target_properties(
 
 # Gooogle C++ testing framework target ======
 if(DEFINED ENV{GTEST_ROOT})
+    string(REPLACE "\\" "/" GTEST_ROOT $ENV{GTEST_ROOT})
+elseif(DEFINED GTEST_ROOT)
+    string(REPLACE "\\" "/" GTEST_ROOT ${GTEST_ROOT})
+endif()
 
-    string(REPLACE "\\" "/" GTEST_SOURCES "$ENV{GTEST_ROOT}/src/gtest-all.cc")
+if(DEFINED GTEST_ROOT)
+
+    set(GTEST_LIBRARY ${GTEST_ROOT})
+    set(GTEST_INCLUDE_DIR ${GTEST_ROOT}/include)
+    set(GTEST_MAIN_LIBRARY gtest)
+    find_package(GTest REQUIRED)
+
+    set(GTEST_SOURCES ${GTEST_ROOT}/src/gtest-all.cc)
 
     add_library(
-        gtest STATIC
+        ${GTEST_MAIN_LIBRARY} STATIC
         ${GTEST_SOURCES})
 
-    target_include_directories(gtest PRIVATE $ENV{GTEST_ROOT}/include $ENV{GTEST_ROOT})
+    target_include_directories(${GTEST_MAIN_LIBRARY} PRIVATE ${GTEST_LIBRARY} ${GTEST_INCLUDE_DIR})
 
     if(UNIX)
-        target_link_libraries(gtest pthread)
+        target_link_libraries(${GTEST_MAIN_LIBRARY} pthread)
     endif()
 
 endif()
