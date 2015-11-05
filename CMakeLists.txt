@@ -8,7 +8,7 @@ include(CTest)
 
 set(SDL2FROMSOURCE 0)
 set(SDL2IMAGEFROMSOURCE 0)
-# set(FREETYPEFROMSOURCE 0)
+set(FREETYPEFROMSOURCE 0)
 
 if(MSVC)
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 19.0) # Visual Studio 2015 and above
@@ -38,30 +38,30 @@ elseif(DEFINED SDL2IMAGEDIR)
         set(SDL2IMAGEFROMSOURCE 1)
     endif()
 endif()
-endif()
 
 if(DEFINED ENV{FREETYPEDIR})
-#     string(REPLACE "\\" "/" FREETYPE_SRC_DIR $ENV{FREETYPEDIR}/src)
-#     if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
-#         string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS $ENV{FREETYPEDIR}/include)
-#         set(FREETYPEFROMSOURCE 1)
-#     endif()
+    string(REPLACE "\\" "/" FREETYPE_SRC_DIR $ENV{FREETYPEDIR}/src)
+    if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
+        string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS $ENV{FREETYPEDIR}/include)
+        set(FREETYPEFROMSOURCE 1)
+    endif()
     if(NOT UNIX)
         string(REPLACE "\\" "/" FREETYPEDIR $ENV{FREETYPEDIR})
     endif()
 elseif(DEFINED FREETYPEDIR)
-#     string(REPLACE "\\" "/" FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
-#     if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
-#         string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
-#         set(FREETYPEFROMSOURCE 1)
-#     endif()
+    string(REPLACE "\\" "/" FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
+    if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
+        string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
+        set(FREETYPEFROMSOURCE 1)
+    endif()
     if(NOT UNIX)
-#         string(REPLACE "\\" "/" FREETYPEDIR ${FREETYPEDIR})
+        string(REPLACE "\\" "/" FREETYPEDIR ${FREETYPEDIR})
     endif()
 # else()
 #     if(NOT UNIX)
 #         message(FATAL_ERROR "Path to FreeType source or binary directory not set or not defined")
 #     endif()
+endif()
 endif()
 
 # SDL2, SDL2_image and FreeType look up =====
@@ -253,71 +253,70 @@ if(SDL2IMAGEFROMSOURCE)
 else()
     find_package(SDL2IMAGE REQUIRED)
 endif()
-# if(FREETYPEFROMSOURCE)
-#     message("FreeType image from source - ${FREETYPEFROMSOURCE}")
-#     set(FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/../builds/windows/ftdebug.c
-#                            ${FREETYPE_SRC_DIR}/autofit/autofit.c
-#                            ${FREETYPE_SRC_DIR}/base/ftbbox.c
-#                            ${FREETYPE_SRC_DIR}/base/ftbdf.c
-#                            ${FREETYPE_SRC_DIR}/base/ftbitmap.c
-#                            ${FREETYPE_SRC_DIR}/base/ftcid.c
-#                            ${FREETYPE_SRC_DIR}/base/ftfntfmt.c
-#                            ${FREETYPE_SRC_DIR}/base/ftfstype.c
-#                            ${FREETYPE_SRC_DIR}/base/ftgasp.c
-#                            ${FREETYPE_SRC_DIR}/base/ftglyph.c
-#                            ${FREETYPE_SRC_DIR}/base/ftgxval.c
-#                            ${FREETYPE_SRC_DIR}/base/ftinit.c
-#                            ${FREETYPE_SRC_DIR}/base/ftlcdfil.c
-#                            ${FREETYPE_SRC_DIR}/base/ftmm.c
-#                            ${FREETYPE_SRC_DIR}/base/ftotval.c
-#                            ${FREETYPE_SRC_DIR}/base/ftpatent.c
-#                            ${FREETYPE_SRC_DIR}/base/ftpfr.c
-#                            ${FREETYPE_SRC_DIR}/base/ftstroke.c
-#                            ${FREETYPE_SRC_DIR}/base/ftsynth.c
-#                            ${FREETYPE_SRC_DIR}/base/ftsystem.c
-#                            ${FREETYPE_SRC_DIR}/base/fttype1.c
-#                            ${FREETYPE_SRC_DIR}/base/ftwinfnt.c
-#                            ${FREETYPE_SRC_DIR}/base/ftadvanc.c
-#                            ${FREETYPE_SRC_DIR}/base/ftutil.c
-#                            ${FREETYPE_SRC_DIR}/base/ftcalc.c
-#                            ${FREETYPE_SRC_DIR}/base/ftgloadr.c
-#                            ${FREETYPE_SRC_DIR}/base/ftobjs.c
-#                            ${FREETYPE_SRC_DIR}/base/ftstream.c
-#                            ${FREETYPE_SRC_DIR}/base/ftoutln.c
-#                            ${FREETYPE_SRC_DIR}/base/ftrfork.c
-#                            ${FREETYPE_SRC_DIR}/base/fttrigon.c
-#                            ${FREETYPE_SRC_DIR}/bdf/bdf.c
-#                            ${FREETYPE_SRC_DIR}/bzip2/ftbzip2.c
-#                            ${FREETYPE_SRC_DIR}/cache/ftcache.c
-#                            ${FREETYPE_SRC_DIR}/cff/cff.c
-#                            ${FREETYPE_SRC_DIR}/cid/type1cid.c
-#                            ${FREETYPE_SRC_DIR}/gzip/ftgzip.c
-#                            ${FREETYPE_SRC_DIR}/lzw/ftlzw.c
-#                            ${FREETYPE_SRC_DIR}/pcf/pcf.c
-#                            ${FREETYPE_SRC_DIR}/pfr/pfr.c
-#                            ${FREETYPE_SRC_DIR}/psaux/psaux.c
-#                            ${FREETYPE_SRC_DIR}/pshinter/pshinter.c
-#                            ${FREETYPE_SRC_DIR}/psnames/psnames.c
-#                            ${FREETYPE_SRC_DIR}/raster/raster.c
-#                            ${FREETYPE_SRC_DIR}/sfnt/sfnt.c
-#                            ${FREETYPE_SRC_DIR}/smooth/smooth.c
-#                            ${FREETYPE_SRC_DIR}/truetype/truetype.c
-#                            ${FREETYPE_SRC_DIR}/type1/type1.c
-#                            ${FREETYPE_SRC_DIR}/type42/type42.c
-#                            ${FREETYPE_SRC_DIR}/winfonts/winfnt.c)
-# else()
-
-set(FREETYPE_INCLUDE_DIRS)
-if(NOT UNIX)
-    set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
+if(FREETYPEFROMSOURCE)
+    message("freetype will making from source")
     if(MSVC)
-        set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/freetype.lib)
-    else()
-        set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/libfreetype.dll.a)
+        set(FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/../builds/windows/ftdebug.c
+                               ${FREETYPE_SRC_DIR}/autofit/autofit.c
+                               ${FREETYPE_SRC_DIR}/base/ftbase.c
+                               ${FREETYPE_SRC_DIR}/base/ftbbox.c
+                               ${FREETYPE_SRC_DIR}/base/ftbitmap.c
+                               ${FREETYPE_SRC_DIR}/base/ftfntfmt.c
+                               ${FREETYPE_SRC_DIR}/base/ftfstype.c
+                               ${FREETYPE_SRC_DIR}/base/ftgasp.c
+                               ${FREETYPE_SRC_DIR}/base/ftglyph.c
+                               ${FREETYPE_SRC_DIR}/base/ftgxval.c
+                               ${FREETYPE_SRC_DIR}/base/ftinit.c
+                               ${FREETYPE_SRC_DIR}/base/ftlcdfil.c
+                               ${FREETYPE_SRC_DIR}/base/ftmm.c
+                               ${FREETYPE_SRC_DIR}/base/ftotval.c
+                               ${FREETYPE_SRC_DIR}/base/ftpatent.c
+                               ${FREETYPE_SRC_DIR}/base/ftpfr.c
+                               ${FREETYPE_SRC_DIR}/base/ftstroke.c
+                               ${FREETYPE_SRC_DIR}/base/ftsynth.c
+                               ${FREETYPE_SRC_DIR}/base/ftsystem.c
+                               ${FREETYPE_SRC_DIR}/base/fttype1.c
+                               ${FREETYPE_SRC_DIR}/base/ftwinfnt.c
+                               ${FREETYPE_SRC_DIR}/bdf/bdf.c
+                               ${FREETYPE_SRC_DIR}/cache/ftcache.c
+                               ${FREETYPE_SRC_DIR}/cff/cff.c
+                               ${FREETYPE_SRC_DIR}/cid/type1cid.c
+                               ${FREETYPE_SRC_DIR}/gzip/ftgzip.c
+                               ${FREETYPE_SRC_DIR}/lzw/ftlzw.c
+                               ${FREETYPE_SRC_DIR}/pcf/pcf.c
+                               ${FREETYPE_SRC_DIR}/pfr/pfr.c
+                               ${FREETYPE_SRC_DIR}/psaux/psaux.c
+                               ${FREETYPE_SRC_DIR}/pshinter/pshinter.c
+                               ${FREETYPE_SRC_DIR}/psnames/psmodule.c
+                               ${FREETYPE_SRC_DIR}/raster/raster.c
+                               ${FREETYPE_SRC_DIR}/sfnt/sfnt.c
+                               ${FREETYPE_SRC_DIR}/smooth/smooth.c
+                               ${FREETYPE_SRC_DIR}/truetype/truetype.c
+                               ${FREETYPE_SRC_DIR}/type1/type1.c
+                               ${FREETYPE_SRC_DIR}/type42/type42.c
+                               ${FREETYPE_SRC_DIR}/winfonts/winfnt.c)
+        add_library(freetype SHARED ${FREETYPE_SRC_FILES})
+
+        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
+        target_include_directories(freetype SYSTEM PRIVATE ${FREETYPE_INCLUDE_DIRS})
+
+        target_compile_definitions(freetype PRIVATE FT2_BUILD_LIBRARY)
+        target_compile_definitions(freetype PRIVATE FT_CONFIG_OPTIONS_H="${CMAKE_SOURCE_DIR}/freetype/config/ftoption.h")
+
+        set(FREETYPE_LIBRARIES freetype)
     endif()
+else()
+    if(NOT UNIX)
+        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
+        if(MSVC)
+            set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/freetype.lib)
+        else()
+            set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/libfreetype.dll.a)
+        endif()
+    endif()
+    find_package(Freetype REQUIRED)
+    set(FREETYPE_DLL "${FREETYPEDIR}/bin/freetype6.dll")
 endif()
-find_package(Freetype REQUIRED)
-# endif()
 # ===========================================
 
 # Compiler setup ============================
@@ -481,11 +480,19 @@ if (WIN32)
         "${SDL2IMAGE_ZLIB_DLL}"
         $<TARGET_FILE_DIR:empty_app>)
 
+    if(FREETYPEFROMSOURCE)
+        add_custom_command(
+          TARGET empty_app
+          POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+          $<TARGET_FILE:freetype>
+          $<TARGET_FILE_DIR:empty_app>)
+    else()
     add_custom_command(
         TARGET empty_app
         POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-        "${FREETYPEDIR}/bin/freetype6.dll"
+        "${FREETYPE_DLL}"
         $<TARGET_FILE_DIR:empty_app>)
+    endif()
 endif()
 # ===========================================
 
@@ -544,11 +551,19 @@ if (WIN32)
         "${SDL2IMAGE_ZLIB_DLL}"
         $<TARGET_FILE_DIR:rasterized_triangle_app>)
 
+    if(FREETYPEFROMSOURCE)
+        add_custom_command(
+          TARGET rasterized_triangle_app
+          POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+          $<TARGET_FILE:freetype>
+          $<TARGET_FILE_DIR:rasterized_triangle_app>)
+    else()
     add_custom_command(
         TARGET rasterized_triangle_app
         POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-        "${FREETYPEDIR}/bin/freetype6.dll"
+        "${FREETYPE_DLL}"
         $<TARGET_FILE_DIR:rasterized_triangle_app>)
+    endif()
 endif()
 
 add_custom_command(
