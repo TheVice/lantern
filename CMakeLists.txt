@@ -14,51 +14,47 @@ set(SDL2IMAGEFROMSOURCE 0)
 set(FREETYPEFROMSOURCE 0)
 
 if(CMAKE_HOST_WIN32)
-if(DEFINED ENV{SDL2DIR})
-    string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2DIR}/src)
-    if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
-        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2DIR}/include)
-        set(SDL2FROMSOURCE 1)
+    if(DEFINED ENV{SDL2DIR})
+        string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2DIR}/src)
+        if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
+            string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2DIR}/include)
+            set(SDL2FROMSOURCE 1)
+        endif()
+    elseif(DEFINED SDL2DIR)
+        string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2DIR}/src)
+        if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
+            string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2DIR}/include)
+            set(SDL2FROMSOURCE 1)
+        endif()
     endif()
-elseif(DEFINED SDL2DIR)
-    string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2DIR}/src)
-    if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
-        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2DIR}/include)
-        set(SDL2FROMSOURCE 1)
-    endif()
-endif()
 
-if(DEFINED ENV{SDL2IMAGEDIR})
-    string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGEDIR})
-    if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
-        set(SDL2IMAGEFROMSOURCE 1)
+    if(DEFINED ENV{SDL2IMAGEDIR})
+        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGEDIR})
+        if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
+            set(SDL2IMAGEFROMSOURCE 1)
+        endif()
+    elseif(DEFINED SDL2IMAGEDIR)
+        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGEDIR})
+        if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
+            set(SDL2IMAGEFROMSOURCE 1)
+        endif()
     endif()
-elseif(DEFINED SDL2IMAGEDIR)
-    string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGEDIR})
-    if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
-        set(SDL2IMAGEFROMSOURCE 1)
-    endif()
-endif()
 
-if(DEFINED ENV{FREETYPEDIR})
-    string(REPLACE "\\" "/" FREETYPE_SRC_DIR $ENV{FREETYPEDIR}/src)
-    if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
-        string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS $ENV{FREETYPEDIR}/include)
-        set(FREETYPEFROMSOURCE 1)
+    if(DEFINED ENV{FREETYPEDIR})
+        string(REPLACE "\\" "/" FREETYPE_SRC_DIR $ENV{FREETYPEDIR}/src)
+        if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
+            string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS $ENV{FREETYPEDIR}/include)
+            set(FREETYPEFROMSOURCE 1)
+        endif()
+        string(REPLACE "\\" "/" FREETYPEDIR $ENV{FREETYPEDIR})
+    elseif(DEFINED FREETYPEDIR)
+        string(REPLACE "\\" "/" FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
+        if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
+            string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
+            set(FREETYPEFROMSOURCE 1)
+        endif()
+        string(REPLACE "\\" "/" FREETYPEDIR ${FREETYPEDIR})
     endif()
-    string(REPLACE "\\" "/" FREETYPEDIR $ENV{FREETYPEDIR})
-elseif(DEFINED FREETYPEDIR)
-    string(REPLACE "\\" "/" FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
-    if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
-        string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
-        set(FREETYPEFROMSOURCE 1)
-    endif()
-    string(REPLACE "\\" "/" FREETYPEDIR ${FREETYPEDIR})
-# else()
-#     if(NOT UNIX)
-#         message(FATAL_ERROR "Path to FreeType source or binary directory not set or not defined")
-#     endif()
-endif()
 endif()
 
 # SDL2, SDL2_image and FreeType look up =====
@@ -614,49 +610,46 @@ endif()
 # ===========================================
 
 # Tests target ==============================
-set(TESTS_SOURCES
-    tests/src/camera.cpp
-    tests/src/main.cpp
-    tests/src/matrix3x3.cpp
-    tests/src/matrix4x4.cpp
-    tests/src/obj_import.cpp
-    # tests/src/pipeline.cpp
-    tests/src/vector3.cpp
-    tests/src/vector4.cpp)
-
-set(TESTS_HEADERS
-    tests/include/assert_utils.h)
-
-add_executable(
-    tests
-    ${TESTS_SOURCES}
-    ${TESTS_HEADERS}
-    ${LANTERN_HEADERS})
-
-target_include_directories(tests PRIVATE lantern/include tests/include)
-
 if (DEFINED GTEST_ROOT)
-    target_include_directories(tests PRIVATE ${GTEST_INCLUDE_DIR})
-endif()
+    set(TESTS_SOURCES
+        tests/src/camera.cpp
+        tests/src/main.cpp
+        tests/src/matrix3x3.cpp
+        tests/src/matrix4x4.cpp
+        tests/src/obj_import.cpp
+        # tests/src/pipeline.cpp
+        tests/src/vector3.cpp
+        tests/src/vector4.cpp)
 
-set_target_properties(
-    tests PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
+    set(TESTS_HEADERS
+        tests/include/assert_utils.h)
 
-target_link_libraries(tests lantern gtest)
+    add_executable(
+        tests
+        ${TESTS_SOURCES}
+        ${TESTS_HEADERS}
+        ${LANTERN_HEADERS})
 
-add_custom_command(
-    TARGET tests POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${PROJECT_SOURCE_DIR}/tests/resources"
-    $<TARGET_FILE_DIR:tests>/resources)
+    target_include_directories(tests PRIVATE lantern/include
+                                             tests/include
+                                             ${GTEST_INCLUDE_DIR})
 
-if(ANDROID)
-    add_custom_target(run_tests
-        DEPENDS tests
-        COMMAND adb push ${CMAKE_BINARY_DIR}/tests /data/local/tmp
-        COMMAND adb shell chmod 775 /data/local/tmp/tests
-        COMMAND adb shell "cd /data/local/tmp ; /data/local/tmp/tests")
+
+    target_link_libraries(tests lantern gtest)
+
+    add_custom_command(
+        TARGET tests POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/tests/resources"
+        $<TARGET_FILE_DIR:tests>/resources)
+
+    if(ANDROID)
+        add_custom_target(run_tests
+            DEPENDS tests
+            COMMAND adb push ${CMAKE_BINARY_DIR}/tests /data/local/tmp
+            COMMAND adb shell chmod 775 /data/local/tmp/tests
+            COMMAND adb shell "cd /data/local/tmp ; /data/local/tmp/tests")
+    endif()
 endif()
 # ===========================================
 
@@ -715,11 +708,11 @@ else()
               $<TARGET_FILE:SDL2>
               $<TARGET_FILE_DIR:empty_app>)
         else()
-        add_custom_command(
-            TARGET empty_app
-            POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-            "${SDL2_DLL}"
-            $<TARGET_FILE_DIR:empty_app>)
+            add_custom_command(
+                TARGET empty_app
+                POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+                "${SDL2_DLL}"
+                $<TARGET_FILE_DIR:empty_app>)
         endif()
 
         if(SDL2IMAGEFROMSOURCE)
@@ -729,11 +722,11 @@ else()
               $<TARGET_FILE:SDL2_image>
               $<TARGET_FILE_DIR:empty_app>)
         else()
-        add_custom_command(
-            TARGET empty_app
-            POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-            "${SDL2IMAGE_DLL}"
-            $<TARGET_FILE_DIR:empty_app>)
+            add_custom_command(
+                TARGET empty_app
+                POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+                "${SDL2IMAGE_DLL}"
+                $<TARGET_FILE_DIR:empty_app>)
         endif()
 
         add_custom_command(
@@ -755,11 +748,11 @@ else()
               $<TARGET_FILE:freetype>
               $<TARGET_FILE_DIR:empty_app>)
         else()
-        add_custom_command(
-            TARGET empty_app
-            POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-            "${FREETYPE_DLL}"
-            $<TARGET_FILE_DIR:empty_app>)
+            add_custom_command(
+                TARGET empty_app
+                POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+                "${FREETYPE_DLL}"
+                $<TARGET_FILE_DIR:empty_app>)
         endif()
     endif()
 endif()
@@ -821,11 +814,11 @@ else()
               $<TARGET_FILE:SDL2>
               $<TARGET_FILE_DIR:rasterized_triangle_app>)
         else()
-        add_custom_command(
-            TARGET rasterized_triangle_app
-            POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-            "${SDL2_DLL}"
-            $<TARGET_FILE_DIR:rasterized_triangle_app>)
+            add_custom_command(
+                TARGET rasterized_triangle_app
+                POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+                "${SDL2_DLL}"
+                $<TARGET_FILE_DIR:rasterized_triangle_app>)
         endif()
 
         if(SDL2IMAGEFROMSOURCE)
@@ -835,11 +828,11 @@ else()
               $<TARGET_FILE:SDL2_image>
               $<TARGET_FILE_DIR:rasterized_triangle_app>)
         else()
-        add_custom_command(
-            TARGET rasterized_triangle_app
-            POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-            "${SDL2IMAGE_DLL}"
-            $<TARGET_FILE_DIR:rasterized_triangle_app>)
+            add_custom_command(
+                TARGET rasterized_triangle_app
+                POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+                "${SDL2IMAGE_DLL}"
+                $<TARGET_FILE_DIR:rasterized_triangle_app>)
         endif()
 
         add_custom_command(
