@@ -385,7 +385,6 @@ if(DEFINED GTEST_ROOT)
     find_package(GTest REQUIRED)
 
     set(GTEST_SOURCES ${GTEST_ROOT}/src/gtest-all.cc)
-
     add_library(
         ${GTEST_MAIN_LIBRARY} STATIC
         ${GTEST_SOURCES})
@@ -400,42 +399,42 @@ endif()
 # ===========================================
 
 # Tests target ==============================
-set(TESTS_SOURCES
-    tests/src/camera.cpp
-    tests/src/main.cpp
-    tests/src/matrix3x3.cpp
-    tests/src/matrix4x4.cpp
-    tests/src/obj_import.cpp
-    # tests/src/pipeline.cpp
-    tests/src/vector3.cpp
-    tests/src/vector4.cpp)
+if (DEFINED GTEST_ROOT)
+    set(TESTS_SOURCES
+        tests/src/camera.cpp
+        tests/src/main.cpp
+        tests/src/matrix3x3.cpp
+        tests/src/matrix4x4.cpp
+        tests/src/obj_import.cpp
+        # tests/src/pipeline.cpp
+        tests/src/vector3.cpp
+        tests/src/vector4.cpp)
 
-set(TESTS_HEADERS
-    tests/include/assert_utils.h)
+    set(TESTS_HEADERS
+        tests/include/assert_utils.h)
 
-add_executable(
-    tests
-    ${TESTS_SOURCES}
-    ${TESTS_HEADERS}
-    ${LANTERN_HEADERS})
+    add_executable(
+        tests
+        ${TESTS_SOURCES}
+        ${TESTS_HEADERS}
+        ${LANTERN_HEADERS})
 
-target_include_directories(tests PRIVATE lantern/include tests/include)
+    target_include_directories(tests PRIVATE lantern/include
+                                             tests/include
+                                             ${GTEST_INCLUDE_DIR})
 
-if (DEFINED ENV{GTEST_ROOT})
-    target_include_directories(tests PRIVATE $ENV{GTEST_ROOT}/include)
+    set_target_properties(
+        tests PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
+
+    target_link_libraries(tests lantern gtest)
+
+    add_custom_command(
+        TARGET tests POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/tests/resources"
+        $<TARGET_FILE_DIR:tests>/resources)
 endif()
-
-set_target_properties(
-    tests PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
-
-target_link_libraries(tests lantern gtest)
-
-add_custom_command(
-    TARGET tests POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${PROJECT_SOURCE_DIR}/tests/resources"
-    $<TARGET_FILE_DIR:tests>/resources)
 # ===========================================
 
 # Empty app target ==========================
