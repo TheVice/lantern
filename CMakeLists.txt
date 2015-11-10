@@ -6,191 +6,260 @@ project(lantern)
 # Add testing tool
 include(CTest)
 
-# SDL2, SDL2_image and FreeType look up ====
-if(NOT ANDROID)
+# SDL2, SDL2_image and FreeType look up =====
+set(SDL2FROMSOURCE FALSE)
+set(SDL2IMAGEFROMSOURCE FALSE)
+set(FREETYPEFROMSOURCE FALSE)
 
-set(SDL2FROMSOURCE 0)
-set(SDL2IMAGEFROMSOURCE 0)
-set(FREETYPEFROMSOURCE 0)
+if(DEFINED ENV{SDL2DIR})
+    string(REPLACE "\\" "/" SDL2DIR $ENV{SDL2DIR})
+elseif(DEFINED SDL2DIR)
+    string(REPLACE "\\" "/" SDL2DIR ${SDL2DIR})
+endif()
 
-if(CMAKE_HOST_WIN32)
-    if(DEFINED ENV{SDL2DIR})
-        string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2DIR}/src)
+if(WIN32 OR ANDROID)
+    if(DEFINED SDL2DIR)
+        set(SDL2_INCLUDE_DIR ${SDL2DIR}/include)
+        set(SDL2_SRC_DIR ${SDL2DIR}/src)
         if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
-            string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2DIR}/include)
-            set(SDL2FROMSOURCE 1)
+            set(SDL2FROMSOURCE TRUE)
         endif()
-    elseif(DEFINED SDL2DIR)
-        string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2DIR}/src)
-        if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
-            string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2DIR}/include)
-            set(SDL2FROMSOURCE 1)
-        endif()
-    endif()
-
-    if(DEFINED ENV{SDL2IMAGEDIR})
-        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGEDIR})
-        if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
-            set(SDL2IMAGEFROMSOURCE 1)
-        endif()
-    elseif(DEFINED SDL2IMAGEDIR)
-        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGEDIR})
-        if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
-            set(SDL2IMAGEFROMSOURCE 1)
-        endif()
-    endif()
-
-    if(DEFINED ENV{FREETYPEDIR})
-        string(REPLACE "\\" "/" FREETYPE_SRC_DIR $ENV{FREETYPEDIR}/src)
-        if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
-            string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS $ENV{FREETYPEDIR}/include)
-            set(FREETYPEFROMSOURCE 1)
-        endif()
-        string(REPLACE "\\" "/" FREETYPEDIR $ENV{FREETYPEDIR})
-    elseif(DEFINED FREETYPEDIR)
-        string(REPLACE "\\" "/" FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
-        if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
-            string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
-            set(FREETYPEFROMSOURCE 1)
-        endif()
-        string(REPLACE "\\" "/" FREETYPEDIR ${FREETYPEDIR})
     endif()
 endif()
 
-# SDL2, SDL2_image and FreeType look up =====
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+if(DEFINED ENV{SDL2IMAGEDIR})
+    string(REPLACE "\\" "/" SDL2IMAGEDIR $ENV{SDL2IMAGEDIR})
+elseif(DEFINED SDL2IMAGEDIR)
+    string(REPLACE "\\" "/" SDL2IMAGEDIR ${SDL2IMAGEDIR})
+endif()
+
+if(WIN32 OR ANDROID)
+    if(DEFINED SDL2IMAGEDIR)
+        set(SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGEDIR})
+        if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
+            set(SDL2IMAGEFROMSOURCE TRUE)
+        endif()
+    endif()
+endif()
+
+if(DEFINED ENV{FREETYPEDIR})
+    string(REPLACE "\\" "/" FREETYPEDIR $ENV{FREETYPEDIR})
+elseif(DEFINED FREETYPEDIR)
+    string(REPLACE "\\" "/" FREETYPEDIR ${FREETYPEDIR})
+endif()
+
+if(WIN32 OR ANDROID)
+    if(DEFINED FREETYPEDIR)
+        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
+        set(FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
+        if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
+            set(FREETYPEFROMSOURCE TRUE)
+        endif()
+    endif()
+endif()
+
+if(ANDROID)
+    if((NOT SDL2FROMSOURCE) OR (NOT SDL2IMAGEFROMSOURCE) OR (NOT FREETYPEFROMSOURCE))
+        message(FATAL_ERROR "Android build required sources of SDL2, SDL2 Image and FreeType libraries")
+    endif()
+else()
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+endif()
+
 if(SDL2FROMSOURCE)
     message("SDL2 will making from source")
-    if(CMAKE_HOST_WIN32)
-        # SDL2
-        set(SDL2_SRC_FILES ${SDL2_SRC_DIR}/atomic/SDL_atomic.c
-                           ${SDL2_SRC_DIR}/atomic/SDL_spinlock.c
-                           ${SDL2_SRC_DIR}/audio/SDL_audio.c
-                           ${SDL2_SRC_DIR}/audio/SDL_audiocvt.c
-                           ${SDL2_SRC_DIR}/audio/SDL_audiodev.c
-                           ${SDL2_SRC_DIR}/audio/SDL_audiotypecvt.c
-                           ${SDL2_SRC_DIR}/audio/SDL_mixer.c
-                           ${SDL2_SRC_DIR}/audio/SDL_wave.c
-                           ${SDL2_SRC_DIR}/core/windows/SDL_windows.c
-                           ${SDL2_SRC_DIR}/cpuinfo/SDL_cpuinfo.c
-                           ${SDL2_SRC_DIR}/dynapi/SDL_dynapi.c
-                           ${SDL2_SRC_DIR}/events/SDL_clipboardevents.c
-                           ${SDL2_SRC_DIR}/events/SDL_dropevents.c
-                           ${SDL2_SRC_DIR}/events/SDL_events.c
-                           ${SDL2_SRC_DIR}/events/SDL_gesture.c
-                           ${SDL2_SRC_DIR}/events/SDL_keyboard.c
-                           ${SDL2_SRC_DIR}/events/SDL_mouse.c
-                           ${SDL2_SRC_DIR}/events/SDL_quit.c
-                           ${SDL2_SRC_DIR}/events/SDL_touch.c
-                           ${SDL2_SRC_DIR}/events/SDL_windowevents.c
-                           ${SDL2_SRC_DIR}/filesystem/windows/SDL_sysfilesystem.c
-                           ${SDL2_SRC_DIR}/file/SDL_rwops.c
-                           ${SDL2_SRC_DIR}/haptic/SDL_haptic.c
-                           ${SDL2_SRC_DIR}/haptic/windows/SDL_syshaptic.c
-                           ${SDL2_SRC_DIR}/joystick/SDL_gamecontroller.c
-                           ${SDL2_SRC_DIR}/joystick/SDL_joystick.c
-                           ${SDL2_SRC_DIR}/joystick/windows/SDL_dxjoystick.c
-                           ${SDL2_SRC_DIR}/joystick/windows/SDL_mmjoystick.c
-                           ${SDL2_SRC_DIR}/libm/e_atan2.c
-                           ${SDL2_SRC_DIR}/libm/e_log.c
-                           ${SDL2_SRC_DIR}/libm/e_pow.c
-                           ${SDL2_SRC_DIR}/libm/e_rem_pio2.c
-                           ${SDL2_SRC_DIR}/libm/e_sqrt.c
-                           ${SDL2_SRC_DIR}/libm/k_cos.c
-                           ${SDL2_SRC_DIR}/libm/k_rem_pio2.c
-                           ${SDL2_SRC_DIR}/libm/k_sin.c
-                           ${SDL2_SRC_DIR}/libm/s_atan.c
-                           ${SDL2_SRC_DIR}/libm/s_copysign.c
-                           ${SDL2_SRC_DIR}/libm/s_cos.c
-                           ${SDL2_SRC_DIR}/libm/s_fabs.c
-                           ${SDL2_SRC_DIR}/libm/s_floor.c
-                           ${SDL2_SRC_DIR}/libm/s_scalbn.c
-                           ${SDL2_SRC_DIR}/libm/s_sin.c
-                           ${SDL2_SRC_DIR}/loadso/windows/SDL_sysloadso.c
-                           ${SDL2_SRC_DIR}/power/SDL_power.c
-                           ${SDL2_SRC_DIR}/power/windows/SDL_syspower.c
-                           ${SDL2_SRC_DIR}/render/direct3d/SDL_render_d3d.c
-                           ${SDL2_SRC_DIR}/render/opengl/SDL_render_gl.c
-                           ${SDL2_SRC_DIR}/render/opengl/SDL_shaders_gl.c
-                           ${SDL2_SRC_DIR}/render/SDL_d3dmath.c
-                           ${SDL2_SRC_DIR}/render/SDL_render.c
-                           ${SDL2_SRC_DIR}/render/SDL_yuv_mmx.c
-                           ${SDL2_SRC_DIR}/render/SDL_yuv_sw.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_blendfillrect.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_blendline.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_blendpoint.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_drawline.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_drawpoint.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_render_sw.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_rotate.c
-                           ${SDL2_SRC_DIR}/SDL.c
-                           ${SDL2_SRC_DIR}/SDL_assert.c
-                           ${SDL2_SRC_DIR}/SDL_error.c
-                           ${SDL2_SRC_DIR}/SDL_hints.c
-                           ${SDL2_SRC_DIR}/SDL_log.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_getenv.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_iconv.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_malloc.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_qsort.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_stdlib.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_string.c
-                           ${SDL2_SRC_DIR}/thread/generic/SDL_syscond.c
-                           ${SDL2_SRC_DIR}/thread/generic/SDL_sysmutex.c
-                           ${SDL2_SRC_DIR}/thread/generic/SDL_syssem.c
-                           ${SDL2_SRC_DIR}/thread/generic/SDL_systhread.c
-                           ${SDL2_SRC_DIR}/thread/generic/SDL_systls.c
-                           ${SDL2_SRC_DIR}/thread/SDL_thread.c
-                           ${SDL2_SRC_DIR}/timer/SDL_timer.c
-                           ${SDL2_SRC_DIR}/timer/windows/SDL_systimer.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_0.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_1.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_A.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_auto.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_copy.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_N.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_slow.c
-                           ${SDL2_SRC_DIR}/video/SDL_bmp.c
-                           ${SDL2_SRC_DIR}/video/SDL_clipboard.c
-                           ${SDL2_SRC_DIR}/video/SDL_egl.c
-                           ${SDL2_SRC_DIR}/video/SDL_fillrect.c
-                           ${SDL2_SRC_DIR}/video/SDL_pixels.c
-                           ${SDL2_SRC_DIR}/video/SDL_rect.c
-                           ${SDL2_SRC_DIR}/video/SDL_RLEaccel.c
-                           ${SDL2_SRC_DIR}/video/SDL_shape.c
-                           ${SDL2_SRC_DIR}/video/SDL_stretch.c
-                           ${SDL2_SRC_DIR}/video/SDL_surface.c
-                           ${SDL2_SRC_DIR}/video/SDL_video.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsclipboard.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsevents.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsframebuffer.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowskeyboard.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsmessagebox.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsmodes.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsmouse.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsopengl.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsopengles.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsshape.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsvideo.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowswindow.c)
+    # SDL2
+    set(SDL2_SRC_FILES ${SDL2_SRC_DIR}/atomic/SDL_atomic.c
+                       ${SDL2_SRC_DIR}/atomic/SDL_spinlock.c
+
+                       ${SDL2_SRC_DIR}/audio/SDL_audio.c
+                       ${SDL2_SRC_DIR}/audio/SDL_audiocvt.c
+                       ${SDL2_SRC_DIR}/audio/SDL_audiodev.c
+                       ${SDL2_SRC_DIR}/audio/SDL_audiotypecvt.c
+                       ${SDL2_SRC_DIR}/audio/SDL_mixer.c
+                       ${SDL2_SRC_DIR}/audio/SDL_wave.c
+
+                       ${SDL2_SRC_DIR}/cpuinfo/SDL_cpuinfo.c
+
+                       ${SDL2_SRC_DIR}/dynapi/SDL_dynapi.c
+
+                       ${SDL2_SRC_DIR}/events/SDL_clipboardevents.c
+                       ${SDL2_SRC_DIR}/events/SDL_dropevents.c
+                       ${SDL2_SRC_DIR}/events/SDL_events.c
+                       ${SDL2_SRC_DIR}/events/SDL_gesture.c
+                       ${SDL2_SRC_DIR}/events/SDL_keyboard.c
+                       ${SDL2_SRC_DIR}/events/SDL_mouse.c
+                       ${SDL2_SRC_DIR}/events/SDL_quit.c
+                       ${SDL2_SRC_DIR}/events/SDL_touch.c
+                       ${SDL2_SRC_DIR}/events/SDL_windowevents.c
+
+                       ${SDL2_SRC_DIR}/file/SDL_rwops.c
+
+                       ${SDL2_SRC_DIR}/haptic/SDL_haptic.c
+
+                       ${SDL2_SRC_DIR}/joystick/SDL_gamecontroller.c
+                       ${SDL2_SRC_DIR}/joystick/SDL_joystick.c
+
+                       ${SDL2_SRC_DIR}/power/SDL_power.c
+
+                       ${SDL2_SRC_DIR}/render/SDL_render.c
+                       ${SDL2_SRC_DIR}/render/SDL_yuv_mmx.c
+                       ${SDL2_SRC_DIR}/render/SDL_yuv_sw.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_blendfillrect.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_blendline.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_blendpoint.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_drawline.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_drawpoint.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_render_sw.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_rotate.c
+
+                       ${SDL2_SRC_DIR}/SDL.c
+                       ${SDL2_SRC_DIR}/SDL_assert.c
+                       ${SDL2_SRC_DIR}/SDL_error.c
+                       ${SDL2_SRC_DIR}/SDL_hints.c
+                       ${SDL2_SRC_DIR}/SDL_log.c
+
+                       ${SDL2_SRC_DIR}/stdlib/SDL_getenv.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_iconv.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_malloc.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_qsort.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_stdlib.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_string.c
+
+                       ${SDL2_SRC_DIR}/thread/SDL_thread.c
+
+                       ${SDL2_SRC_DIR}/timer/SDL_timer.c
+
+                       ${SDL2_SRC_DIR}/video/SDL_blit.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_0.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_1.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_A.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_auto.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_copy.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_N.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_slow.c
+                       ${SDL2_SRC_DIR}/video/SDL_bmp.c
+                       ${SDL2_SRC_DIR}/video/SDL_clipboard.c
+                       ${SDL2_SRC_DIR}/video/SDL_egl.c
+                       ${SDL2_SRC_DIR}/video/SDL_fillrect.c
+                       ${SDL2_SRC_DIR}/video/SDL_pixels.c
+                       ${SDL2_SRC_DIR}/video/SDL_rect.c
+                       ${SDL2_SRC_DIR}/video/SDL_RLEaccel.c
+                       ${SDL2_SRC_DIR}/video/SDL_shape.c
+                       ${SDL2_SRC_DIR}/video/SDL_stretch.c
+                       ${SDL2_SRC_DIR}/video/SDL_surface.c
+                       ${SDL2_SRC_DIR}/video/SDL_video.c)
+    if(WIN32)
+        list(APPEND SDL2_SRC_FILES ${SDL2_SRC_DIR}/core/windows/SDL_windows.c
+                                   ${SDL2_SRC_DIR}/filesystem/windows/SDL_sysfilesystem.c
+                                   ${SDL2_SRC_DIR}/haptic/windows/SDL_syshaptic.c
+                                   ${SDL2_SRC_DIR}/joystick/windows/SDL_dxjoystick.c
+                                   ${SDL2_SRC_DIR}/joystick/windows/SDL_mmjoystick.c
+
+                                   ${SDL2_SRC_DIR}/libm/e_atan2.c
+                                   ${SDL2_SRC_DIR}/libm/e_log.c
+                                   ${SDL2_SRC_DIR}/libm/e_pow.c
+                                   ${SDL2_SRC_DIR}/libm/e_rem_pio2.c
+                                   ${SDL2_SRC_DIR}/libm/e_sqrt.c
+                                   ${SDL2_SRC_DIR}/libm/k_cos.c
+                                   ${SDL2_SRC_DIR}/libm/k_rem_pio2.c
+                                   ${SDL2_SRC_DIR}/libm/k_sin.c
+                                   ${SDL2_SRC_DIR}/libm/s_atan.c
+                                   ${SDL2_SRC_DIR}/libm/s_copysign.c
+                                   ${SDL2_SRC_DIR}/libm/s_cos.c
+                                   ${SDL2_SRC_DIR}/libm/s_fabs.c
+                                   ${SDL2_SRC_DIR}/libm/s_floor.c
+                                   ${SDL2_SRC_DIR}/libm/s_scalbn.c
+                                   ${SDL2_SRC_DIR}/libm/s_sin.c
+
+                                   ${SDL2_SRC_DIR}/loadso/windows/SDL_sysloadso.c
+                                   ${SDL2_SRC_DIR}/power/windows/SDL_syspower.c
+
+                                   ${SDL2_SRC_DIR}/render/direct3d/SDL_render_d3d.c
+                                   ${SDL2_SRC_DIR}/render/opengl/SDL_render_gl.c
+                                   ${SDL2_SRC_DIR}/render/opengl/SDL_shaders_gl.c
+                                   ${SDL2_SRC_DIR}/render/SDL_d3dmath.c
+
+                                   ${SDL2_SRC_DIR}/thread/generic/SDL_syscond.c
+                                   ${SDL2_SRC_DIR}/thread/generic/SDL_sysmutex.c
+                                   ${SDL2_SRC_DIR}/thread/generic/SDL_syssem.c
+                                   ${SDL2_SRC_DIR}/thread/generic/SDL_systhread.c
+                                   ${SDL2_SRC_DIR}/thread/generic/SDL_systls.c
+
+                                   ${SDL2_SRC_DIR}/timer/windows/SDL_systimer.c
+
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsclipboard.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsevents.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsframebuffer.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowskeyboard.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsmessagebox.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsmodes.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsmouse.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsopengl.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsopengles.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsshape.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsvideo.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowswindow.c)
+
         add_library(SDL2 SHARED ${SDL2_SRC_FILES})
         set(SDL2_INCLUDE_DIR "SDL2/include" ${SDL2_INCLUDE_DIR})
-        target_include_directories(SDL2 SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
+
         target_link_libraries(SDL2 winmm imm32 version)
         if(MSVC)
             if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 19.0) # Visual Studio 2015 and above
                 target_link_libraries(SDL2 winmm imm32 version vcruntime ucrtd) # libucrt
             endif()
         endif()
-        # SDL2main
-        add_library(SDL2main STATIC ${SDL2_SRC_DIR}/main/windows/SDL_windows_main.c)
-        target_include_directories(SDL2main SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
 
-        set(SDL2_LIBRARY SDL2 SDL2main)
+    elseif(ANDROID)
+        list(APPEND SDL2_SRC_FILES ${SDL2_SRC_DIR}/audio/android/SDL_androidaudio.c
+                                   ${SDL2_SRC_DIR}/audio/dummy/SDL_dummyaudio.c
+                                   ${SDL2_SRC_DIR}/core/android/SDL_android.c
+                                   ${SDL2_SRC_DIR}/filesystem/dummy/SDL_sysfilesystem.c
+                                   ${SDL2_SRC_DIR}/haptic/dummy/SDL_syshaptic.c
+                                   ${SDL2_SRC_DIR}/joystick/android/SDL_sysjoystick.c
+                                   ${SDL2_SRC_DIR}/loadso/dlopen/SDL_sysloadso.c
+                                   ${SDL2_SRC_DIR}/power/android/SDL_syspower.c
+                                   ${SDL2_SRC_DIR}/render/opengles/SDL_render_gles.c
+                                   ${SDL2_SRC_DIR}/render/opengles2/SDL_render_gles2.c
+                                   ${SDL2_SRC_DIR}/render/opengles2/SDL_shaders_gles2.c
+                                   ${SDL2_SRC_DIR}/thread/pthread/SDL_syscond.c
+                                   ${SDL2_SRC_DIR}/thread/pthread/SDL_sysmutex.c
+                                   ${SDL2_SRC_DIR}/thread/pthread/SDL_syssem.c
+                                   ${SDL2_SRC_DIR}/thread/pthread/SDL_systhread.c
+                                   ${SDL2_SRC_DIR}/thread/pthread/SDL_systls.c
+                                   ${SDL2_SRC_DIR}/timer/unix/SDL_systimer.c
+                                   ${SDL2_SRC_DIR}/video/android/SDL_androidclipboard.c
+                                   ${SDL2_SRC_DIR}/video/android/SDL_androidevents.c
+                                   ${SDL2_SRC_DIR}/video/android/SDL_androidgl.c
+                                   ${SDL2_SRC_DIR}/video/android/SDL_androidkeyboard.c
+                                   ${SDL2_SRC_DIR}/video/android/SDL_androidtouch.c
+                                   ${SDL2_SRC_DIR}/video/android/SDL_androidvideo.c
+                                   ${SDL2_SRC_DIR}/video/android/SDL_androidwindow.c)
+
+          add_library(SDL2 STATIC ${SDL2_SRC_FILES})
+          add_definitions(-DGL_GLEXT_PROTOTYPES)
+          set_target_properties(
+              SDL2 PROPERTIES
+              ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
     endif()
+
+    target_include_directories(SDL2 SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
+
+    # SDL2main
+    if(WIN32)
+        add_library(SDL2main STATIC ${SDL2_SRC_DIR}/main/windows/SDL_windows_main.c)
+    elseif(ANDROID)
+        add_library(SDL2main STATIC ${SDL2_SRC_DIR}/main/android/SDL_android_main.c)
+    endif()
+    target_include_directories(SDL2main SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
+
+    set(SDL2_LIBRARY SDL2 SDL2main)
 else()
     find_package(SDL2 REQUIRED)
 endif()
+
+if(NOT ANDROID)
 if(SDL2IMAGEFROMSOURCE)
     message("SDL2_image will making from source")
     if(CMAKE_HOST_WIN32)
@@ -319,34 +388,6 @@ else()
         set(FREETYPE_DLL "${FREETYPEDIR}/bin/freetype6.dll")
     endif()
 endif()
-else()
-    if(DEFINED ENV{SDL2DIR})
-        string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2DIR}/src)
-        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2DIR}/include)
-    elseif(DEFINED SDL2DIR)
-        string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2DIR}/src)
-        string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2DIR}/include)
-    else()
-        message(FATAL_ERROR "Path to SDL2 source dir not defined")
-    endif()
-
-    if(DEFINED ENV{SDL2IMAGEDIR})
-        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGEDIR})
-    elseif(DEFINED SDL2IMAGEDIR)
-        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGEDIR})
-    else()
-        message(FATAL_ERROR "Path to SDL2Image source dir not defined")
-    endif()
-
-    if(DEFINED ENV{FREETYPEDIR})
-        string(REPLACE "\\" "/" FREETYPE_SRC_DIR $ENV{FREETYPEDIR}/src)
-        string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS $ENV{FREETYPEDIR}/include)
-    elseif(DEFINED FREETYPEDIR)
-        string(REPLACE "\\" "/" FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
-        string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
-    else()
-        message(FATAL_ERROR "Path to FreeType source dir not defined")
-    endif()
 endif()
 # ===========================================
 
@@ -396,49 +437,6 @@ endif()
 
 # SDL2, SDL2_image and FreeType targets =====
 if(ANDROID)
-    # SDL2
-    file(GLOB C_FILES ${SDL2_SRC_DIR}/*.c
-                      ${SDL2_SRC_DIR}/audio/*.c
-                      ${SDL2_SRC_DIR}/audio/android/*.c
-                      ${SDL2_SRC_DIR}/audio/dummy/*.c
-                      ${SDL2_SRC_DIR}/atomic/SDL_atomic.c
-                      ${SDL2_SRC_DIR}/atomic/SDL_spinlock.c
-                      ${SDL2_SRC_DIR}/core/android/*.c
-                      ${SDL2_SRC_DIR}/cpuinfo/*.c
-                      ${SDL2_SRC_DIR}/dynapi/*.c
-                      ${SDL2_SRC_DIR}/events/*.c
-                      ${SDL2_SRC_DIR}/file/*.c
-                      ${SDL2_SRC_DIR}/haptic/*.c
-                      ${SDL2_SRC_DIR}/haptic/dummy/*.c
-                      ${SDL2_SRC_DIR}/joystick/*.c
-                      ${SDL2_SRC_DIR}/joystick/android/*.c
-                      ${SDL2_SRC_DIR}/loadso/dlopen/*.c
-                      ${SDL2_SRC_DIR}/power/*.c
-                      ${SDL2_SRC_DIR}/power/android/*.c
-                      ${SDL2_SRC_DIR}/filesystem/dummy/*.c
-                      ${SDL2_SRC_DIR}/render/*.c
-                      ${SDL2_SRC_DIR}/render/*/*.c
-                      ${SDL2_SRC_DIR}/stdlib/*.c
-                      ${SDL2_SRC_DIR}/thread/*.c
-                      ${SDL2_SRC_DIR}/thread/pthread/*.c
-                      ${SDL2_SRC_DIR}/timer/*.c
-                      ${SDL2_SRC_DIR}/timer/unix/*.c
-                      ${SDL2_SRC_DIR}/video/*.c
-                      ${SDL2_SRC_DIR}/video/android/*.c
-                      ${SDL2_SRC_DIR}/test/*.c)
-
-    file(GLOB INC_FILES ${SDL2_INCLUDE_DIR}/*.h)
-
-    add_library(SDL2 STATIC ${INC_FILES} ${C_FILES})
-    target_include_directories(SDL2 PRIVATE SYSTEM ${SDL2_INCLUDE_DIR})
-
-    add_definitions(-DGL_GLEXT_PROTOTYPES)
-
-    set_target_properties(
-        SDL2 PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
-    set(SDL2_LIBRARY SDL2)
-
     # SDL2_image
     file(GLOB C_FILES ${SDL2IMAGE_INCLUDE_DIR}/*.c)
     file(GLOB INC_FILES ${SDL2IMAGE_INCLUDE_DIR}/*.h)
@@ -574,11 +572,12 @@ endif(ANDROID)
 # Gooogle C++ testing framework target ======
 if(ANDROID)
     set(GTEST_ROOT ${NDK_PATH}/sources/third_party/googletest/googletest)
-endif()
-if(DEFINED ENV{GTEST_ROOT})
-    string(REPLACE "\\" "/" GTEST_ROOT $ENV{GTEST_ROOT})
-elseif(DEFINED GTEST_ROOT)
-    string(REPLACE "\\" "/" GTEST_ROOT ${GTEST_ROOT})
+else()
+    if(DEFINED ENV{GTEST_ROOT})
+        string(REPLACE "\\" "/" GTEST_ROOT $ENV{GTEST_ROOT})
+    elseif(DEFINED GTEST_ROOT)
+        string(REPLACE "\\" "/" GTEST_ROOT ${GTEST_ROOT})
+    endif()
 endif()
 
 if(DEFINED GTEST_ROOT)
@@ -655,8 +654,7 @@ endif()
 
 # Empty app target ==========================
 if(ANDROID)
-    file(GLOB target_source_files examples/empty_app/*.cpp
-                                  examples/empty_app/SDL_android_main.c)
+    file(GLOB target_source_files examples/empty_app/*.cpp)
     list(APPEND target_include_dirs ${LANTERN_INCLUDE_FOLDERS}
                                     ${SDL2_INCLUDE_DIR}
                                     ${SDL2_SRC_DIR}
@@ -760,8 +758,7 @@ endif()
 
 # Rasterized triangle app target ============
 if(ANDROID)
-    file(GLOB target_source_files examples/rasterized_triangle_app/*.cpp
-                                  examples/rasterized_triangle_app/SDL_android_main.c)
+    file(GLOB target_source_files examples/rasterized_triangle_app/*.cpp)
     list(APPEND target_include_dirs ${LANTERN_INCLUDE_FOLDERS}
                                     ${SDL2_INCLUDE_DIR}
                                     ${SDL2_SRC_DIR}

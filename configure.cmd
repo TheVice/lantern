@@ -59,7 +59,9 @@ if not exist %CURRENT_DIR%\build\%CMAKE_VER% mkdir %CURRENT_DIR%\build\%CMAKE_VE
 
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
 set ANDROID_NATIVE_API_LEVEL=12
+:: android list target
 set ANDROID_ABI=armeabi
+:: armeabi arm64-v8a x86 x86_64 mips mips64
 
 if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL% mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%
 if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI% mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%
@@ -69,17 +71,17 @@ if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\Debug
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="%ANDROID_TOOLCHAIN%" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="%ANDROID_NATIVE_API_LEVEL%" -DANDROID_ABI="%ANDROID_ABI%"
+cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="%ANDROID_TOOLCHAIN%" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="%ANDROID_NATIVE_API_LEVEL%" -DANDROID_ABI="%ANDROID_ABI%"
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\Release
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="%ANDROID_TOOLCHAIN%" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="%ANDROID_NATIVE_API_LEVEL%" -DANDROID_ABI="%ANDROID_ABI%"
+cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="%ANDROID_TOOLCHAIN%" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="%ANDROID_NATIVE_API_LEVEL%" -DANDROID_ABI="%ANDROID_ABI%"
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\RelWithDebInfo
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="%ANDROID_TOOLCHAIN%" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="%ANDROID_NATIVE_API_LEVEL%" -DANDROID_ABI="%ANDROID_ABI%"
+cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="%ANDROID_TOOLCHAIN%" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="%ANDROID_NATIVE_API_LEVEL%" -DANDROID_ABI="%ANDROID_ABI%"
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%
@@ -119,7 +121,7 @@ if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Ansi mkdir %CURRENT_DI
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Ansi
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR%
+cmake %~dp0 -G %CMAKE_GENERATOR%
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%
@@ -144,17 +146,17 @@ if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\RelWithDebInfo mkdir %
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Debug
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
+cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Release
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
+cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\RelWithDebInfo
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
+cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%
@@ -168,7 +170,7 @@ goto end
 
 :NO_ANDROID_TOOLCHAIN_CMAKE
 echo "*****************************************************************************"
-echo Path to android.toolchain.cmake not set
+echo Path to android.toolchain.cmake not set in the ANDROID_TOOLCHAIN
 echo "*****************************************************************************"
 goto end
 
@@ -186,7 +188,7 @@ goto end
 :using
 echo "*****************************************************************************"
 echo "%0 using with clean|Android|MinGW|MSVC18|MSVC19"
-echo clean for Deleting binaries files (*.a *.lib *.exe) from bin directory
+echo clean for deleting binaries files (*.a *.lib *.exe) from bin directory
 echo Android for Eclipse project with Android SDK and NDK
 echo MinGW for Eclipse project with Minimalist GNU for Windows
 echo MSVC18 for Visual Studio 2013
