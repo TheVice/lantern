@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.io.File;
 
 public class libsdlActivity extends SDLActivity {
-
+/*
     //public static native void changeDir(String dirname);
 
 	public static void writeFile(InputStream source, String destination) {
@@ -98,7 +98,7 @@ public class libsdlActivity extends SDLActivity {
             exc.printStackTrace();
             throw new RuntimeException("Unable to find entry " + entryName + " in zip file " + fileName);
         }
-
+*/
         /*
          * try {
          * 
@@ -112,7 +112,7 @@ public class libsdlActivity extends SDLActivity {
          * 
          * exc.printStackTrace(); }
          */
-
+/*
         InputStream input = null;
         try {
 
@@ -141,10 +141,10 @@ public class libsdlActivity extends SDLActivity {
             exc.printStackTrace();
         }
     }
-
+*/
 
     /** Called when the activity is first created. */
-    @Override
+/*  @Override
     public void onCreate(Bundle savedInstanceState) {
 
         String cacheDir = getCacheDir().getAbsolutePath();
@@ -164,5 +164,5 @@ public class libsdlActivity extends SDLActivity {
         System.setProperty("user.dir", cacheDir);
         System.loadLibrary("rasterized_triangle_app");
     }
-
+*/
 }

@@ -249,12 +249,13 @@ if(SDL2FROMSOURCE)
     # SDL2main
     if(WIN32)
         add_library(SDL2main STATIC ${SDL2_SRC_DIR}/main/windows/SDL_windows_main.c)
+        target_include_directories(SDL2main SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
+        set(SDL2_LIBRARY SDL2 SDL2main)
     elseif(ANDROID)
-        add_library(SDL2main STATIC ${SDL2_SRC_DIR}/main/android/SDL_android_main.c)
+        # add_library(SDL2main STATIC ${SDL2_SRC_DIR}/main/android/SDL_android_main.c)
+        set(SDL2_LIBRARY SDL2)
     endif()
-    target_include_directories(SDL2main SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
 
-    set(SDL2_LIBRARY SDL2 SDL2main)
 else()
     find_package(SDL2 REQUIRED)
 endif()
@@ -393,17 +394,21 @@ endif()
 
 # Compiler setup ============================
 if (MSVC)
-    set(COMPILER_FLAGS "/W4 /GS")
+    set(COMPILER_C_FLAGS "/W4 /GS")
+    set(COMPILER_CXX_FLAGS "/W4 /GS")
     set(LINK_FLAGS "${LINK_FLAGS} /SafeSEH /DynamicBase /NXCompat")
 
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DNOMINMAX)
 else()
-    set(COMPILER_FLAGS
+    set(COMPILER_C_FLAGS
+        "-std=c11 -Wall -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter -Wextra")
+    set(COMPILER_CXX_FLAGS
         "-std=gnu++0x -Wall -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter -Wextra")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  ${DEFAULT_CMAKE_C_FLAGS} ${COMPILER_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CMAKE_CXX_FLAGS} ${COMPILER_CXX_FLAGS}")
 
 if(NOT ANDROID)
     if(CMAKE_HOST_WIN32)
@@ -563,12 +568,6 @@ else()
 endif()
 # ===========================================
 
-# Android misc library ======================
-if(ANDROID)
-    add_library(misc STATIC examples/misc.c)
-endif(ANDROID)
-# ===========================================
-
 # Gooogle C++ testing framework target ======
 if(ANDROID)
     set(GTEST_ROOT ${NDK_PATH}/sources/third_party/googletest/googletest)
@@ -645,7 +644,7 @@ if (DEFINED GTEST_ROOT)
     if(ANDROID)
         add_custom_target(run_tests
             DEPENDS tests
-            COMMAND adb push ${CMAKE_BINARY_DIR}/tests /data/local/tmp
+            COMMAND adb push $<TARGET_FILE_DIR:tests> /data/local/tmp
             COMMAND adb shell chmod 775 /data/local/tmp/tests
             COMMAND adb shell "cd /data/local/tmp ; /data/local/tmp/tests")
     endif()
@@ -654,7 +653,8 @@ endif()
 
 # Empty app target ==========================
 if(ANDROID)
-    file(GLOB target_source_files examples/empty_app/*.cpp)
+    file(GLOB target_source_files examples/empty_app/*.cpp
+                                  ${SDL2_SRC_DIR}/main/android/SDL_android_main.c)
     list(APPEND target_include_dirs ${LANTERN_INCLUDE_FOLDERS}
                                     ${SDL2_INCLUDE_DIR}
                                     ${SDL2_SRC_DIR}
@@ -664,7 +664,6 @@ if(ANDROID)
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
                                  FreeType
-                                 misc
                                  GLESv1_CM
                                  GLESv2
                                  log
@@ -758,7 +757,8 @@ endif()
 
 # Rasterized triangle app target ============
 if(ANDROID)
-    file(GLOB target_source_files examples/rasterized_triangle_app/*.cpp)
+    file(GLOB target_source_files examples/rasterized_triangle_app/*.cpp
+                                  ${SDL2_SRC_DIR}/main/android/SDL_android_main.c)
     list(APPEND target_include_dirs ${LANTERN_INCLUDE_FOLDERS}
                                     ${SDL2_INCLUDE_DIR}
                                     ${SDL2_SRC_DIR}
@@ -768,7 +768,6 @@ if(ANDROID)
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
                                  FreeType
-                                 misc
                                  GLESv1_CM
                                  GLESv2
                                  log

@@ -42,18 +42,12 @@ public class SDLActivity extends Activity {
     
     // Audio
     protected static AudioTrack mAudioTrack;
-    public static String cacheDir = null;
+
     // Load the .so
-    // static {
-        //System.loadLibrary("SDL2");
-        //System.loadLibrary("SDL2_image");
-        //System.loadLibrary("SDL2_mixer");
-        //System.loadLibrary("SDL2_net");
-        //System.loadLibrary("SDL2_ttf");
-        // System.loadLibrary("rasterized_triangle_app");
-    // }
-    
-    
+    static {
+        System.loadLibrary("rasterized_triangle_app");
+    }
+
     public static void initialize() {
         // The static nature of the singleton and Android quirkyness force us to initialize everything here
         // Otherwise, when exiting the app and returning to it, these variables *keep* their pre exit values
@@ -94,10 +88,6 @@ public class SDLActivity extends Activity {
         mLayout.addView(mSurface);
 
         setContentView(mLayout);
-
-        // String cacheDir = getCacheDir().getAbsolutePath();
-        // SDLActivity.changeDir(cacheDir);
-        cacheDir = getCacheDir().getAbsolutePath();
     }
 
     // Events
@@ -271,9 +261,7 @@ public class SDLActivity extends Activity {
     }
 
     // C functions we call
-    // public static native void nativeInit();
-    public static native void nativeInit(String dirname);
-    // public static native void changeDir(String dirname);
+    public static native void nativeInit();
     public static native void nativeLowMemory();
     public static native void nativeQuit();
     public static native void nativePause();
@@ -508,8 +496,7 @@ class SDLMain implements Runnable {
     @Override
     public void run() {
         // Runs SDL_main()
-        //SDLActivity.nativeInit();
-        SDLActivity.nativeInit(SDLActivity.cacheDir);
+        SDLActivity.nativeInit();
 
         //Log.v("SDL", "SDL thread terminated");
     }
