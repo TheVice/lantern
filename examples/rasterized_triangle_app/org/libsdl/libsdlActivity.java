@@ -27,49 +27,45 @@ import java.io.InputStream;
 import java.io.File;
 
 public class libsdlActivity extends SDLActivity {
-	
-	// Load the .so
-	static {
-        System.loadLibrary("rasterized_triangle_app");
-	}
-	
-	/** Called when the activity is first created. */
+
+    /** Called when the activity is first created. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         final String cacheDir = getCacheDir().getAbsolutePath();
         final File file = new File(cacheDir + "/resources");
-
-        if (!file.exists()) {
-        	file.mkdir();
-        }
-        
         final String pathToApk = getPathToApk();
         final ZipFile zipFile = openZipFile(pathToApk);
         final Vector<String> files = listZip(zipFile);
 
         Log.v("SDL", "Start file list");
-		for(String fileName : files) {
-			if (fileName.contains("resources/")) {
-                Log.v("SDL", fileName);
+        for(String fileName : files) {
+
+            if (fileName.contains("resources/")) {
+
+                if (!file.exists()) {
+
+                    file.mkdir();
+                }
 
                 final int index = fileName.indexOf("resources/") + "resources".length();
                 final String destination = file.getAbsolutePath() + fileName.substring(index);
-                Log.v("SDL", destination);
+                Log.v("SDL", "Extract " + fileName + " from " + pathToApk + " into " + destination);
 
-                /*try {
+                try {
 
                     extractEntryInto(zipFile, fileName, destination);
                 } catch (RuntimeException exc) {
 
                     exc.printStackTrace();
-                }*/
+                }
             }
-		}
-		Log.v("SDL", "End file list");
-
+        }
+        Log.v("SDL", "End file list");
         closeZipFile(zipFile);
 
+        // Load the .so
+        System.loadLibrary("rasterized_triangle_app");
         super.onCreate(savedInstanceState);
     }
 
@@ -82,7 +78,7 @@ public class libsdlActivity extends SDLActivity {
         } catch (FileNotFoundException exc) {
 
             exc.printStackTrace();
-		    throw new RuntimeException("Unable to extract into " + destination);
+            throw new RuntimeException("Unable to extract into " + destination);
         }
 
         byte buffer[] = new byte[bufferLength];
@@ -131,29 +127,29 @@ public class libsdlActivity extends SDLActivity {
         }
         return zipFile;
     }
-    
-	public static Vector<String> listZip(ZipFile zipFile) {
 
-		Vector<String> files = new Vector<String>(1024);
-		Enumeration<ZipEntry> listOfFiles = (Enumeration<ZipEntry>) zipFile.entries();
-		while(listOfFiles.hasMoreElements()) {
-			files.add(listOfFiles.nextElement().getName());
-		}
+    public static Vector<String> listZip(ZipFile zipFile) {
 
-		return files;
-	}
-	
-	public static void extractEntryInto(ZipFile zipFile, String entryName, String destination) {
-		
-	    ZipEntry arEntry = null;
-	    try {
+        Vector<String> files = new Vector<String>(1024);
+        Enumeration<ZipEntry> listOfFiles = (Enumeration<ZipEntry>) zipFile.entries();
+        while(listOfFiles.hasMoreElements()) {
+            files.add(listOfFiles.nextElement().getName());
+        }
 
-	        arEntry = zipFile.getEntry(entryName);
-	    } catch (IllegalStateException exc) {
+        return files;
+    }
 
-	        exc.printStackTrace();
-	        throw new RuntimeException("Unable to find entry " + entryName + " in zip file " + zipFile.getName());
-	    }
+    public static void extractEntryInto(ZipFile zipFile, String entryName, String destination) {
+
+        ZipEntry arEntry = null;
+        try {
+
+            arEntry = zipFile.getEntry(entryName);
+        } catch (IllegalStateException exc) {
+
+            exc.printStackTrace();
+            throw new RuntimeException("Unable to find entry " + entryName + " in zip file " + zipFile.getName());
+        }
 
         InputStream input = null;
         try {
@@ -167,13 +163,13 @@ public class libsdlActivity extends SDLActivity {
 
         try {
 
-        	writeFile(input, destination);
+            writeFile(input, destination);
         } catch (IOException exc) {
 
             exc.printStackTrace();
             throw new RuntimeException("Unable to extract entry " + entryName + " from " + zipFile.getName() + " into " + destination);
         }
-        
+
         try {
 
             input.close();
@@ -181,22 +177,17 @@ public class libsdlActivity extends SDLActivity {
 
             exc.printStackTrace();
         }
-	}
+    }
 
     public static void closeZipFile(ZipFile zipFile) {
-	    try {
-	
-	        zipFile.close();
-	    } catch (IOException exc) {
-	
-	        exc.printStackTrace();
-	    }
-	}
-    
-/*  @Override
-    public void onCreate(Bundle savedInstanceState) {
 
-        System.loadLibrary("rasterized_triangle_app");
+        try {
+
+            zipFile.close();
+        } catch (IOException exc) {
+
+            exc.printStackTrace();
+        }
     }
-*/
+
 }

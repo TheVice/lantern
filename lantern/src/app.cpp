@@ -4,11 +4,6 @@
 #if __ANDROID__
 #include <jni.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#if __ANDROID_API__ > 8
-#include <android/asset_manager.h>
-#include <android/asset_manager_jni.h>
-#endif
 #endif
 #include "app.h"
 
@@ -23,14 +18,6 @@ bool isPathExist(const char* aPath)
 	return -1 != access(aPath, F_OK);
 }
 
-void makeDir(const char* aPath)
-{
-	if(!isPathExist(aPath))
-	{
-		mkdir(aPath, S_IRWXU | S_IRWXG);
-	}
-}
-
 void changeDir(const char* aPath)
 {
 	chdir(aPath);
@@ -41,49 +28,21 @@ char* getCurrentDir(char* aBuffer, size_t aBufferLength)
 	return getcwd(aBuffer, aBufferLength);
 }
 
-#if __ANDROID_API__ > 8
-void unpackResourcesFromApk(AAssetManager* aManager)
+char* getCacheDir(JNIEnv *aEnv, jobject aActivity, jclass aActivityClazz, char* aBuffer, size_t aBufferLength)
 {
-	const char* dirName = "resources";
-	makeDir(dirName);
-	AAssetDir* assetDir = AAssetManager_openDir(aManager, dirName);
-	const char* filename = nullptr;
+	jmethodID getCacheDirId = aEnv->GetMethodID(aActivityClazz, "getCacheDir", "()Ljava/io/File;");
+	jobject appCacheDirFO = aEnv->CallObjectMethod(aActivity, getCacheDirId); //activity.getCacheDir()
 
-	while ((filename = AAssetDir_getNextFileName(assetDir)) != nullptr)
-	{
-		char inputPath[BUFSIZ];
+	jclass fileClass = aEnv->FindClass("java/io/File");
+	jmethodID getAbsolutePathId = aEnv->GetMethodID(fileClass, "getAbsolutePath", "()Ljava/lang/String;");
+	jstring appCacheDirJs = (jstring)aEnv->CallObjectMethod(appCacheDirFO, getAbsolutePathId); //activity.getCacheDir().getAbsolutePath()
 
-//		strcpy(inputPath, dirName);
-//		strcat(inputPath, "/");
-//		strcat(inputPath, filename);
-
-		sprintf(inputPath, "%s%s%s", dirName, "/", filename);
-
-		AAsset* asset = AAssetManager_open(aManager, inputPath,
-		                                   AASSET_MODE_STREAMING);
-		char buf[BUFSIZ];
-		int nbRead = 0;
-		char outputPath[BUFSIZ];
-
-//		strcpy(outputPath, dirName);
-//		strcat(outputPath, "/");
-//		strcat(outputPath, filename);
-
-//		sprintf(outputPath, "%s%s%s", dirName, "/", filename);
-		strcpy(outputPath, inputPath);
-
-		FILE* out = fopen(outputPath, "w");
-		while ((nbRead = AAsset_read(asset, buf, BUFSIZ)) > 0)
-		{
-			fwrite(buf, nbRead, 1, out);
-		}
-		fclose(out);
-		AAsset_close(asset);
-	}
-
-	AAssetDir_close(assetDir);
+	const char* appCacheDir = aEnv->GetStringUTFChars(appCacheDirJs, nullptr);
+	strncpy(aBuffer, appCacheDir, aBufferLength);
+	aEnv->ReleaseStringUTFChars(appCacheDirJs, appCacheDir);
+	return aBuffer;
 }
-#endif
+
 #endif
 
 app::app(unsigned int const width, unsigned int const height)
@@ -152,36 +111,17 @@ app::app(unsigned int const width, unsigned int const height)
 
 	set_target_framerate(60);
 #if __ANDROID__
-	// <===
-	SDL_Log("__ANDROID__");
+	SDL_Log("<=== __ANDROID__");
+
 	JNIEnv *env = (JNIEnv*)SDL_AndroidGetJNIEnv();
-	SDL_Log("env %p", env);
 	jobject activity = (jobject)SDL_AndroidGetActivity();
-	SDL_Log("activity %p", activity);
-	jclass clazz(env->GetObjectClass(activity));
-	SDL_Log("clazz %p", clazz);
+	jclass activityClazz(env->GetObjectClass(activity));
 
 	//<=== Print cacheDir
-	jmethodID getCacheDirId = env->GetMethodID (clazz, "getCacheDir", "()Ljava/io/File;");
-	SDL_Log("getCacheDirId %p", getCacheDirId);
-	jobject appCacheDirFO = env->CallObjectMethod(activity, getCacheDirId);
-	SDL_Log("appCacheDirFO %p", appCacheDirFO);
-	jclass fileClass = env->FindClass("java/io/File");
-	SDL_Log("fileClass %p", fileClass);
-	jmethodID getAbsolutePathId = env->GetMethodID(fileClass, "getAbsolutePath", "()Ljava/lang/String;");
-	SDL_Log("getAbsolutePathId %p", getAbsolutePathId);
-	jstring appCacheDirJs = (jstring)env->CallObjectMethod(appCacheDirFO, getAbsolutePathId);
-	SDL_Log("appCacheDirJs %p", appCacheDirJs);
-
 	char buffer[BUFSIZ];
 	SDL_Log("Current dir %s", getCurrentDir(buffer, sizeof(buffer)/sizeof(*buffer)));
-	const char* appCacheDir = env->GetStringUTFChars(appCacheDirJs, NULL);
-	SDL_Log("appCacheDir %s", appCacheDir);
-
-	strcpy(buffer, appCacheDir);
-
-	env->ReleaseStringUTFChars(appCacheDirJs, appCacheDir);
-	SDL_Log("appCacheDir released");
+	getCacheDir(env, activity, activityClazz, buffer, sizeof(buffer)/sizeof(*buffer));
+	SDL_Log("appCacheDir %s", buffer);
 	//===> Print cacheDir
 
 	//<== Change dir
@@ -190,29 +130,10 @@ app::app(unsigned int const width, unsigned int const height)
 	SDL_Log("Current dir %s", getCurrentDir(buffer, sizeof(buffer)/sizeof(*buffer)));
 	//==> Change dir
 
-#if __ANDROID_API__ > 8
-    jmethodID getAssetsId = env->GetMethodID(clazz, "getAssets", "()Landroid/content/res/AssetManager;");
-    SDL_Log("getAssetsId %p", getAssetsId);
-    jobject assetManager = env->CallObjectMethod(activity, getAssetsId); // activity.getAssets();
-    SDL_Log("assetManager %p", assetManager);
-
-    //jobject localAssetManager = env->NewLocalRef(assetManager);
-
-    AAssetManager* pAssetManager = AAssetManager_fromJava(env, assetManager);//localAssetManager);
-
-    SDL_Log("Before unpackResourcesFromApk");
-    unpackResourcesFromApk(pAssetManager);
-    SDL_Log("After unpackResourcesFromApk");
-
-    env->DeleteLocalRef(assetManager);
-    //env->DeleteLocalRef(localAssetManager);
-#endif
-
 	env->DeleteLocalRef(activity);
-	env->DeleteLocalRef(clazz);
+	env->DeleteLocalRef(activityClazz);
 
-	SDL_Log("__ANDROID__");
-	// ===>
+	SDL_Log("__ANDROID__ ===>");
 #endif
 }
 

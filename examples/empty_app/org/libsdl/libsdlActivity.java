@@ -6,16 +6,13 @@ import android.os.Bundle;
 import android.util.Log;
 
 public class libsdlActivity extends SDLActivity {
-	
-	// Load the .so
-	static {
-        System.loadLibrary("empty_app");
-	}
-	
-    // Setup
+
+    /** Called when the activity is first created. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.v("SDL", "libsdlActivity::onCreate():" + mSingleton);
+
+        // Load the .so
+        System.loadLibrary("empty_app");
         super.onCreate(savedInstanceState);
     }
 
