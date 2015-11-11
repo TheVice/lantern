@@ -1,9 +1,12 @@
 package org.libsdl;
+
 import org.libsdl.app.SDLActivity;
+
+import android.os.Bundle;
+import android.util.Log;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.Bundle;
 import android.opengl.GLSurfaceView;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -22,6 +25,19 @@ import java.io.InputStream;
 import java.io.File;
 
 public class libsdlActivity extends SDLActivity {
+	
+	// Load the .so
+	static {
+        System.loadLibrary("rasterized_triangle_app");
+	}
+	
+    // Setup
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Log.v("SDL", "libsdlActivity::onCreate():" + mSingleton);
+        super.onCreate(savedInstanceState);
+    }
+
 /*
     //public static native void changeDir(String dirname);
 

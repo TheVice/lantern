@@ -781,7 +781,6 @@ if(ANDROID)
                         "${target_source_files}"
                         "${target_include_dirs}"
                         "${target_link_libs}")
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/examples/rasterized_triangle_app/resources" "${CMAKE_BINARY_DIR}/examples/rasterized_triangle_app/assets/resources")
 else()
     add_executable(
         rasterized_triangle_app WIN32

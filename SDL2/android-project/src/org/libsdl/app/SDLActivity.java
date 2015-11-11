@@ -20,6 +20,7 @@ import android.graphics.*;
 import android.media.*;
 import android.hardware.*;
 
+
 /**
     SDL Activity
 */
@@ -44,10 +45,16 @@ public class SDLActivity extends Activity {
     protected static AudioTrack mAudioTrack;
 
     // Load the .so
-    static {
-        System.loadLibrary("rasterized_triangle_app");
-    }
-
+    /*static {
+        System.loadLibrary("SDL2");
+        //System.loadLibrary("SDL2_image");
+        //System.loadLibrary("SDL2_mixer");
+        //System.loadLibrary("SDL2_net");
+        //System.loadLibrary("SDL2_ttf");
+        System.loadLibrary("main");
+    }*/
+    
+    
     public static void initialize() {
         // The static nature of the singleton and Android quirkyness force us to initialize everything here
         // Otherwise, when exiting the app and returning to it, these variables *keep* their pre exit values
@@ -104,6 +111,7 @@ public class SDLActivity extends Activity {
         super.onResume();
         SDLActivity.handleResume();
     }
+
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -191,6 +199,7 @@ public class SDLActivity extends Activity {
         SDLActivity.mSDLThread = null;
         mSingleton.finish();
     }
+
 
     // Messages from the SDLMain thread
     static final int COMMAND_CHANGE_TITLE = 1;
@@ -654,6 +663,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     // unused
     @Override
     public void onDraw(Canvas canvas) {}
+
 
     // Key events
     @Override
