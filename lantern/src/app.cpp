@@ -1,11 +1,90 @@
 #include <iostream>
 #include <stdexcept>
 #include <SDL_image.h>
+#if __ANDROID__
+#include <jni.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#if __ANDROID_API__ > 8
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#endif
+#endif
 #include "app.h"
 
 using namespace lantern;
 
 app* app::_instance = nullptr;
+
+#if __ANDROID__
+
+bool isPathExist(const char* aPath)
+{
+	return -1 != access(aPath, F_OK);
+}
+
+void makeDir(const char* aPath)
+{
+	if(!isPathExist(aPath))
+	{
+		mkdir(aPath, S_IRWXU | S_IRWXG);
+	}
+}
+
+void changeDir(const char* aPath)
+{
+	chdir(aPath);
+}
+
+char* getCurrentDir(char* aBuffer, size_t aBufferLength)
+{
+	return getcwd(aBuffer, aBufferLength);
+}
+
+#if __ANDROID_API__ > 8
+void unpackResourcesFromApk(AAssetManager* aManager)
+{
+	const char* dirName = "resources";
+	makeDir(dirName);
+	AAssetDir* assetDir = AAssetManager_openDir(aManager, dirName);
+	const char* filename = nullptr;
+
+	while ((filename = AAssetDir_getNextFileName(assetDir)) != nullptr)
+	{
+		char inputPath[BUFSIZ];
+
+//		strcpy(inputPath, dirName);
+//		strcat(inputPath, "/");
+//		strcat(inputPath, filename);
+
+		sprintf(inputPath, "%s%s%s", dirName, "/", filename);
+
+		AAsset* asset = AAssetManager_open(aManager, inputPath,
+		                                   AASSET_MODE_STREAMING);
+		char buf[BUFSIZ];
+		int nbRead = 0;
+		char outputPath[BUFSIZ];
+
+//		strcpy(outputPath, dirName);
+//		strcat(outputPath, "/");
+//		strcat(outputPath, filename);
+
+//		sprintf(outputPath, "%s%s%s", dirName, "/", filename);
+		strcpy(outputPath, inputPath);
+
+		FILE* out = fopen(outputPath, "w");
+		while ((nbRead = AAsset_read(asset, buf, BUFSIZ)) > 0)
+		{
+			fwrite(buf, nbRead, 1, out);
+		}
+		fclose(out);
+		AAsset_close(asset);
+	}
+
+	AAssetDir_close(assetDir);
+}
+#endif
+#endif
 
 app::app(unsigned int const width, unsigned int const height)
 	: m_freetype_library{nullptr},
@@ -72,6 +151,69 @@ app::app(unsigned int const width, unsigned int const height)
 	}
 
 	set_target_framerate(60);
+#if __ANDROID__
+	// <===
+	SDL_Log("__ANDROID__");
+	JNIEnv *env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+	SDL_Log("env %p", env);
+	jobject activity = (jobject)SDL_AndroidGetActivity();
+	SDL_Log("activity %p", activity);
+	jclass clazz(env->GetObjectClass(activity));
+	SDL_Log("clazz %p", clazz);
+
+	//<=== Print cacheDir
+	jmethodID getCacheDirId = env->GetMethodID (clazz, "getCacheDir", "()Ljava/io/File;");
+	SDL_Log("getCacheDirId %p", getCacheDirId);
+	jobject appCacheDirFO = env->CallObjectMethod(activity, getCacheDirId);
+	SDL_Log("appCacheDirFO %p", appCacheDirFO);
+	jclass fileClass = env->FindClass("java/io/File");
+	SDL_Log("fileClass %p", fileClass);
+	jmethodID getAbsolutePathId = env->GetMethodID(fileClass, "getAbsolutePath", "()Ljava/lang/String;");
+	SDL_Log("getAbsolutePathId %p", getAbsolutePathId);
+	jstring appCacheDirJs = (jstring)env->CallObjectMethod(appCacheDirFO, getAbsolutePathId);
+	SDL_Log("appCacheDirJs %p", appCacheDirJs);
+
+	char buffer[BUFSIZ];
+	SDL_Log("Current dir %s", getCurrentDir(buffer, sizeof(buffer)/sizeof(*buffer)));
+	const char* appCacheDir = env->GetStringUTFChars(appCacheDirJs, NULL);
+	SDL_Log("appCacheDir %s", appCacheDir);
+
+	strcpy(buffer, appCacheDir);
+
+	env->ReleaseStringUTFChars(appCacheDirJs, appCacheDir);
+	SDL_Log("appCacheDir released");
+	//===> Print cacheDir
+
+	//<== Change dir
+	SDL_Log("isPathExist %i", isPathExist(buffer));
+	changeDir(buffer);
+	SDL_Log("Current dir %s", getCurrentDir(buffer, sizeof(buffer)/sizeof(*buffer)));
+	//==> Change dir
+
+#if __ANDROID_API__ > 8
+    jmethodID getAssetsId = env->GetMethodID(clazz, "getAssets", "()Landroid/content/res/AssetManager;");
+    SDL_Log("getAssetsId %p", getAssetsId);
+    jobject assetManager = env->CallObjectMethod(activity, getAssetsId); // activity.getAssets();
+    SDL_Log("assetManager %p", assetManager);
+
+    //jobject localAssetManager = env->NewLocalRef(assetManager);
+
+    AAssetManager* pAssetManager = AAssetManager_fromJava(env, assetManager);//localAssetManager);
+
+    SDL_Log("Before unpackResourcesFromApk");
+    unpackResourcesFromApk(pAssetManager);
+    SDL_Log("After unpackResourcesFromApk");
+
+    env->DeleteLocalRef(assetManager);
+    //env->DeleteLocalRef(localAssetManager);
+#endif
+
+	env->DeleteLocalRef(activity);
+	env->DeleteLocalRef(clazz);
+
+	SDL_Log("__ANDROID__");
+	// ===>
+#endif
 }
 
 app::~app()

@@ -9,9 +9,13 @@ macro(add_Android_Project target_name activity_name package_name project_directo
     # execute_process(COMMAND ${CMAKE_COMMAND} -E remove ${project_directory}/src/${java_path}/${activity_name}.java)
     execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${project_directory}/res/layout)
     execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${project_directory}/src/com)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/examples/${target_name}/org ${project_directory}/src/org)
-    # execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/examples/${target_name}/org/libsdl/libsdlActivity.java ${project_directory}/src/${java_path}/libsdlActivity.java)
-    # execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/examples/${target_name}/org/libsdl/app/SDLActivity.java ${project_directory}/src/${java_path}/app/SDLActivity.java)
+
+    add_custom_command(
+        TARGET ${target_name}
+        POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/examples/${target_name}/org
+        ${project_directory}/src/org)
+    # execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/examples/${target_name}/org ${project_directory}/src/org)
 
     # FILE(READ ${project_directory}/src/${java_path}/libsdlActivity.java file_content)
     # string(REPLACE "package org.libsdl;" "package ${package_name};" file_content "${file_content}")
