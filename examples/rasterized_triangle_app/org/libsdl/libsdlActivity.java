@@ -17,6 +17,7 @@ import java.util.zip.ZipFile;
 import java.io.IOException;
 import java.lang.IllegalStateException;
 import java.util.Enumeration;
+import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,12 +36,27 @@ public class libsdlActivity extends SDLActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.v("SDL", "libsdlActivity::onCreate():" + mSingleton);
+        
+        final String pathToApk = getPathToApk();
+        Log.v("SDL", "pathToApk " + pathToApk);
+        final ZipFile zipFile = openZipFile(pathToApk);
+        Log.v("SDL", "Zip file opened " + pathToApk + " | " + zipFile.getName());
+        
+        Vector<String> files = listZip(zipFile);
+
+        Log.v("SDL", "Start file list");
+		for(String f : files) {
+			Log.v("SDL", f);
+		}
+		Log.v("SDL", "End file list");
+
+        closeZipFile(zipFile);
+        Log.v("SDL", "Zip file closed " + pathToApk + " | " + zipFile.getName());
+        
         super.onCreate(savedInstanceState);
     }
 
 /*
-    //public static native void changeDir(String dirname);
-
 	public static void writeFile(InputStream source, String destination) {
 
         FileOutputStream fileOutputStream = null;
@@ -75,7 +91,7 @@ public class libsdlActivity extends SDLActivity {
             exc.printStackTrace();
         }
     }
-
+*/
     public String getPathToApk() {
 
         PackageManager packMgmr = getPackageManager();
@@ -93,7 +109,7 @@ public class libsdlActivity extends SDLActivity {
         return appInfo.sourceDir;
     }
 
-    public void extractZipInto(String fileName, String entryName, String destination) {
+    public static ZipFile openZipFile(String fileName) {
 
         ZipFile zipFile = null;
         try {
@@ -104,7 +120,10 @@ public class libsdlActivity extends SDLActivity {
             exc.printStackTrace();
             throw new RuntimeException("Unable to open zip file " + fileName);
         }
-
+        return zipFile;
+    }
+    
+/*
         ZipEntry arEntry = null;
         try {
 
@@ -115,19 +134,25 @@ public class libsdlActivity extends SDLActivity {
             throw new RuntimeException("Unable to find entry " + entryName + " in zip file " + fileName);
         }
 */
+	public static Vector<String> listZip(ZipFile zipFile) {
+
+		Vector<String> files = new Vector<String>(1024);
         /*
          * try {
          * 
-         * Enumeration<ZipEntry> listOfFiles =
-         * (Enumeration<ZipEntry>)zipFile.entries();
-         * 
-         * while(listOfFiles.hasMoreElements()) {
-         * 
-         * info(listOfFiles.nextElement().getName()); } }
-         * catch(IllegalStateException exc) {
+         */	
+		Enumeration<ZipEntry> listOfFiles = (Enumeration<ZipEntry>) zipFile.entries();
+		while(listOfFiles.hasMoreElements()) {
+			files.add(listOfFiles.nextElement().getName());
+		}
+
+		/*
+		 * } catch(IllegalStateException exc) {
          * 
          * exc.printStackTrace(); }
          */
+		return files;
+	}
 /*
         InputStream input = null;
         try {
@@ -148,24 +173,22 @@ public class libsdlActivity extends SDLActivity {
 
             exc.printStackTrace();
         }
-
-        try {
-
-            zipFile.close();
-        } catch (IOException exc) {
-
-            exc.printStackTrace();
-        }
-    }
 */
+    public static void closeZipFile(ZipFile zipFile) {
+	    try {
+	
+	        zipFile.close();
+	    } catch (IOException exc) {
+	
+	        exc.printStackTrace();
+	    }
+	}
 
     /** Called when the activity is first created. */
 /*  @Override
     public void onCreate(Bundle savedInstanceState) {
 
         String cacheDir = getCacheDir().getAbsolutePath();
-        // changeDir(cacheDir);
-        // makeDir(cacheDir + "/resources");
 
         File file = new File(cacheDir + "/resources");
         file.mkdir();
