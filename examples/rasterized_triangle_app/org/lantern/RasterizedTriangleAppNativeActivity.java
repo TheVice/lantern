@@ -1,6 +1,4 @@
-package org.libsdl;
-
-import org.libsdl.app.SDLActivity;
+package org.lantern;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -26,7 +24,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.File;
 
-public class libsdlActivity extends SDLActivity {
+public class RasterizedTriangleAppNativeActivity extends org.libsdl.app.SDLActivity {
 
     /** Called when the activity is first created. */
     @Override

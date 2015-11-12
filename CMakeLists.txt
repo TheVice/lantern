@@ -239,9 +239,6 @@ if(SDL2FROMSOURCE)
 
           add_library(SDL2 STATIC ${SDL2_SRC_FILES})
           add_definitions(-DGL_GLEXT_PROTOTYPES)
-          set_target_properties(
-              SDL2 PROPERTIES
-              ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
     endif()
 
     target_include_directories(SDL2 SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
@@ -477,9 +474,6 @@ if(ANDROID)
     add_definitions(-DLOAD_XV)
     add_definitions(-DLOAD_PNG)
 
-    set_target_properties(
-        SDL2_image PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
     set(SDL2IMAGE_LIBRARY SDL2_image)
 
     # FreeType
@@ -561,10 +555,6 @@ if(NOT ANDROID)
     set_target_properties(
         lantern PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-else()
-    set_target_properties(
-        lantern PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}")
 endif()
 # ===========================================
 
@@ -672,7 +662,7 @@ if(ANDROID)
 
     add_Android_Project(empty_app
                         EmptyAppNativeActivity
-                        com.android.lantern.empty_app
+                        org.lantern
                         ${CMAKE_BINARY_DIR}/examples/empty_app
                         "${target_source_files}"
                         "${target_include_dirs}"
@@ -776,7 +766,7 @@ if(ANDROID)
 
     add_Android_Project(rasterized_triangle_app
                         RasterizedTriangleAppNativeActivity
-                        com.android.lantern.rasterized_triangle_app
+                        org.lantern
                         ${CMAKE_BINARY_DIR}/examples/rasterized_triangle_app
                         "${target_source_files}"
                         "${target_include_dirs}"
