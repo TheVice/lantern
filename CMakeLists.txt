@@ -257,43 +257,35 @@ else()
     find_package(SDL2 REQUIRED)
 endif()
 
-if(NOT ANDROID)
 if(SDL2IMAGEFROMSOURCE)
     message("SDL2_image will making from source")
-    if(CMAKE_HOST_WIN32)
-        set(SDL2_IMAGE_SRC_FILES ${SDL2IMAGE_INCLUDE_DIR}/IMG.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_bmp.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_gif.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_jpg.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_lbm.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_pcx.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_png.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_pnm.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_tga.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_tif.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_webp.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xcf.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xpm.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xv.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xxx.c)
+    # SDL2_image
+    set(SDL2_IMAGE_SRC_FILES ${SDL2IMAGE_INCLUDE_DIR}/IMG.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_bmp.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_gif.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_jpg.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_lbm.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_pcx.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_png.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_pnm.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_tga.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_tif.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_webp.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_xcf.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_xpm.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_xv.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_xxx.c)
+    if(WIN32)
         add_library(SDL2_image SHARED ${SDL2_IMAGE_SRC_FILES})
 
-        target_compile_definitions(SDL2_image PRIVATE LOAD_BMP)
-        target_compile_definitions(SDL2_image PRIVATE LOAD_GIF)
         target_compile_definitions(SDL2_image PRIVATE LOAD_JPG)
         target_compile_definitions(SDL2_image PRIVATE LOAD_JPG_DYNAMIC="libjpeg-9.dll")
-        target_compile_definitions(SDL2_image PRIVATE LOAD_LBM)
-        target_compile_definitions(SDL2_image PRIVATE LOAD_PCX)
         target_compile_definitions(SDL2_image PRIVATE LOAD_PNG)
         target_compile_definitions(SDL2_image PRIVATE LOAD_PNG_DYNAMIC="libpng16-16.dll")
-        target_compile_definitions(SDL2_image PRIVATE LOAD_PNM)
-        target_compile_definitions(SDL2_image PRIVATE LOAD_TGA)
         target_compile_definitions(SDL2_image PRIVATE LOAD_TIF)
         target_compile_definitions(SDL2_image PRIVATE LOAD_TIF_DYNAMIC="libtiff-5.dll")
         target_compile_definitions(SDL2_image PRIVATE LOAD_WEBP)
         target_compile_definitions(SDL2_image PRIVATE LOAD_WEBP_DYNAMIC="libwebp-4.dll")
-        target_compile_definitions(SDL2_image PRIVATE LOAD_XPM)
-        target_compile_definitions(SDL2_image PRIVATE LOAD_XV)
         target_compile_definitions(SDL2_image PRIVATE PNG_USE_DLL)
         target_compile_definitions(SDL2_image PRIVATE ZLIB_DLL)
 
@@ -306,7 +298,7 @@ if(SDL2IMAGEFROMSOURCE)
                                                              ${SDL2IMAGE_INCLUDE_DIR}/external/jpeg-9)
 
         target_link_libraries(SDL2_image ${SDL2_LIBRARY})
-        set(SDL2IMAGE_LIBRARY SDL2_image)
+
         if(CMAKE_CL_64)
             set(SDL2IMAGE_LIBPNG_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x64/libpng16-16.dll)
             set(SDL2IMAGE_ZLIB_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x64/zlib1.dll)
@@ -314,10 +306,47 @@ if(SDL2IMAGEFROMSOURCE)
             set(SDL2IMAGE_LIBPNG_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x86/libpng16-16.dll)
             set(SDL2IMAGE_ZLIB_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x86/zlib1.dll)
         endif()
+    elseif(ANDROID)
+      list(APPEND SDL2_IMAGE_SRC_FILES ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/png.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngerror.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngget.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngmem.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngpread.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngread.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrio.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrtran.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrutil.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngset.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngtrans.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwio.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwrite.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwtran.c
+                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwutil.c)
+
+        add_library(SDL2_image STATIC ${SDL2_IMAGE_SRC_FILES})
+
+        target_compile_definitions(SDL2_image PRIVATE LOAD_PNG)
+        target_compile_definitions(SDL2_image PRIVATE LOAD_XCF)
+
+        target_include_directories(SDL2_image SYSTEM PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR}
+                                                             ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2)
     endif()
+
+    target_compile_definitions(SDL2_image PRIVATE LOAD_BMP)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_GIF)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_LBM)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_PCX)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_PNM)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_TGA)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_XPM)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_XV)
+
+    set(SDL2IMAGE_LIBRARY SDL2_image)
 else()
     find_package(SDL2IMAGE REQUIRED)
 endif()
+
+if(NOT ANDROID)
 if(FREETYPEFROMSOURCE)
     message("freetype will making from source")
     if(CMAKE_HOST_WIN32)
@@ -393,7 +422,12 @@ endif()
 if (MSVC)
     set(COMPILER_C_FLAGS "/W4 /GS")
     set(COMPILER_CXX_FLAGS "/W4 /GS")
-    set(LINK_FLAGS "${LINK_FLAGS} /SafeSEH /DynamicBase /NXCompat")
+
+    if(CMAKE_CL_64)
+      set(LINK_FLAGS "${LINK_FLAGS} /DynamicBase /NXCompat")
+    else()
+      set(LINK_FLAGS "${LINK_FLAGS} /SafeSEH /DynamicBase /NXCompat")
+    endif()
 
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DNOMINMAX)
@@ -437,45 +471,7 @@ if(ANDROID)
 endif()
 # ===========================================
 
-# SDL2, SDL2_image and FreeType targets =====
 if(ANDROID)
-    # SDL2_image
-    file(GLOB C_FILES ${SDL2IMAGE_INCLUDE_DIR}/*.c)
-    file(GLOB INC_FILES ${SDL2IMAGE_INCLUDE_DIR}/*.h)
-
-    list(APPEND C_FILES ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/png.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngerror.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngget.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngmem.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngpread.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngread.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrio.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrtran.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrutil.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngset.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngtrans.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwio.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwrite.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwtran.c
-                        ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwutil.c)
-
-    add_library(SDL2_image STATIC ${INC_FILES} ${C_FILES})
-    target_include_directories(SDL2_image PRIVATE SYSTEM ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR} 
-                                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2)
-
-    add_definitions(-DLOAD_BMP)
-    add_definitions(-DLOAD_GIF)
-    add_definitions(-DLOAD_LBM)
-    add_definitions(-DLOAD_PCX)
-    add_definitions(-DLOAD_PNM)
-    add_definitions(-DLOAD_TGA)
-    add_definitions(-DLOAD_XCF)
-    add_definitions(-DLOAD_XPM)
-    add_definitions(-DLOAD_XV)
-    add_definitions(-DLOAD_PNG)
-
-    set(SDL2IMAGE_LIBRARY SDL2_image)
-
     # FreeType
     set(C_FILES ${FREETYPE_SRC_DIR}/autofit/autofit.c
                 ${FREETYPE_SRC_DIR}/base/ftadvanc.c
@@ -533,7 +529,6 @@ if(ANDROID)
     target_include_directories(FreeType PRIVATE SYSTEM ${FREETYPE_INCLUDE_DIRS})
     add_definitions(-DFT2_BUILD_LIBRARY)
 endif()
-# ===========================================
 
 # Library target ============================
 file(GLOB LANTERN_HEADERS "lantern/include/*.h")
