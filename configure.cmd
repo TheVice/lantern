@@ -67,7 +67,6 @@ if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL% 
 if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI% mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%
 if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\Debug mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\Debug
 if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\Release mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\Release
-if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\RelWithDebInfo mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\RelWithDebInfo
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\Debug
 echo "*****************************************************************************"
@@ -77,11 +76,6 @@ echo "**************************************************************************
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\Release
 echo "*****************************************************************************"
 cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="%ANDROID_TOOLCHAIN%" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="%ANDROID_NATIVE_API_LEVEL%" -DANDROID_ABI="%ANDROID_ABI%"
-echo "*****************************************************************************"
-
-cd %CURRENT_DIR%\build\%CMAKE_VER%\Android-%ANDROID_NATIVE_API_LEVEL%\%ANDROID_ABI%\RelWithDebInfo
-echo "*****************************************************************************"
-cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s" -DCMAKE_TOOLCHAIN_FILE="%ANDROID_TOOLCHAIN%" -DLIBRARY_OUTPUT_PATH_ROOT="." -DANDROID_NATIVE_API_LEVEL="%ANDROID_NATIVE_API_LEVEL%" -DANDROID_ABI="%ANDROID_ABI%"
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%

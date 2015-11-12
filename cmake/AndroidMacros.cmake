@@ -14,38 +14,58 @@ macro(add_Android_Project target_name activity_name package_name project_directo
     set(source_java ${CMAKE_SOURCE_DIR}/examples/${target_name}/org)
 
     if(EXISTS ${source_AndroidManifest})
-        # message("EXISTS ${source_AndroidManifest}")
         execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source_AndroidManifest} ${project_directory}/AndroidManifest.xml)
         execute_process(COMMAND ${ANDROID_EXECUTABLE} update project -n ${target_name} -t android-${ANDROID_NATIVE_API_LEVEL} -p ${project_directory})
-        # ${package_name}
-        # ${activity_name}
+        
+        file(READ ${project_directory}/AndroidManifest.xml file_content)
+
+        string(FIND ${file_content} "package=\"" index)
+        if(-1 LESS ${index})
+            math(EXPR index "9 + ${index}")
+            string(SUBSTRING ${file_content} ${index} -1 package)
+            string(FIND ${package} "\"" index)
+            string(SUBSTRING ${package} 0 ${index} package)
+
+            if((${package_name} STRLESS ${package}) OR (${package_name} STRGREATER ${package}))
+                message(WARNING "Package name defined at ${project_directory}/AndroidManifest.xml - ${package} different than at come to this macros - ${package_name}")
+            endif()
+        else()
+            message(WARNING "Package name not found at ${project_directory}/AndroidManifest.xml")
+        endif()
+
+        string(FIND ${file_content} "android:name=\"" index)
+        if(-1 LESS ${index})
+            math(EXPR index "14 + ${index}")
+            string(SUBSTRING ${file_content} ${index} -1 activity)
+            string(FIND ${activity} "\"" index)
+            string(SUBSTRING ${activity} 0 ${index} activity)
+            
+            if((${activity_name} STRLESS ${activity}) OR (${activity_name} STRGREATER ${activity}))
+                message(WARNING "Activity name defined at ${project_directory}/AndroidManifest.xml - ${activity} different than at come to this macros - ${activity_name}")
+            endif()
+        else()
+            message(WARNING "Activity name not found at ${project_directory}/AndroidManifest.xml")
+        endif()
     else()
-        # message("NOT EXISTS ${source_AndroidManifest}")
         execute_process(COMMAND ${ANDROID_EXECUTABLE} create project -n ${target_name} -a ${activity_name} -k ${package_name} -t android-${ANDROID_NATIVE_API_LEVEL} -p ${project_directory})
     endif()
 
     if(EXISTS ${source_strings})
-        # message("EXISTS ${source_strings}")
         execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source_strings} ${project_directory}/res/values/strings.xml)
     else()
-        # message("NOT EXISTS ${source_strings}")
-        # FILE(READ ${project_directory}/res/values/strings.xml file_content)
-        # string(REPLACE "<string name=\"app_name\">${activity_name}</string>" "<string name=\"app_name\">${target_name}</string>" file_content "${file_content}")
-        # FILE(WRITE ${project_directory}/res/values/strings.xml "${file_content}")
+        if(EXISTS ${project_directory}/res/values/strings.xml)
+            file(READ ${project_directory}/res/values/strings.xml file_content)
+            string(REPLACE "<string name=\"app_name\">${activity_name}</string>" "<string name=\"app_name\">${target_name}</string>" file_content "${file_content}")
+            file(WRITE ${project_directory}/res/values/strings.xml "${file_content}")
+        endif()
     endif()
 
     if(EXISTS ${source_sdl_java})
-    #     message("EXISTS ${source_sdl_java}")
         execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_sdl_java} ${project_directory}/src/org)
-    else()
-    #     message("NOT EXISTS ${source_sdl_java}")
     endif()
 
     if(EXISTS ${source_java})
-    #     message("EXISTS ${source_java}")
         execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_java} ${project_directory}/src/org)
-    else()
-    #     message("NOT EXISTS ${source_java}")
     endif()
 
     add_custom_target(${target_name}_copy-AndroidManifest
