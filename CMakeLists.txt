@@ -6,7 +6,7 @@ project(lantern)
 # Add testing tool
 include(CTest)
 
-# SDL2, SDL2_image and FreeType look up =====
+# SDL2, SDL2_image and freetype look up =====
 set(SDL2FROMSOURCE FALSE)
 set(SDL2IMAGEFROMSOURCE FALSE)
 set(FREETYPEFROMSOURCE FALSE)
@@ -50,7 +50,6 @@ endif()
 
 if(WIN32 OR ANDROID)
     if(DEFINED FREETYPEDIR)
-        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
         set(FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
         if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
             set(FREETYPEFROMSOURCE TRUE)
@@ -60,7 +59,7 @@ endif()
 
 if(ANDROID)
     if((NOT SDL2FROMSOURCE) OR (NOT SDL2IMAGEFROMSOURCE) OR (NOT FREETYPEFROMSOURCE))
-        message(FATAL_ERROR "Android build required sources of SDL2, SDL2 Image and FreeType libraries")
+        message(FATAL_ERROR "Android build required sources of SDL2, SDL2 Image and freetype libraries")
     endif()
 else()
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
@@ -346,75 +345,99 @@ else()
     find_package(SDL2IMAGE REQUIRED)
 endif()
 
-if(NOT ANDROID)
+if(DEFINED FREETYPEDIR)
+    if(WIN32)
+        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
+    elseif(ANDROID)
+        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
+    endif()
+endif()
+
+if(UNIX)
+    set(FREETYPE_INCLUDE_DIRS /usr/include/freetype2)
+endif()
+
 if(FREETYPEFROMSOURCE)
     message("freetype will making from source")
-    if(CMAKE_HOST_WIN32)
-        set(FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/../builds/windows/ftdebug.c
-                               ${FREETYPE_SRC_DIR}/autofit/autofit.c
-                               ${FREETYPE_SRC_DIR}/base/ftbase.c
-                               ${FREETYPE_SRC_DIR}/base/ftbbox.c
-                               ${FREETYPE_SRC_DIR}/base/ftbitmap.c
-                               ${FREETYPE_SRC_DIR}/base/ftfntfmt.c
-                               ${FREETYPE_SRC_DIR}/base/ftfstype.c
-                               ${FREETYPE_SRC_DIR}/base/ftgasp.c
-                               ${FREETYPE_SRC_DIR}/base/ftglyph.c
-                               ${FREETYPE_SRC_DIR}/base/ftgxval.c
-                               ${FREETYPE_SRC_DIR}/base/ftinit.c
-                               ${FREETYPE_SRC_DIR}/base/ftlcdfil.c
-                               ${FREETYPE_SRC_DIR}/base/ftmm.c
-                               ${FREETYPE_SRC_DIR}/base/ftotval.c
-                               ${FREETYPE_SRC_DIR}/base/ftpatent.c
-                               ${FREETYPE_SRC_DIR}/base/ftpfr.c
-                               ${FREETYPE_SRC_DIR}/base/ftstroke.c
-                               ${FREETYPE_SRC_DIR}/base/ftsynth.c
-                               ${FREETYPE_SRC_DIR}/base/ftsystem.c
-                               ${FREETYPE_SRC_DIR}/base/fttype1.c
-                               ${FREETYPE_SRC_DIR}/base/ftwinfnt.c
-                               ${FREETYPE_SRC_DIR}/bdf/bdf.c
-                               ${FREETYPE_SRC_DIR}/cache/ftcache.c
-                               ${FREETYPE_SRC_DIR}/cff/cff.c
-                               ${FREETYPE_SRC_DIR}/cid/type1cid.c
-                               ${FREETYPE_SRC_DIR}/gzip/ftgzip.c
-                               ${FREETYPE_SRC_DIR}/lzw/ftlzw.c
-                               ${FREETYPE_SRC_DIR}/pcf/pcf.c
-                               ${FREETYPE_SRC_DIR}/pfr/pfr.c
-                               ${FREETYPE_SRC_DIR}/psaux/psaux.c
-                               ${FREETYPE_SRC_DIR}/pshinter/pshinter.c
-                               ${FREETYPE_SRC_DIR}/psnames/psmodule.c
-                               ${FREETYPE_SRC_DIR}/raster/raster.c
-                               ${FREETYPE_SRC_DIR}/sfnt/sfnt.c
-                               ${FREETYPE_SRC_DIR}/smooth/smooth.c
-                               ${FREETYPE_SRC_DIR}/truetype/truetype.c
-                               ${FREETYPE_SRC_DIR}/type1/type1.c
-                               ${FREETYPE_SRC_DIR}/type42/type42.c
-                               ${FREETYPE_SRC_DIR}/winfonts/winfnt.c)
+    # freetype
+    set(FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/autofit/autofit.c
+                           ${FREETYPE_SRC_DIR}/base/ftbbox.c
+                           ${FREETYPE_SRC_DIR}/base/ftbitmap.c
+                           ${FREETYPE_SRC_DIR}/base/ftfntfmt.c
+                           ${FREETYPE_SRC_DIR}/base/ftfstype.c
+                           ${FREETYPE_SRC_DIR}/base/ftgasp.c
+                           ${FREETYPE_SRC_DIR}/base/ftglyph.c
+                           ${FREETYPE_SRC_DIR}/base/ftgxval.c
+                           ${FREETYPE_SRC_DIR}/base/ftinit.c
+                           ${FREETYPE_SRC_DIR}/base/ftlcdfil.c
+                           ${FREETYPE_SRC_DIR}/base/ftmm.c
+                           ${FREETYPE_SRC_DIR}/base/ftotval.c
+                           ${FREETYPE_SRC_DIR}/base/ftpatent.c
+                           ${FREETYPE_SRC_DIR}/base/ftpfr.c
+                           ${FREETYPE_SRC_DIR}/base/ftstroke.c
+                           ${FREETYPE_SRC_DIR}/base/ftsynth.c
+                           ${FREETYPE_SRC_DIR}/base/ftsystem.c
+                           ${FREETYPE_SRC_DIR}/base/fttype1.c
+                           ${FREETYPE_SRC_DIR}/base/ftwinfnt.c
+                           ${FREETYPE_SRC_DIR}/bdf/bdf.c
+                           ${FREETYPE_SRC_DIR}/cache/ftcache.c
+                           ${FREETYPE_SRC_DIR}/cff/cff.c
+                           ${FREETYPE_SRC_DIR}/cid/type1cid.c
+                           ${FREETYPE_SRC_DIR}/gzip/ftgzip.c
+                           ${FREETYPE_SRC_DIR}/lzw/ftlzw.c
+                           ${FREETYPE_SRC_DIR}/pcf/pcf.c
+                           ${FREETYPE_SRC_DIR}/pfr/pfr.c
+                           ${FREETYPE_SRC_DIR}/psaux/psaux.c
+                           ${FREETYPE_SRC_DIR}/pshinter/pshinter.c
+                           ${FREETYPE_SRC_DIR}/raster/raster.c
+                           ${FREETYPE_SRC_DIR}/sfnt/sfnt.c
+                           ${FREETYPE_SRC_DIR}/smooth/smooth.c
+                           ${FREETYPE_SRC_DIR}/truetype/truetype.c
+                           ${FREETYPE_SRC_DIR}/type1/type1.c
+                           ${FREETYPE_SRC_DIR}/type42/type42.c
+                           ${FREETYPE_SRC_DIR}/winfonts/winfnt.c)
+    if(WIN32)
+        list(APPEND FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/../builds/windows/ftdebug.c
+                                       ${FREETYPE_SRC_DIR}/base/ftbase.c
+                                       ${FREETYPE_SRC_DIR}/psnames/psmodule.c)
+
         add_library(freetype SHARED ${FREETYPE_SRC_FILES})
-
-        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
-        target_include_directories(freetype SYSTEM PRIVATE ${FREETYPE_INCLUDE_DIRS})
-
-        target_compile_definitions(freetype PRIVATE FT2_BUILD_LIBRARY)
         target_compile_definitions(freetype PRIVATE FT_CONFIG_OPTIONS_H="${CMAKE_SOURCE_DIR}/freetype/config/ftoption.h")
+    elseif(ANDROID)
+        list(APPEND FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/base/ftadvanc.c
+                                       ${FREETYPE_SRC_DIR}/base/ftbdf.c
+                                       ${FREETYPE_SRC_DIR}/base/ftcalc.c
+                                       ${FREETYPE_SRC_DIR}/base/ftgloadr.c
+                                       ${FREETYPE_SRC_DIR}/base/ftobjs.c
+                                       ${FREETYPE_SRC_DIR}/base/ftoutln.c
+                                       ${FREETYPE_SRC_DIR}/base/ftrfork.c
+                                       ${FREETYPE_SRC_DIR}/base/ftstream.c
+                                       ${FREETYPE_SRC_DIR}/base/fttrigon.c
+                                       ${FREETYPE_SRC_DIR}/base/ftutil.c
+                                       ${FREETYPE_SRC_DIR}/bzip2/ftbzip2.c
+                                       ${FREETYPE_SRC_DIR}/gzip/zutil.c
+                                       ${FREETYPE_SRC_DIR}/psnames/psnames.c
+                                   ${SDL2IMAGE_INCLUDE_DIR}/external/zlib-1.2.8/zutil.c)
 
-        set(FREETYPE_LIBRARIES freetype)
+        add_library(freetype STATIC ${FREETYPE_SRC_FILES})
     endif()
+
+    target_compile_definitions(freetype PRIVATE FT2_BUILD_LIBRARY)
+    target_include_directories(freetype SYSTEM PRIVATE ${FREETYPE_INCLUDE_DIRS})
+
+    set(FREETYPE_LIBRARIES freetype)
 else()
-    if(NOT UNIX)
-        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
+    if(WIN32)
         if(MSVC)
             set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/freetype.lib)
         else()
             set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/libfreetype.dll.a)
         endif()
-    else()
-        set(FREETYPE_INCLUDE_DIRS /usr/include/freetype2)
     endif()
     find_package(Freetype REQUIRED)
-    if(NOT UNIX)
+    if(WIN32)
         set(FREETYPE_DLL "${FREETYPEDIR}/bin/freetype6.dll")
     endif()
-endif()
 endif()
 # ===========================================
 
@@ -470,65 +493,6 @@ if(ANDROID)
     string(TOLOWER ${CMAKE_BUILD_TYPE} ant_build_type)
 endif()
 # ===========================================
-
-if(ANDROID)
-    # FreeType
-    set(C_FILES ${FREETYPE_SRC_DIR}/autofit/autofit.c
-                ${FREETYPE_SRC_DIR}/base/ftadvanc.c
-                ${FREETYPE_SRC_DIR}/base/ftbbox.c
-                ${FREETYPE_SRC_DIR}/base/ftbdf.c
-                ${FREETYPE_SRC_DIR}/base/ftbitmap.c
-                ${FREETYPE_SRC_DIR}/base/ftcalc.c
-                ${FREETYPE_SRC_DIR}/base/ftfntfmt.c
-                ${FREETYPE_SRC_DIR}/base/ftfstype.c
-                ${FREETYPE_SRC_DIR}/base/ftgasp.c
-                ${FREETYPE_SRC_DIR}/base/ftgloadr.c
-                ${FREETYPE_SRC_DIR}/base/ftglyph.c
-                ${FREETYPE_SRC_DIR}/base/ftgxval.c
-                ${FREETYPE_SRC_DIR}/base/ftinit.c
-                ${FREETYPE_SRC_DIR}/base/ftlcdfil.c
-                ${FREETYPE_SRC_DIR}/base/ftmm.c
-                ${FREETYPE_SRC_DIR}/base/ftobjs.c
-                ${FREETYPE_SRC_DIR}/base/ftotval.c
-                ${FREETYPE_SRC_DIR}/base/ftoutln.c
-                ${FREETYPE_SRC_DIR}/base/ftpatent.c
-                ${FREETYPE_SRC_DIR}/base/ftpfr.c
-                ${FREETYPE_SRC_DIR}/base/ftrfork.c
-                ${FREETYPE_SRC_DIR}/base/ftstream.c
-                ${FREETYPE_SRC_DIR}/base/ftstroke.c
-                ${FREETYPE_SRC_DIR}/base/ftsynth.c
-                ${FREETYPE_SRC_DIR}/base/ftsystem.c
-                ${FREETYPE_SRC_DIR}/base/fttrigon.c
-                ${FREETYPE_SRC_DIR}/base/fttype1.c
-                ${FREETYPE_SRC_DIR}/base/ftutil.c
-                ${FREETYPE_SRC_DIR}/base/ftwinfnt.c
-                ${FREETYPE_SRC_DIR}/bdf/bdf.c
-                ${FREETYPE_SRC_DIR}/cache/ftcache.c
-                ${FREETYPE_SRC_DIR}/cff/cff.c
-                ${FREETYPE_SRC_DIR}/cid/type1cid.c
-                ${FREETYPE_SRC_DIR}/gzip/ftgzip.c
-                ${FREETYPE_SRC_DIR}/gzip/zutil.c
-                ${FREETYPE_SRC_DIR}/lzw/ftlzw.c
-                ${FREETYPE_SRC_DIR}/pcf/pcf.c
-                ${FREETYPE_SRC_DIR}/pfr/pfr.c
-                ${FREETYPE_SRC_DIR}/psaux/psaux.c
-                ${FREETYPE_SRC_DIR}/pshinter/pshinter.c
-                ${FREETYPE_SRC_DIR}/psnames/psnames.c
-                ${FREETYPE_SRC_DIR}/raster/raster.c
-                ${FREETYPE_SRC_DIR}/sfnt/sfnt.c
-                ${FREETYPE_SRC_DIR}/smooth/smooth.c
-                ${FREETYPE_SRC_DIR}/truetype/truetype.c
-                ${FREETYPE_SRC_DIR}/type1/type1.c
-                ${FREETYPE_SRC_DIR}/type42/type42.c
-                ${FREETYPE_SRC_DIR}/winfonts/winfnt.c
-                ${FREETYPE_SRC_DIR}/bzip2/ftbzip2.c
-                ${FREETYPE_SRC_DIR}/pcf/pcf.c
-            ${SDL2IMAGE_INCLUDE_DIR}/external/zlib-1.2.8/zutil.c)
-
-    add_library(FreeType STATIC ${C_FILES})
-    target_include_directories(FreeType PRIVATE SYSTEM ${FREETYPE_INCLUDE_DIRS})
-    add_definitions(-DFT2_BUILD_LIBRARY)
-endif()
 
 # Library target ============================
 file(GLOB LANTERN_HEADERS "lantern/include/*.h")
@@ -648,7 +612,7 @@ if(ANDROID)
     list(APPEND target_link_libs lantern
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
-                                 FreeType
+                                 ${FREETYPE_LIBRARIES}
                                  GLESv1_CM
                                  GLESv2
                                  log
@@ -752,7 +716,7 @@ if(ANDROID)
     list(APPEND target_link_libs lantern
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
-                                 FreeType
+                                 ${FREETYPE_LIBRARIES}
                                  GLESv1_CM
                                  GLESv2
                                  log
