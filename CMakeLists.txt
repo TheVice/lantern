@@ -50,17 +50,25 @@ endif()
 
 if(WIN32 OR ANDROID)
     if(DEFINED FREETYPEDIR)
+        if(WIN32)
+            set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
+        elseif(ANDROID)
+           set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
+        endif()
         set(FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
         if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
             set(FREETYPEFROMSOURCE TRUE)
         endif()
     endif()
+elseif(UNIX)
+    set(FREETYPE_INCLUDE_DIRS /usr/include/freetype2)
 endif()
 
 if(ANDROID)
     if((NOT SDL2FROMSOURCE) OR (NOT SDL2IMAGEFROMSOURCE) OR (NOT FREETYPEFROMSOURCE))
         message(FATAL_ERROR "Android build required sources of SDL2, SDL2 Image and freetype libraries")
     endif()
+    include(${CMAKE_SOURCE_DIR}/cmake/AndroidMacros.cmake)
 else()
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 endif()
@@ -70,18 +78,14 @@ if(SDL2FROMSOURCE)
     # SDL2
     set(SDL2_SRC_FILES ${SDL2_SRC_DIR}/atomic/SDL_atomic.c
                        ${SDL2_SRC_DIR}/atomic/SDL_spinlock.c
-
                        ${SDL2_SRC_DIR}/audio/SDL_audio.c
                        ${SDL2_SRC_DIR}/audio/SDL_audiocvt.c
                        ${SDL2_SRC_DIR}/audio/SDL_audiodev.c
                        ${SDL2_SRC_DIR}/audio/SDL_audiotypecvt.c
                        ${SDL2_SRC_DIR}/audio/SDL_mixer.c
                        ${SDL2_SRC_DIR}/audio/SDL_wave.c
-
                        ${SDL2_SRC_DIR}/cpuinfo/SDL_cpuinfo.c
-
                        ${SDL2_SRC_DIR}/dynapi/SDL_dynapi.c
-
                        ${SDL2_SRC_DIR}/events/SDL_clipboardevents.c
                        ${SDL2_SRC_DIR}/events/SDL_dropevents.c
                        ${SDL2_SRC_DIR}/events/SDL_events.c
@@ -91,16 +95,11 @@ if(SDL2FROMSOURCE)
                        ${SDL2_SRC_DIR}/events/SDL_quit.c
                        ${SDL2_SRC_DIR}/events/SDL_touch.c
                        ${SDL2_SRC_DIR}/events/SDL_windowevents.c
-
                        ${SDL2_SRC_DIR}/file/SDL_rwops.c
-
                        ${SDL2_SRC_DIR}/haptic/SDL_haptic.c
-
                        ${SDL2_SRC_DIR}/joystick/SDL_gamecontroller.c
                        ${SDL2_SRC_DIR}/joystick/SDL_joystick.c
-
                        ${SDL2_SRC_DIR}/power/SDL_power.c
-
                        ${SDL2_SRC_DIR}/render/SDL_render.c
                        ${SDL2_SRC_DIR}/render/SDL_yuv_mmx.c
                        ${SDL2_SRC_DIR}/render/SDL_yuv_sw.c
@@ -111,24 +110,19 @@ if(SDL2FROMSOURCE)
                        ${SDL2_SRC_DIR}/render/software/SDL_drawpoint.c
                        ${SDL2_SRC_DIR}/render/software/SDL_render_sw.c
                        ${SDL2_SRC_DIR}/render/software/SDL_rotate.c
-
                        ${SDL2_SRC_DIR}/SDL.c
                        ${SDL2_SRC_DIR}/SDL_assert.c
                        ${SDL2_SRC_DIR}/SDL_error.c
                        ${SDL2_SRC_DIR}/SDL_hints.c
                        ${SDL2_SRC_DIR}/SDL_log.c
-
                        ${SDL2_SRC_DIR}/stdlib/SDL_getenv.c
                        ${SDL2_SRC_DIR}/stdlib/SDL_iconv.c
                        ${SDL2_SRC_DIR}/stdlib/SDL_malloc.c
                        ${SDL2_SRC_DIR}/stdlib/SDL_qsort.c
                        ${SDL2_SRC_DIR}/stdlib/SDL_stdlib.c
                        ${SDL2_SRC_DIR}/stdlib/SDL_string.c
-
                        ${SDL2_SRC_DIR}/thread/SDL_thread.c
-
                        ${SDL2_SRC_DIR}/timer/SDL_timer.c
-
                        ${SDL2_SRC_DIR}/video/SDL_blit.c
                        ${SDL2_SRC_DIR}/video/SDL_blit_0.c
                        ${SDL2_SRC_DIR}/video/SDL_blit_1.c
@@ -154,7 +148,6 @@ if(SDL2FROMSOURCE)
                                    ${SDL2_SRC_DIR}/haptic/windows/SDL_syshaptic.c
                                    ${SDL2_SRC_DIR}/joystick/windows/SDL_dxjoystick.c
                                    ${SDL2_SRC_DIR}/joystick/windows/SDL_mmjoystick.c
-
                                    ${SDL2_SRC_DIR}/libm/e_atan2.c
                                    ${SDL2_SRC_DIR}/libm/e_log.c
                                    ${SDL2_SRC_DIR}/libm/e_pow.c
@@ -170,23 +163,18 @@ if(SDL2FROMSOURCE)
                                    ${SDL2_SRC_DIR}/libm/s_floor.c
                                    ${SDL2_SRC_DIR}/libm/s_scalbn.c
                                    ${SDL2_SRC_DIR}/libm/s_sin.c
-
                                    ${SDL2_SRC_DIR}/loadso/windows/SDL_sysloadso.c
                                    ${SDL2_SRC_DIR}/power/windows/SDL_syspower.c
-
                                    ${SDL2_SRC_DIR}/render/direct3d/SDL_render_d3d.c
                                    ${SDL2_SRC_DIR}/render/opengl/SDL_render_gl.c
                                    ${SDL2_SRC_DIR}/render/opengl/SDL_shaders_gl.c
                                    ${SDL2_SRC_DIR}/render/SDL_d3dmath.c
-
                                    ${SDL2_SRC_DIR}/thread/generic/SDL_syscond.c
                                    ${SDL2_SRC_DIR}/thread/generic/SDL_sysmutex.c
                                    ${SDL2_SRC_DIR}/thread/generic/SDL_syssem.c
                                    ${SDL2_SRC_DIR}/thread/generic/SDL_systhread.c
                                    ${SDL2_SRC_DIR}/thread/generic/SDL_systls.c
-
                                    ${SDL2_SRC_DIR}/timer/windows/SDL_systimer.c
-
                                    ${SDL2_SRC_DIR}/video/windows/SDL_windowsclipboard.c
                                    ${SDL2_SRC_DIR}/video/windows/SDL_windowsevents.c
                                    ${SDL2_SRC_DIR}/video/windows/SDL_windowsframebuffer.c
@@ -237,7 +225,7 @@ if(SDL2FROMSOURCE)
                                    ${SDL2_SRC_DIR}/video/android/SDL_androidwindow.c)
 
           add_library(SDL2 STATIC ${SDL2_SRC_FILES})
-          add_definitions(-DGL_GLEXT_PROTOTYPES)
+          target_compile_definitions(SDL2 PRIVATE GL_GLEXT_PROTOTYPES)
     endif()
 
     target_include_directories(SDL2 SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
@@ -251,7 +239,6 @@ if(SDL2FROMSOURCE)
         # add_library(SDL2main STATIC ${SDL2_SRC_DIR}/main/android/SDL_android_main.c)
         set(SDL2_LIBRARY SDL2)
     endif()
-
 else()
     find_package(SDL2 REQUIRED)
 endif()
@@ -343,18 +330,6 @@ if(SDL2IMAGEFROMSOURCE)
     set(SDL2IMAGE_LIBRARY SDL2_image)
 else()
     find_package(SDL2IMAGE REQUIRED)
-endif()
-
-if(DEFINED FREETYPEDIR)
-    if(WIN32)
-        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
-    elseif(ANDROID)
-        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
-    endif()
-endif()
-
-if(UNIX)
-    set(FREETYPE_INCLUDE_DIRS /usr/include/freetype2)
 endif()
 
 if(FREETYPEFROMSOURCE)
@@ -461,7 +436,7 @@ else()
         "-std=gnu++0x -Wall -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter -Wextra")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  ${DEFAULT_CMAKE_C_FLAGS} ${COMPILER_C_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${DEFAULT_CMAKE_C_FLAGS} ${COMPILER_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CMAKE_CXX_FLAGS} ${COMPILER_CXX_FLAGS}")
 
 if(NOT ANDROID)
@@ -476,7 +451,6 @@ if(NOT ANDROID)
         add_definitions(-U__STRICT_ANSI__)
     endif()
 endif()
-
 # ===========================================
 
 # Android ===================================
@@ -547,12 +521,6 @@ if(DEFINED GTEST_ROOT)
         target_link_libraries(${GTEST_MAIN_LIBRARY} pthread)
     endif()
 
-endif()
-# ===========================================
-
-# Android macros ============================
-if(ANDROID)
-    include(cmake/AndroidMacros.cmake)
 endif()
 # ===========================================
 

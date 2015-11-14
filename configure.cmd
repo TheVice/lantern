@@ -7,6 +7,7 @@ if %1 == clean goto CLEAN_BINARIES
 cmake > nul
 if %ERRORLEVEL% NEQ 0 goto NO_CMAKE_IN_PATH
 
+cmake -version 2>&1 | findstr /C:"version 3.4" > nul && goto CMAKE34
 cmake -version 2>&1 | findstr /C:"version 3.3" > nul && goto CMAKE33
 cmake -version 2>&1 | findstr /C:"version 3.2" > nul && goto CMAKE32
 cmake -version 2>&1 | findstr /C:"version 3.1" > nul && goto CMAKE31
@@ -15,6 +16,10 @@ cmake -version 2>&1 | findstr /C:"version 2.8" > nul && goto CMAKE28
 
 goto UNKNOWN_CMAKE_VERSION
 
+:CMAKE34
+echo Found cmake v3.4
+set CMAKE_VER=cmake-3.4
+goto CMAKE_VERSION_DETECTED
 :CMAKE33
 echo Found cmake v3.3
 set CMAKE_VER=cmake-3.3
