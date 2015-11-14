@@ -49,3 +49,12 @@ On Windows you have to specify a few environment variables for dependencies so t
 
 * If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 using VS 2015 - just download source package and after unpack source directory set to `SDL2DIR` path to that folder, just the same you do for binary package, or just download SDL2 build both package here: https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/
 * Lantern fails loading resources when running from a directory different than the one where the executable is
+* On Visual Studio 2015 (all 3rd party libraries made from source) in release mode rasterized_triangle_app failed to start:
+```Microsoft Visual C++ Runtime Library
+Debug Assertion Failed!
+
+Program: ...\rasterized_triangle_app\Release\rasterized_triangle_app.exe
+File: minkernel\crts\ucrt\src\appcrt\lowio\read.cpp
+Line: 378
+
+Expression: _osfile(fh) & FOPEN```

@@ -79,19 +79,19 @@ goto MSVC
 
 :MSVC
 set CURRENT_DIR=%CD%
-if not exist %CURRENT_DIR%\build mkdir %CURRENT_DIR%\build
-if not exist %CURRENT_DIR%\build\%CMAKE_VER% mkdir %CURRENT_DIR%\build\%CMAKE_VER%
+if not exist "%CURRENT_DIR%\build" mkdir "%CURRENT_DIR%\build"
+if not exist "%CURRENT_DIR%\build\%CMAKE_VER%" mkdir "%CURRENT_DIR%\build\%CMAKE_VER%"
 
-if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32 mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Win32
-if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL% mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%
-if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Ansi mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Ansi
+if not exist "%CURRENT_DIR%\build\%CMAKE_VER%\Win32" mkdir "%CURRENT_DIR%\build\%CMAKE_VER%\Win32"
+if not exist "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%" mkdir "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%"
+if not exist "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Ansi" mkdir "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Ansi"
 
-cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Ansi
+cd "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Ansi"
 echo "*****************************************************************************"
 cmake %~dp0 -G %CMAKE_GENERATOR%
 echo "*****************************************************************************"
 
-cd %CURRENT_DIR%
+cd "%CURRENT_DIR%"
 goto end
 
 :MinGW
@@ -103,30 +103,30 @@ set TOOL="MinGW_%MIGW_VERSION%"
 set CMAKE_GENERATOR="Eclipse CDT4 - MinGW Makefiles"
 
 set CURRENT_DIR=%CD%
-if not exist %CURRENT_DIR%\build mkdir %CURRENT_DIR%\build
-if not exist %CURRENT_DIR%\build\%CMAKE_VER% mkdir %CURRENT_DIR%\build\%CMAKE_VER%
-if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32 mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Win32
-if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL% mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%
-if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Debug mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Debug
-if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Release mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Release
-if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\RelWithDebInfo mkdir %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\RelWithDebInfo
+if not exist "%CURRENT_DIR%\build" mkdir "%CURRENT_DIR%\build"
+if not exist "%CURRENT_DIR%\build\%CMAKE_VER%" mkdir "%CURRENT_DIR%\build\%CMAKE_VER%"
+if not exist "%CURRENT_DIR%\build\%CMAKE_VER%\Win32" mkdir "%CURRENT_DIR%\build\%CMAKE_VER%\Win32"
+if not exist "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%" mkdir "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%"
+if not exist "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Debug" mkdir "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Debug"
+if not exist "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Release" mkdir "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Release"
+if not exist "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\RelWithDebInfo" mkdir "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\RelWithDebInfo"
 
-cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Debug
+cd "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Debug"
 echo "*****************************************************************************"
 cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
 echo "*****************************************************************************"
 
-cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Release
+cd "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Release"
 echo "*****************************************************************************"
 cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
 echo "*****************************************************************************"
 
-cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\RelWithDebInfo
+cd "%CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\RelWithDebInfo"
 echo "*****************************************************************************"
 cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
 echo "*****************************************************************************"
 
-cd %CURRENT_DIR%
+cd "%CURRENT_DIR%"
 goto end
 
 :NO_CMAKE_IN_PATH
