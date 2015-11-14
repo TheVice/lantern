@@ -6,224 +6,229 @@ project(lantern)
 # Add testing tool
 include(CTest)
 
-set(SDL2FROMSOURCE 0)
-set(SDL2IMAGEFROMSOURCE 0)
-set(FREETYPEFROMSOURCE 0)
+# SDL2, SDL2_image and freetype look up =====
+set(SDL2FROMSOURCE FALSE)
+set(SDL2IMAGEFROMSOURCE FALSE)
+set(FREETYPEFROMSOURCE FALSE)
 
-if(CMAKE_HOST_WIN32)
-    if(DEFINED ENV{SDL2DIR})
-        string(REPLACE "\\" "/" SDL2_SRC_DIR $ENV{SDL2DIR}/src)
+if(DEFINED ENV{SDL2DIR})
+    string(REPLACE "\\" "/" SDL2DIR $ENV{SDL2DIR})
+elseif(DEFINED SDL2DIR)
+    string(REPLACE "\\" "/" SDL2DIR ${SDL2DIR})
+endif()
+
+if(WIN32)
+    if(DEFINED SDL2DIR)
+        set(SDL2_INCLUDE_DIR ${SDL2DIR}/include)
+        set(SDL2_SRC_DIR ${SDL2DIR}/src)
         if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
-            string(REPLACE "\\" "/" SDL2_INCLUDE_DIR $ENV{SDL2DIR}/include)
-            set(SDL2FROMSOURCE 1)
+            set(SDL2FROMSOURCE TRUE)
         endif()
-    elseif(DEFINED SDL2DIR)
-        string(REPLACE "\\" "/" SDL2_SRC_DIR ${SDL2DIR}/src)
-        if(EXISTS ${SDL2_SRC_DIR}/SDL.c)
-            string(REPLACE "\\" "/" SDL2_INCLUDE_DIR ${SDL2DIR}/include)
-            set(SDL2FROMSOURCE 1)
-        endif()
-    endif()
-
-    if(DEFINED ENV{SDL2IMAGEDIR})
-        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR $ENV{SDL2IMAGEDIR})
-        if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
-            set(SDL2IMAGEFROMSOURCE 1)
-        endif()
-    elseif(DEFINED SDL2IMAGEDIR)
-        string(REPLACE "\\" "/" SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGEDIR})
-        if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
-            set(SDL2IMAGEFROMSOURCE 1)
-        endif()
-    endif()
-
-    if(DEFINED ENV{FREETYPEDIR})
-        string(REPLACE "\\" "/" FREETYPE_SRC_DIR $ENV{FREETYPEDIR}/src)
-        if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
-            string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS $ENV{FREETYPEDIR}/include)
-            set(FREETYPEFROMSOURCE 1)
-        endif()
-        string(REPLACE "\\" "/" FREETYPEDIR $ENV{FREETYPEDIR})
-    elseif(DEFINED FREETYPEDIR)
-        string(REPLACE "\\" "/" FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
-        if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
-            string(REPLACE "\\" "/" FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include)
-            set(FREETYPEFROMSOURCE 1)
-        endif()
-        string(REPLACE "\\" "/" FREETYPEDIR ${FREETYPEDIR})
     endif()
 endif()
 
-# SDL2, SDL2_image and FreeType look up =====
+if(DEFINED ENV{SDL2IMAGEDIR})
+    string(REPLACE "\\" "/" SDL2IMAGEDIR $ENV{SDL2IMAGEDIR})
+elseif(DEFINED SDL2IMAGEDIR)
+    string(REPLACE "\\" "/" SDL2IMAGEDIR ${SDL2IMAGEDIR})
+endif()
+
+if(WIN32)
+    if(DEFINED SDL2IMAGEDIR)
+        set(SDL2IMAGE_INCLUDE_DIR ${SDL2IMAGEDIR})
+        if(EXISTS ${SDL2IMAGE_INCLUDE_DIR}/IMG.c)
+            set(SDL2IMAGEFROMSOURCE TRUE)
+        endif()
+    endif()
+endif()
+
+if(DEFINED ENV{FREETYPEDIR})
+    string(REPLACE "\\" "/" FREETYPEDIR $ENV{FREETYPEDIR})
+elseif(DEFINED FREETYPEDIR)
+    string(REPLACE "\\" "/" FREETYPEDIR ${FREETYPEDIR})
+endif()
+
+if(WIN32)
+    if(DEFINED FREETYPEDIR)
+        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
+        set(FREETYPE_SRC_DIR ${FREETYPEDIR}/src)
+        if(EXISTS ${FREETYPE_SRC_DIR}/base/ftapi.c)
+            set(FREETYPEFROMSOURCE TRUE)
+        endif()
+    endif()
+elseif(UNIX)
+    set(FREETYPE_INCLUDE_DIRS /usr/include/freetype2)
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
 if(SDL2FROMSOURCE)
     message("SDL2 will making from source")
-    if(CMAKE_HOST_WIN32)
-        # SDL2
-        set(SDL2_SRC_FILES ${SDL2_SRC_DIR}/atomic/SDL_atomic.c
-                           ${SDL2_SRC_DIR}/atomic/SDL_spinlock.c
-                           ${SDL2_SRC_DIR}/audio/SDL_audio.c
-                           ${SDL2_SRC_DIR}/audio/SDL_audiocvt.c
-                           ${SDL2_SRC_DIR}/audio/SDL_audiodev.c
-                           ${SDL2_SRC_DIR}/audio/SDL_audiotypecvt.c
-                           ${SDL2_SRC_DIR}/audio/SDL_mixer.c
-                           ${SDL2_SRC_DIR}/audio/SDL_wave.c
-                           ${SDL2_SRC_DIR}/core/windows/SDL_windows.c
-                           ${SDL2_SRC_DIR}/cpuinfo/SDL_cpuinfo.c
-                           ${SDL2_SRC_DIR}/dynapi/SDL_dynapi.c
-                           ${SDL2_SRC_DIR}/events/SDL_clipboardevents.c
-                           ${SDL2_SRC_DIR}/events/SDL_dropevents.c
-                           ${SDL2_SRC_DIR}/events/SDL_events.c
-                           ${SDL2_SRC_DIR}/events/SDL_gesture.c
-                           ${SDL2_SRC_DIR}/events/SDL_keyboard.c
-                           ${SDL2_SRC_DIR}/events/SDL_mouse.c
-                           ${SDL2_SRC_DIR}/events/SDL_quit.c
-                           ${SDL2_SRC_DIR}/events/SDL_touch.c
-                           ${SDL2_SRC_DIR}/events/SDL_windowevents.c
-                           ${SDL2_SRC_DIR}/filesystem/windows/SDL_sysfilesystem.c
-                           ${SDL2_SRC_DIR}/file/SDL_rwops.c
-                           ${SDL2_SRC_DIR}/haptic/SDL_haptic.c
-                           ${SDL2_SRC_DIR}/haptic/windows/SDL_syshaptic.c
-                           ${SDL2_SRC_DIR}/joystick/SDL_gamecontroller.c
-                           ${SDL2_SRC_DIR}/joystick/SDL_joystick.c
-                           ${SDL2_SRC_DIR}/joystick/windows/SDL_dxjoystick.c
-                           ${SDL2_SRC_DIR}/joystick/windows/SDL_mmjoystick.c
-                           ${SDL2_SRC_DIR}/libm/e_atan2.c
-                           ${SDL2_SRC_DIR}/libm/e_log.c
-                           ${SDL2_SRC_DIR}/libm/e_pow.c
-                           ${SDL2_SRC_DIR}/libm/e_rem_pio2.c
-                           ${SDL2_SRC_DIR}/libm/e_sqrt.c
-                           ${SDL2_SRC_DIR}/libm/k_cos.c
-                           ${SDL2_SRC_DIR}/libm/k_rem_pio2.c
-                           ${SDL2_SRC_DIR}/libm/k_sin.c
-                           ${SDL2_SRC_DIR}/libm/s_atan.c
-                           ${SDL2_SRC_DIR}/libm/s_copysign.c
-                           ${SDL2_SRC_DIR}/libm/s_cos.c
-                           ${SDL2_SRC_DIR}/libm/s_fabs.c
-                           ${SDL2_SRC_DIR}/libm/s_floor.c
-                           ${SDL2_SRC_DIR}/libm/s_scalbn.c
-                           ${SDL2_SRC_DIR}/libm/s_sin.c
-                           ${SDL2_SRC_DIR}/loadso/windows/SDL_sysloadso.c
-                           ${SDL2_SRC_DIR}/power/SDL_power.c
-                           ${SDL2_SRC_DIR}/power/windows/SDL_syspower.c
-                           ${SDL2_SRC_DIR}/render/direct3d/SDL_render_d3d.c
-                           ${SDL2_SRC_DIR}/render/opengl/SDL_render_gl.c
-                           ${SDL2_SRC_DIR}/render/opengl/SDL_shaders_gl.c
-                           ${SDL2_SRC_DIR}/render/SDL_d3dmath.c
-                           ${SDL2_SRC_DIR}/render/SDL_render.c
-                           ${SDL2_SRC_DIR}/render/SDL_yuv_mmx.c
-                           ${SDL2_SRC_DIR}/render/SDL_yuv_sw.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_blendfillrect.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_blendline.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_blendpoint.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_drawline.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_drawpoint.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_render_sw.c
-                           ${SDL2_SRC_DIR}/render/software/SDL_rotate.c
-                           ${SDL2_SRC_DIR}/SDL.c
-                           ${SDL2_SRC_DIR}/SDL_assert.c
-                           ${SDL2_SRC_DIR}/SDL_error.c
-                           ${SDL2_SRC_DIR}/SDL_hints.c
-                           ${SDL2_SRC_DIR}/SDL_log.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_getenv.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_iconv.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_malloc.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_qsort.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_stdlib.c
-                           ${SDL2_SRC_DIR}/stdlib/SDL_string.c
-                           ${SDL2_SRC_DIR}/thread/generic/SDL_syscond.c
-                           ${SDL2_SRC_DIR}/thread/generic/SDL_sysmutex.c
-                           ${SDL2_SRC_DIR}/thread/generic/SDL_syssem.c
-                           ${SDL2_SRC_DIR}/thread/generic/SDL_systhread.c
-                           ${SDL2_SRC_DIR}/thread/generic/SDL_systls.c
-                           ${SDL2_SRC_DIR}/thread/SDL_thread.c
-                           ${SDL2_SRC_DIR}/timer/SDL_timer.c
-                           ${SDL2_SRC_DIR}/timer/windows/SDL_systimer.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_0.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_1.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_A.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_auto.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_copy.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_N.c
-                           ${SDL2_SRC_DIR}/video/SDL_blit_slow.c
-                           ${SDL2_SRC_DIR}/video/SDL_bmp.c
-                           ${SDL2_SRC_DIR}/video/SDL_clipboard.c
-                           ${SDL2_SRC_DIR}/video/SDL_egl.c
-                           ${SDL2_SRC_DIR}/video/SDL_fillrect.c
-                           ${SDL2_SRC_DIR}/video/SDL_pixels.c
-                           ${SDL2_SRC_DIR}/video/SDL_rect.c
-                           ${SDL2_SRC_DIR}/video/SDL_RLEaccel.c
-                           ${SDL2_SRC_DIR}/video/SDL_shape.c
-                           ${SDL2_SRC_DIR}/video/SDL_stretch.c
-                           ${SDL2_SRC_DIR}/video/SDL_surface.c
-                           ${SDL2_SRC_DIR}/video/SDL_video.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsclipboard.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsevents.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsframebuffer.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowskeyboard.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsmessagebox.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsmodes.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsmouse.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsopengl.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsopengles.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsshape.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowsvideo.c
-                           ${SDL2_SRC_DIR}/video/windows/SDL_windowswindow.c)
+    # SDL2
+    set(SDL2_SRC_FILES ${SDL2_SRC_DIR}/atomic/SDL_atomic.c
+                       ${SDL2_SRC_DIR}/atomic/SDL_spinlock.c
+                       ${SDL2_SRC_DIR}/audio/SDL_audio.c
+                       ${SDL2_SRC_DIR}/audio/SDL_audiocvt.c
+                       ${SDL2_SRC_DIR}/audio/SDL_audiodev.c
+                       ${SDL2_SRC_DIR}/audio/SDL_audiotypecvt.c
+                       ${SDL2_SRC_DIR}/audio/SDL_mixer.c
+                       ${SDL2_SRC_DIR}/audio/SDL_wave.c
+                       ${SDL2_SRC_DIR}/cpuinfo/SDL_cpuinfo.c
+                       ${SDL2_SRC_DIR}/dynapi/SDL_dynapi.c
+                       ${SDL2_SRC_DIR}/events/SDL_clipboardevents.c
+                       ${SDL2_SRC_DIR}/events/SDL_dropevents.c
+                       ${SDL2_SRC_DIR}/events/SDL_events.c
+                       ${SDL2_SRC_DIR}/events/SDL_gesture.c
+                       ${SDL2_SRC_DIR}/events/SDL_keyboard.c
+                       ${SDL2_SRC_DIR}/events/SDL_mouse.c
+                       ${SDL2_SRC_DIR}/events/SDL_quit.c
+                       ${SDL2_SRC_DIR}/events/SDL_touch.c
+                       ${SDL2_SRC_DIR}/events/SDL_windowevents.c
+                       ${SDL2_SRC_DIR}/file/SDL_rwops.c
+                       ${SDL2_SRC_DIR}/haptic/SDL_haptic.c
+                       ${SDL2_SRC_DIR}/joystick/SDL_gamecontroller.c
+                       ${SDL2_SRC_DIR}/joystick/SDL_joystick.c
+                       ${SDL2_SRC_DIR}/power/SDL_power.c
+                       ${SDL2_SRC_DIR}/render/SDL_render.c
+                       ${SDL2_SRC_DIR}/render/SDL_yuv_mmx.c
+                       ${SDL2_SRC_DIR}/render/SDL_yuv_sw.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_blendfillrect.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_blendline.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_blendpoint.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_drawline.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_drawpoint.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_render_sw.c
+                       ${SDL2_SRC_DIR}/render/software/SDL_rotate.c
+                       ${SDL2_SRC_DIR}/SDL.c
+                       ${SDL2_SRC_DIR}/SDL_assert.c
+                       ${SDL2_SRC_DIR}/SDL_error.c
+                       ${SDL2_SRC_DIR}/SDL_hints.c
+                       ${SDL2_SRC_DIR}/SDL_log.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_getenv.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_iconv.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_malloc.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_qsort.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_stdlib.c
+                       ${SDL2_SRC_DIR}/stdlib/SDL_string.c
+                       ${SDL2_SRC_DIR}/thread/SDL_thread.c
+                       ${SDL2_SRC_DIR}/timer/SDL_timer.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_0.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_1.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_A.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_auto.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_copy.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_N.c
+                       ${SDL2_SRC_DIR}/video/SDL_blit_slow.c
+                       ${SDL2_SRC_DIR}/video/SDL_bmp.c
+                       ${SDL2_SRC_DIR}/video/SDL_clipboard.c
+                       ${SDL2_SRC_DIR}/video/SDL_egl.c
+                       ${SDL2_SRC_DIR}/video/SDL_fillrect.c
+                       ${SDL2_SRC_DIR}/video/SDL_pixels.c
+                       ${SDL2_SRC_DIR}/video/SDL_rect.c
+                       ${SDL2_SRC_DIR}/video/SDL_RLEaccel.c
+                       ${SDL2_SRC_DIR}/video/SDL_shape.c
+                       ${SDL2_SRC_DIR}/video/SDL_stretch.c
+                       ${SDL2_SRC_DIR}/video/SDL_surface.c
+                       ${SDL2_SRC_DIR}/video/SDL_video.c)
+    if(WIN32)
+        list(APPEND SDL2_SRC_FILES ${SDL2_SRC_DIR}/core/windows/SDL_windows.c
+                                   ${SDL2_SRC_DIR}/filesystem/windows/SDL_sysfilesystem.c
+                                   ${SDL2_SRC_DIR}/haptic/windows/SDL_syshaptic.c
+                                   ${SDL2_SRC_DIR}/joystick/windows/SDL_dxjoystick.c
+                                   ${SDL2_SRC_DIR}/joystick/windows/SDL_mmjoystick.c
+                                   ${SDL2_SRC_DIR}/libm/e_atan2.c
+                                   ${SDL2_SRC_DIR}/libm/e_log.c
+                                   ${SDL2_SRC_DIR}/libm/e_pow.c
+                                   ${SDL2_SRC_DIR}/libm/e_rem_pio2.c
+                                   ${SDL2_SRC_DIR}/libm/e_sqrt.c
+                                   ${SDL2_SRC_DIR}/libm/k_cos.c
+                                   ${SDL2_SRC_DIR}/libm/k_rem_pio2.c
+                                   ${SDL2_SRC_DIR}/libm/k_sin.c
+                                   ${SDL2_SRC_DIR}/libm/s_atan.c
+                                   ${SDL2_SRC_DIR}/libm/s_copysign.c
+                                   ${SDL2_SRC_DIR}/libm/s_cos.c
+                                   ${SDL2_SRC_DIR}/libm/s_fabs.c
+                                   ${SDL2_SRC_DIR}/libm/s_floor.c
+                                   ${SDL2_SRC_DIR}/libm/s_scalbn.c
+                                   ${SDL2_SRC_DIR}/libm/s_sin.c
+                                   ${SDL2_SRC_DIR}/loadso/windows/SDL_sysloadso.c
+                                   ${SDL2_SRC_DIR}/power/windows/SDL_syspower.c
+                                   ${SDL2_SRC_DIR}/render/direct3d/SDL_render_d3d.c
+                                   ${SDL2_SRC_DIR}/render/opengl/SDL_render_gl.c
+                                   ${SDL2_SRC_DIR}/render/opengl/SDL_shaders_gl.c
+                                   ${SDL2_SRC_DIR}/render/SDL_d3dmath.c
+                                   ${SDL2_SRC_DIR}/thread/generic/SDL_syscond.c
+                                   ${SDL2_SRC_DIR}/thread/generic/SDL_sysmutex.c
+                                   ${SDL2_SRC_DIR}/thread/generic/SDL_syssem.c
+                                   ${SDL2_SRC_DIR}/thread/generic/SDL_systhread.c
+                                   ${SDL2_SRC_DIR}/thread/generic/SDL_systls.c
+                                   ${SDL2_SRC_DIR}/timer/windows/SDL_systimer.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsclipboard.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsevents.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsframebuffer.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowskeyboard.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsmessagebox.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsmodes.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsmouse.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsopengl.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsopengles.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsshape.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowsvideo.c
+                                   ${SDL2_SRC_DIR}/video/windows/SDL_windowswindow.c)
+
         add_library(SDL2 SHARED ${SDL2_SRC_FILES})
         set(SDL2_INCLUDE_DIR "SDL2/include" ${SDL2_INCLUDE_DIR})
-        target_include_directories(SDL2 SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
+
         target_link_libraries(SDL2 winmm imm32 version)
         if(MSVC)
             if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 19.0) # Visual Studio 2015 and above
                 target_link_libraries(SDL2 winmm imm32 version vcruntime ucrtd) # libucrt
             endif()
         endif()
-        # SDL2main
+    endif()
+
+    target_include_directories(SDL2 SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
+
+    # SDL2main
+    if(WIN32)
         add_library(SDL2main STATIC ${SDL2_SRC_DIR}/main/windows/SDL_windows_main.c)
         target_include_directories(SDL2main SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
-
         set(SDL2_LIBRARY SDL2 SDL2main)
     endif()
 else()
     find_package(SDL2 REQUIRED)
 endif()
+
 if(SDL2IMAGEFROMSOURCE)
     message("SDL2_image will making from source")
-    if(CMAKE_HOST_WIN32)
-        set(SDL2_IMAGE_SRC_FILES ${SDL2IMAGE_INCLUDE_DIR}/IMG.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_bmp.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_gif.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_jpg.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_lbm.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_pcx.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_png.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_pnm.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_tga.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_tif.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_webp.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xcf.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xpm.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xv.c
-                                 ${SDL2IMAGE_INCLUDE_DIR}/IMG_xxx.c)
+    # SDL2_image
+    set(SDL2_IMAGE_SRC_FILES ${SDL2IMAGE_INCLUDE_DIR}/IMG.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_bmp.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_gif.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_jpg.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_lbm.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_pcx.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_png.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_pnm.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_tga.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_tif.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_webp.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_xcf.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_xpm.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_xv.c
+                             ${SDL2IMAGE_INCLUDE_DIR}/IMG_xxx.c)
+    if(WIN32)
         add_library(SDL2_image SHARED ${SDL2_IMAGE_SRC_FILES})
 
-        target_compile_definitions(SDL2_image PRIVATE LOAD_BMP)
-        target_compile_definitions(SDL2_image PRIVATE LOAD_GIF)
         target_compile_definitions(SDL2_image PRIVATE LOAD_JPG)
         target_compile_definitions(SDL2_image PRIVATE LOAD_JPG_DYNAMIC="libjpeg-9.dll")
-        target_compile_definitions(SDL2_image PRIVATE LOAD_LBM)
-        target_compile_definitions(SDL2_image PRIVATE LOAD_PCX)
         target_compile_definitions(SDL2_image PRIVATE LOAD_PNG)
         target_compile_definitions(SDL2_image PRIVATE LOAD_PNG_DYNAMIC="libpng16-16.dll")
-        target_compile_definitions(SDL2_image PRIVATE LOAD_PNM)
-        target_compile_definitions(SDL2_image PRIVATE LOAD_TGA)
         target_compile_definitions(SDL2_image PRIVATE LOAD_TIF)
         target_compile_definitions(SDL2_image PRIVATE LOAD_TIF_DYNAMIC="libtiff-5.dll")
         target_compile_definitions(SDL2_image PRIVATE LOAD_WEBP)
         target_compile_definitions(SDL2_image PRIVATE LOAD_WEBP_DYNAMIC="libwebp-4.dll")
-        target_compile_definitions(SDL2_image PRIVATE LOAD_XPM)
-        target_compile_definitions(SDL2_image PRIVATE LOAD_XV)
         target_compile_definitions(SDL2_image PRIVATE PNG_USE_DLL)
         target_compile_definitions(SDL2_image PRIVATE ZLIB_DLL)
 
@@ -236,7 +241,7 @@ if(SDL2IMAGEFROMSOURCE)
                                                              ${SDL2IMAGE_INCLUDE_DIR}/external/jpeg-9)
 
         target_link_libraries(SDL2_image ${SDL2_LIBRARY})
-        set(SDL2IMAGE_LIBRARY SDL2_image)
+
         if(CMAKE_CL_64)
             set(SDL2IMAGE_LIBPNG_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x64/libpng16-16.dll)
             set(SDL2IMAGE_ZLIB_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x64/zlib1.dll)
@@ -245,74 +250,83 @@ if(SDL2IMAGEFROMSOURCE)
             set(SDL2IMAGE_ZLIB_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x86/zlib1.dll)
         endif()
     endif()
+
+    target_compile_definitions(SDL2_image PRIVATE LOAD_BMP)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_GIF)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_LBM)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_PCX)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_PNM)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_TGA)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_XPM)
+    target_compile_definitions(SDL2_image PRIVATE LOAD_XV)
+
+    set(SDL2IMAGE_LIBRARY SDL2_image)
 else()
     find_package(SDL2IMAGE REQUIRED)
 endif()
+
 if(FREETYPEFROMSOURCE)
     message("freetype will making from source")
-    if(CMAKE_HOST_WIN32)
-        set(FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/../builds/windows/ftdebug.c
-                               ${FREETYPE_SRC_DIR}/autofit/autofit.c
-                               ${FREETYPE_SRC_DIR}/base/ftbase.c
-                               ${FREETYPE_SRC_DIR}/base/ftbbox.c
-                               ${FREETYPE_SRC_DIR}/base/ftbitmap.c
-                               ${FREETYPE_SRC_DIR}/base/ftfntfmt.c
-                               ${FREETYPE_SRC_DIR}/base/ftfstype.c
-                               ${FREETYPE_SRC_DIR}/base/ftgasp.c
-                               ${FREETYPE_SRC_DIR}/base/ftglyph.c
-                               ${FREETYPE_SRC_DIR}/base/ftgxval.c
-                               ${FREETYPE_SRC_DIR}/base/ftinit.c
-                               ${FREETYPE_SRC_DIR}/base/ftlcdfil.c
-                               ${FREETYPE_SRC_DIR}/base/ftmm.c
-                               ${FREETYPE_SRC_DIR}/base/ftotval.c
-                               ${FREETYPE_SRC_DIR}/base/ftpatent.c
-                               ${FREETYPE_SRC_DIR}/base/ftpfr.c
-                               ${FREETYPE_SRC_DIR}/base/ftstroke.c
-                               ${FREETYPE_SRC_DIR}/base/ftsynth.c
-                               ${FREETYPE_SRC_DIR}/base/ftsystem.c
-                               ${FREETYPE_SRC_DIR}/base/fttype1.c
-                               ${FREETYPE_SRC_DIR}/base/ftwinfnt.c
-                               ${FREETYPE_SRC_DIR}/bdf/bdf.c
-                               ${FREETYPE_SRC_DIR}/cache/ftcache.c
-                               ${FREETYPE_SRC_DIR}/cff/cff.c
-                               ${FREETYPE_SRC_DIR}/cid/type1cid.c
-                               ${FREETYPE_SRC_DIR}/gzip/ftgzip.c
-                               ${FREETYPE_SRC_DIR}/lzw/ftlzw.c
-                               ${FREETYPE_SRC_DIR}/pcf/pcf.c
-                               ${FREETYPE_SRC_DIR}/pfr/pfr.c
-                               ${FREETYPE_SRC_DIR}/psaux/psaux.c
-                               ${FREETYPE_SRC_DIR}/pshinter/pshinter.c
-                               ${FREETYPE_SRC_DIR}/psnames/psmodule.c
-                               ${FREETYPE_SRC_DIR}/raster/raster.c
-                               ${FREETYPE_SRC_DIR}/sfnt/sfnt.c
-                               ${FREETYPE_SRC_DIR}/smooth/smooth.c
-                               ${FREETYPE_SRC_DIR}/truetype/truetype.c
-                               ${FREETYPE_SRC_DIR}/type1/type1.c
-                               ${FREETYPE_SRC_DIR}/type42/type42.c
-                               ${FREETYPE_SRC_DIR}/winfonts/winfnt.c)
+    # freetype
+    set(FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/autofit/autofit.c
+                           ${FREETYPE_SRC_DIR}/base/ftbbox.c
+                           ${FREETYPE_SRC_DIR}/base/ftbitmap.c
+                           ${FREETYPE_SRC_DIR}/base/ftfntfmt.c
+                           ${FREETYPE_SRC_DIR}/base/ftfstype.c
+                           ${FREETYPE_SRC_DIR}/base/ftgasp.c
+                           ${FREETYPE_SRC_DIR}/base/ftglyph.c
+                           ${FREETYPE_SRC_DIR}/base/ftgxval.c
+                           ${FREETYPE_SRC_DIR}/base/ftinit.c
+                           ${FREETYPE_SRC_DIR}/base/ftlcdfil.c
+                           ${FREETYPE_SRC_DIR}/base/ftmm.c
+                           ${FREETYPE_SRC_DIR}/base/ftotval.c
+                           ${FREETYPE_SRC_DIR}/base/ftpatent.c
+                           ${FREETYPE_SRC_DIR}/base/ftpfr.c
+                           ${FREETYPE_SRC_DIR}/base/ftstroke.c
+                           ${FREETYPE_SRC_DIR}/base/ftsynth.c
+                           ${FREETYPE_SRC_DIR}/base/ftsystem.c
+                           ${FREETYPE_SRC_DIR}/base/fttype1.c
+                           ${FREETYPE_SRC_DIR}/base/ftwinfnt.c
+                           ${FREETYPE_SRC_DIR}/bdf/bdf.c
+                           ${FREETYPE_SRC_DIR}/cache/ftcache.c
+                           ${FREETYPE_SRC_DIR}/cff/cff.c
+                           ${FREETYPE_SRC_DIR}/cid/type1cid.c
+                           ${FREETYPE_SRC_DIR}/gzip/ftgzip.c
+                           ${FREETYPE_SRC_DIR}/lzw/ftlzw.c
+                           ${FREETYPE_SRC_DIR}/pcf/pcf.c
+                           ${FREETYPE_SRC_DIR}/pfr/pfr.c
+                           ${FREETYPE_SRC_DIR}/psaux/psaux.c
+                           ${FREETYPE_SRC_DIR}/pshinter/pshinter.c
+                           ${FREETYPE_SRC_DIR}/raster/raster.c
+                           ${FREETYPE_SRC_DIR}/sfnt/sfnt.c
+                           ${FREETYPE_SRC_DIR}/smooth/smooth.c
+                           ${FREETYPE_SRC_DIR}/truetype/truetype.c
+                           ${FREETYPE_SRC_DIR}/type1/type1.c
+                           ${FREETYPE_SRC_DIR}/type42/type42.c
+                           ${FREETYPE_SRC_DIR}/winfonts/winfnt.c)
+    if(WIN32)
+        list(APPEND FREETYPE_SRC_FILES ${FREETYPE_SRC_DIR}/../builds/windows/ftdebug.c
+                                       ${FREETYPE_SRC_DIR}/base/ftbase.c
+                                       ${FREETYPE_SRC_DIR}/psnames/psmodule.c)
+
         add_library(freetype SHARED ${FREETYPE_SRC_FILES})
-
-        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
-        target_include_directories(freetype SYSTEM PRIVATE ${FREETYPE_INCLUDE_DIRS})
-
-        target_compile_definitions(freetype PRIVATE FT2_BUILD_LIBRARY)
         target_compile_definitions(freetype PRIVATE FT_CONFIG_OPTIONS_H="${CMAKE_SOURCE_DIR}/freetype/config/ftoption.h")
-
-        set(FREETYPE_LIBRARIES freetype)
     endif()
+
+    target_compile_definitions(freetype PRIVATE FT2_BUILD_LIBRARY)
+    target_include_directories(freetype SYSTEM PRIVATE ${FREETYPE_INCLUDE_DIRS})
+
+    set(FREETYPE_LIBRARIES freetype)
 else()
-    if(NOT UNIX)
-        set(FREETYPE_INCLUDE_DIRS ${FREETYPEDIR}/include ${FREETYPEDIR}/include/freetype2)
+    if(WIN32)
         if(MSVC)
             set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/freetype.lib)
         else()
             set(FREETYPE_LIBRARY ${FREETYPEDIR}/lib/libfreetype.dll.a)
         endif()
-    else()
-        set(FREETYPE_INCLUDE_DIRS /usr/include/freetype2)
     endif()
     find_package(Freetype REQUIRED)
-    if(NOT UNIX)
+    if(WIN32)
         set(FREETYPE_DLL "${FREETYPEDIR}/bin/freetype6.dll")
     endif()
 endif()
@@ -320,17 +334,26 @@ endif()
 
 # Compiler setup ============================
 if (MSVC)
-    set(COMPILER_FLAGS "/W4 /GS")
-    set(LINK_FLAGS "${LINK_FLAGS} /SafeSEH /DynamicBase /NXCompat")
+    set(COMPILER_C_FLAGS "/W4 /GS")
+    set(COMPILER_CXX_FLAGS "/W4 /GS")
+
+    if(CMAKE_CL_64)
+      set(LINK_FLAGS "${LINK_FLAGS} /DynamicBase /NXCompat")
+    else()
+      set(LINK_FLAGS "${LINK_FLAGS} /SafeSEH /DynamicBase /NXCompat")
+    endif()
 
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DNOMINMAX)
 else()
-    set(COMPILER_FLAGS
+    set(COMPILER_C_FLAGS
+        "-std=c11 -Wall -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter -Wextra")
+    set(COMPILER_CXX_FLAGS
         "-std=gnu++0x -Wall -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter -Wextra")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${DEFAULT_CMAKE_C_FLAGS} ${COMPILER_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_CMAKE_CXX_FLAGS} ${COMPILER_CXX_FLAGS}")
 
 if(CMAKE_HOST_WIN32)
     add_definitions(-DWIN32)
@@ -342,7 +365,6 @@ if(NOT MSVC)
     add_definitions(-DGTEST_HAS_PTHREAD=0)
     add_definitions(-U__STRICT_ANSI__)
 endif(NOT MSVC)
-
 # ===========================================
 
 # Library target ============================
@@ -367,10 +389,16 @@ set_target_properties(
 # ===========================================
 
 # Gooogle C++ testing framework target ======
+if(UNIX)
+    if(EXISTS /usr/src/gtest/)
+        set(GTEST_ROOT /usr/src/gtest)
+    endif()
+else()
 if(DEFINED ENV{GTEST_ROOT})
-    string(REPLACE "\\" "/" GTEST_ROOT $ENV{GTEST_ROOT})
-elseif(DEFINED GTEST_ROOT)
-    string(REPLACE "\\" "/" GTEST_ROOT ${GTEST_ROOT})
+        string(REPLACE "\\" "/" GTEST_ROOT $ENV{GTEST_ROOT})
+    elseif(DEFINED GTEST_ROOT)
+        string(REPLACE "\\" "/" GTEST_ROOT ${GTEST_ROOT})
+    endif()
 endif()
 
 if(DEFINED GTEST_ROOT)
@@ -381,6 +409,7 @@ if(DEFINED GTEST_ROOT)
     find_package(GTest REQUIRED)
 
     set(GTEST_SOURCES ${GTEST_ROOT}/src/gtest-all.cc)
+
     add_library(
         ${GTEST_MAIN_LIBRARY} STATIC
         ${GTEST_SOURCES})

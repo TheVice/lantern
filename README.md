@@ -14,10 +14,10 @@ Note that because it doesn't use GPU, it is much slower comparing to DirectX or 
 
 ###Dependencies
 
-* SDL2 - used for creating windows, copying resulting texture data to a screen, handling input and system events
-* SDL2_Image - used for loading images files
-* FreeType - used for loading truetype fonts, calculating their metrics and rendering glyphs bitmaps
-* Google C++ Tests - used for testing
+* [SDL2](http://www.libsdl.org/download-2.0.php) - used for creating windows, copying resulting texture data to a screen, handling input and system events
+* [SDL2_Image](https://www.libsdl.org/projects/SDL_image/) - used for loading images files
+* [FreeType](http://www.freetype.org/download.html) - used for loading truetype fonts, calculating their metrics and rendering glyphs bitmaps
+* [Google C++ Tests](https://github.com/google/googletest/releases) - used for testing
 
 ###Building
 
@@ -25,9 +25,9 @@ Lantern uses CMake as its build system.
 
 Simple scripts `configure.cmd` and `configure.sh` were created to simplify building process a little, though (output goes to `<lantern>/build` folder). Using:
 * `configure.cmd MSVC18` - creates VS solution for Visual Studio 2013
-* `configure.cmd MSVC19` - creates VS solution for Visual Studio 2015
-* `configure.cmd MinGW` - creates MinGW makefiles
-* `configure.sh gcc` - creates Linux makefiles
+* `configure.cmd MSVC19` - creates VS solution for Visual Studio 2015 (only for CMake 3.1 and above)
+* `configure.cmd MinGW` - creates Eclipse project (on Windows host
+* `configure.sh gcc` - creates Eclipse project (on Linux host)
 
 On Linux you probably have to `chmod +x configure.sh` before running them or run it directly by bash: `bash configure.sh gcc`
 
@@ -40,13 +40,12 @@ You also have to have all the dependencies and tools installed (obviously). As a
  * `sudo apt-get install libgtest-dev`
 
 On Windows you have to specify a few environment variables for dependencies so that CMake's `find_package` will be able to find them:
- * `SDL2DIR` - path to SDL2 development library or source of this library (only for MinGW and Visual Studio)
- * `SDL2IMAGEDIR` - path to SDL2_Image development library or source of this library (only for MinGW and Visual Studio)
- * `FREETYPEDIR` - path to a folder containing FreeType's headers and library or source of this library (only for MinGW and Visual Studio)
+ * `SDL2DIR` - path to SDL2 development library or source of this library
+ * `SDL2IMAGEDIR` - path to SDL2_Image development library or source of this library
+ * `FREETYPEDIR` - path to a folder containing FreeType's headers and library or source of this library
  * `GTEST_ROOT` - path to Google Tests source code folder (required only if you're going to build tests target)
 
 ###Known issues
 
 * If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 using VS 2015 - just download source package and after unpack source directory set to `SDL2DIR` path to that folder, just the same you do for binary package, or just download SDL2 build both package here: https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/
-
 * Lantern fails loading resources when running from a directory different than the one where the executable is

@@ -7,6 +7,7 @@ if %1 == clean goto CLEAN_BINARIES
 cmake > nul
 if %ERRORLEVEL% NEQ 0 goto NO_CMAKE_IN_PATH
 
+cmake -version 2>&1 | findstr /C:"version 3.4" > nul && goto CMAKE34
 cmake -version 2>&1 | findstr /C:"version 3.3" > nul && goto CMAKE33
 cmake -version 2>&1 | findstr /C:"version 3.2" > nul && goto CMAKE32
 cmake -version 2>&1 | findstr /C:"version 3.1" > nul && goto CMAKE31
@@ -15,6 +16,10 @@ cmake -version 2>&1 | findstr /C:"version 2.8" > nul && goto CMAKE28
 
 goto UNKNOWN_CMAKE_VERSION
 
+:CMAKE34
+echo Found cmake v3.4
+set CMAKE_VER=cmake-3.4
+goto CMAKE_VERSION_DETECTED
 :CMAKE33
 echo Found cmake v3.3
 set CMAKE_VER=cmake-3.3
@@ -83,7 +88,7 @@ if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Ansi mkdir %CURRENT_DI
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Ansi
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR%
+cmake %~dp0 -G %CMAKE_GENERATOR%
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%
@@ -108,17 +113,17 @@ if not exist %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\RelWithDebInfo mkdir %
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Debug
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
+cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\Release
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
+cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%\build\%CMAKE_VER%\Win32\%TOOL%\RelWithDebInfo
 echo "*****************************************************************************"
-cmake %CURRENT_DIR%\. -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
+cmake %~dp0 -G %CMAKE_GENERATOR% -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j%NUMBER_OF_PROCESSORS% -s"
 echo "*****************************************************************************"
 
 cd %CURRENT_DIR%
@@ -144,7 +149,7 @@ goto end
 :using
 echo "*****************************************************************************"
 echo "%0 using with clean|MinGW|MSVC18|MSVC19"
-echo clean for Deleting binaries files (*.a *.lib *.exe) from bin directory
+echo clean for deleting binaries files (*.a *.lib *.exe) from bin directory
 echo MinGW for Eclipse project with Minimalist GNU for Windows
 echo MSVC18 for Visual Studio 2013
 echo MSVC19 for Visual Studio 2015 (only for cmake 3.1 and above)
