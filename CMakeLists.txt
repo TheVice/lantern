@@ -197,7 +197,6 @@ if(SDL2FROMSOURCE)
                 target_link_libraries(SDL2 winmm imm32 version vcruntime ucrtd) # libucrt
             endif()
         endif()
-
     elseif(ANDROID)
         list(APPEND SDL2_SRC_FILES ${SDL2_SRC_DIR}/audio/android/SDL_androidaudio.c
                                    ${SDL2_SRC_DIR}/audio/dummy/SDL_dummyaudio.c
@@ -493,13 +492,19 @@ endif()
 
 # Gooogle C++ testing framework target ======
 if(ANDROID)
-    set(GTEST_ROOT ${NDK_PATH}/sources/third_party/googletest/googletest)
-else()
-    if(DEFINED ENV{GTEST_ROOT})
-        string(REPLACE "\\" "/" GTEST_ROOT $ENV{GTEST_ROOT})
-    elseif(DEFINED GTEST_ROOT)
-        string(REPLACE "\\" "/" GTEST_ROOT ${GTEST_ROOT})
+    if(EXISTS ${NDK_PATH}/sources/third_party/googletest/googletest)
+        set(GTEST_ROOT ${NDK_PATH}/sources/third_party/googletest/googletest)
     endif()
+elseif(UNIX)
+    if(EXISTS /usr/src/gtest/)
+        set(GTEST_ROOT /usr/src/gtest)
+    endif()
+endif()
+
+if(DEFINED ENV{GTEST_ROOT})
+    string(REPLACE "\\" "/" GTEST_ROOT $ENV{GTEST_ROOT})
+elseif(DEFINED GTEST_ROOT)
+    string(REPLACE "\\" "/" GTEST_ROOT ${GTEST_ROOT})
 endif()
 
 if(DEFINED GTEST_ROOT)
@@ -549,6 +554,9 @@ if (DEFINED GTEST_ROOT)
                                              tests/include
                                              ${GTEST_INCLUDE_DIR})
 
+    set_target_properties(
+        tests PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
 
     target_link_libraries(tests lantern gtest)
 
