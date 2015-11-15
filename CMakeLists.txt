@@ -309,13 +309,14 @@ if(SDL2IMAGEFROMSOURCE)
                                          ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwtran.c
                                          ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwutil.c)
 
-        add_library(SDL2_image STATIC ${SDL2_IMAGE_SRC_FILES})
+        add_library(SDL2_image SHARED ${SDL2_IMAGE_SRC_FILES})
 
         target_compile_definitions(SDL2_image PRIVATE LOAD_PNG)
         target_compile_definitions(SDL2_image PRIVATE LOAD_XCF)
 
         target_include_directories(SDL2_image SYSTEM PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2IMAGE_INCLUDE_DIR}
                                                              ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2)
+        target_link_libraries(SDL2_image SDL2 z)
     endif()
 
     target_compile_definitions(SDL2_image PRIVATE LOAD_BMP)
@@ -628,8 +629,7 @@ if(ANDROID)
     list(APPEND target_link_libs lantern
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
-                                 ${FREETYPE_LIBRARIES}
-                                 z)
+                                 ${FREETYPE_LIBRARIES})
 
     add_Android_Project(empty_app
                         EmptyAppNativeActivity
@@ -728,8 +728,7 @@ if(ANDROID)
     list(APPEND target_link_libs lantern
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
-                                 ${FREETYPE_LIBRARIES}
-                                 z)
+                                 ${FREETYPE_LIBRARIES})
 
     add_Android_Project(rasterized_triangle_app
                         RasterizedTriangleAppNativeActivity
