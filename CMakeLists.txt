@@ -223,8 +223,9 @@ if(SDL2FROMSOURCE)
                                    ${SDL2_SRC_DIR}/video/android/SDL_androidvideo.c
                                    ${SDL2_SRC_DIR}/video/android/SDL_androidwindow.c)
 
-          add_library(SDL2 STATIC ${SDL2_SRC_FILES})
+          add_library(SDL2 SHARED ${SDL2_SRC_FILES})
           target_compile_definitions(SDL2 PRIVATE GL_GLEXT_PROTOTYPES)
+          target_link_libraries(SDL2 android log GLESv1_CM GLESv2 m)
     endif()
 
     target_include_directories(SDL2 SYSTEM PRIVATE ${SDL2_INCLUDE_DIR})
@@ -292,21 +293,21 @@ if(SDL2IMAGEFROMSOURCE)
             set(SDL2IMAGE_ZLIB_DLL ${SDL2IMAGE_INCLUDE_DIR}/VisualC/external/lib/x86/zlib1.dll)
         endif()
     elseif(ANDROID)
-      list(APPEND SDL2_IMAGE_SRC_FILES ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/png.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngerror.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngget.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngmem.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngpread.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngread.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrio.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrtran.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrutil.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngset.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngtrans.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwio.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwrite.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwtran.c
-                                       ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwutil.c)
+        list(APPEND SDL2_IMAGE_SRC_FILES ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/png.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngerror.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngget.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngmem.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngpread.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngread.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrio.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrtran.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngrutil.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngset.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngtrans.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwio.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwrite.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwtran.c
+                                         ${SDL2IMAGE_INCLUDE_DIR}/external/libpng-1.6.2/pngwutil.c)
 
         add_library(SDL2_image STATIC ${SDL2_IMAGE_SRC_FILES})
 
@@ -628,10 +629,6 @@ if(ANDROID)
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
                                  ${FREETYPE_LIBRARIES}
-                                 GLESv1_CM
-                                 GLESv2
-                                 log
-                                 android
                                  z)
 
     add_Android_Project(empty_app
@@ -732,10 +729,6 @@ if(ANDROID)
                                  ${SDL2IMAGE_LIBRARY}
                                  ${SDL2_LIBRARY}
                                  ${FREETYPE_LIBRARIES}
-                                 GLESv1_CM
-                                 GLESv2
-                                 log
-                                 android
                                  z)
 
     add_Android_Project(rasterized_triangle_app
