@@ -63,6 +63,7 @@ public class RasterizedTriangleAppNativeActivity extends org.libsdl.app.SDLActiv
         closeZipFile(zipFile);
 
         // Load the .so
+        System.loadLibrary("freetype");
         System.loadLibrary("rasterized_triangle_app");
         super.onCreate(savedInstanceState);
     }

@@ -395,7 +395,7 @@ if(FREETYPEFROMSOURCE)
                                        ${FREETYPE_SRC_DIR}/psnames/psnames.c
                                    ${SDL2IMAGE_INCLUDE_DIR}/external/zlib-1.2.8/zutil.c)
 
-        add_library(freetype STATIC ${FREETYPE_SRC_FILES})
+        add_library(freetype SHARED ${FREETYPE_SRC_FILES})
     endif()
 
     target_compile_definitions(freetype PRIVATE FT2_BUILD_LIBRARY)

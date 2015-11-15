@@ -10,6 +10,7 @@ public class EmptyAppNativeActivity extends org.libsdl.app.SDLActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         // Load the .so
+        System.loadLibrary("freetype");
         System.loadLibrary("empty_app");
         super.onCreate(savedInstanceState);
     }

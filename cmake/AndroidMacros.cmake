@@ -103,6 +103,7 @@ macro(add_Android_Project target_name activity_name package_name project_directo
         DEPENDS ${target_name}_copy-java
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libSDL2.so ${project_directory}/libs/${ANDROID_ABI}/libSDL2.so
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libSDL2_image.so ${project_directory}/libs/${ANDROID_ABI}/libSDL2_image.so
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libfreetype.so ${project_directory}/libs/${ANDROID_ABI}/libfreetype.so
         COMMAND ${ANT_EXECUTABLE} ${ant_build_type} -buildfile ${project_directory}
     )
 
