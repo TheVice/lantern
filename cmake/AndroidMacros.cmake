@@ -13,6 +13,29 @@ macro(add_Android_Project target_name activity_name package_name project_directo
     set(source_sdl_java ${CMAKE_SOURCE_DIR}/SDL2/android-project/src/org)
     set(source_java ${CMAKE_SOURCE_DIR}/examples/${target_name}/org)
 
+    if(release STREQUAL ${ant_build_type})
+        if(EXISTS ${SDK_PATH}/build-tools/23.0.2/${ZIPALIGN_EXECUTABLE})
+            set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/23.0.2/${ZIPALIGN_EXECUTABLE})
+        elseif(EXISTS ${SDK_PATH}/build-tools/23.0.1/${ZIPALIGN_EXECUTABLE})
+            set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/23.0.1/${ZIPALIGN_EXECUTABLE})
+        elseif(EXISTS ${SDK_PATH}/build-tools/23.0.0/${ZIPALIGN_EXECUTABLE})
+            set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/23.0.0/${ZIPALIGN_EXECUTABLE})
+        elseif(EXISTS ${SDK_PATH}/build-tools/22.0.1/${ZIPALIGN_EXECUTABLE})
+            set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/22.0.1/${ZIPALIGN_EXECUTABLE})
+        elseif(EXISTS ${SDK_PATH}/build-tools/22.0.0/${ZIPALIGN_EXECUTABLE})
+            set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/22.0.0/${ZIPALIGN_EXECUTABLE})
+        elseif(EXISTS ${SDK_PATH}/build-tools/21.1.2/${ZIPALIGN_EXECUTABLE})
+            set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/21.1.2/${ZIPALIGN_EXECUTABLE})
+        elseif(EXISTS ${SDK_PATH}/build-tools/20.0.0/${ZIPALIGN_EXECUTABLE})
+            set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/20.0.0/${ZIPALIGN_EXECUTABLE})
+        elseif(EXISTS ${SDK_PATH}/build-tools/19.1.0/${ZIPALIGN_EXECUTABLE})
+            set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/19.1.0/${ZIPALIGN_EXECUTABLE})
+        else()
+            # message(FATAL_ERROR "Unable to found ${ZIPALIGN_EXECUTABLE}")
+        endif()
+        message(${ZIPALIGN_EXECUTABLE})
+    endif()
+
     if(EXISTS ${source_AndroidManifest})
         execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source_AndroidManifest} ${project_directory}/AndroidManifest.xml)
         execute_process(COMMAND ${ANDROID_EXECUTABLE} update project -n ${target_name} -t android-${ANDROID_NATIVE_API_LEVEL} -p ${project_directory})
@@ -89,10 +112,27 @@ macro(add_Android_Project target_name activity_name package_name project_directo
         )
     endif()
 
-    add_custom_target(${target_name}_install-apk
-        DEPENDS ${target_name}_build-apk
-        COMMAND adb install -r ${project_directory}/bin/${target_name}-${ant_build_type}.apk
-    )
+    if(release STREQUAL ${ant_build_type})
+        if(EXISTS ${CMAKE_BINARY_DIR}/my-release-key.keystore)
+            message("Found private key ${CMAKE_BINARY_DIR}/my-release-key.keystore")
+        else()
+            message("There is no private key ${CMAKE_BINARY_DIR}/my-release-key.keystore so let create it")
+            execute_process(COMMAND keytool -genkey -v -keystore my-release-key.keystore -alias alias_name -keyalg RSA -keysize 2048 -validity 730 -dname "cn=, ou=, o=, c=" -keypass 123456 -storepass 123456)
+        endif()
+        add_custom_target(${target_name}_install-apk
+            DEPENDS ${target_name}_build-apk
+            COMMAND jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore my-release-key.keystore ${project_directory}/bin/${target_name}-${ant_build_type}-unsigned.apk alias_name -storepass 123456
+            COMMAND jarsigner -verify -verbose -certs ${project_directory}/bin/${target_name}-${ant_build_type}-unsigned.apk
+            COMMAND ${ZIPALIGN_EXECUTABLE} -f -v 4 ${project_directory}/bin/${target_name}-${ant_build_type}-unsigned.apk ${project_directory}/bin/${target_name}-${ant_build_type}.apk
+            COMMAND ${ZIPALIGN_EXECUTABLE} -c -v 4 ${project_directory}/bin/${target_name}-${ant_build_type}.apk
+            COMMAND adb install -r ${project_directory}/bin/${target_name}-${ant_build_type}.apk
+        )
+    else()
+        add_custom_target(${target_name}_install-apk
+            DEPENDS ${target_name}_build-apk
+            COMMAND adb install -r ${project_directory}/bin/${target_name}-${ant_build_type}.apk
+        )
+    endif()
 
     add_custom_target(${target_name}_run-apk
         DEPENDS ${target_name}_install-apk
