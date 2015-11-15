@@ -60,52 +60,34 @@ macro(add_Android_Project target_name activity_name package_name project_directo
         endif()
     endif()
 
-    if(EXISTS ${source_sdl_java})
-        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_sdl_java} ${project_directory}/src/org)
-    endif()
-
-    if(EXISTS ${source_java})
-        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_java} ${project_directory}/src/org)
-    endif()
-
-    add_custom_target(${target_name}_copy-AndroidManifest
-        DEPENDS ${target_name}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source_AndroidManifest} ${project_directory}/AndroidManifest.xml
-    )
-
-    add_custom_target(${target_name}_copy-strings
-        DEPENDS ${target_name}_copy-AndroidManifest
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source_strings} ${project_directory}/res/values/strings.xml
-    )
 
     if(EXISTS ${source_resources})
-        add_custom_target(${target_name}_copy-resources
-            DEPENDS ${target_name}_copy-strings
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_resources} ${project_directory}/assets/resources
-        )
-        add_custom_target(${target_name}_copy-SDL-java
-            DEPENDS ${target_name}_copy-resources
+        # execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_resources} ${project_directory}/assets/resources)
+        add_custom_target(${target_name}_build-apk
+            DEPENDS ${target_name}
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source_AndroidManifest} ${project_directory}/AndroidManifest.xml
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source_strings} ${project_directory}/res/values/strings.xml
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_sdl_java} ${project_directory}/src/org
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_java} ${project_directory}/src/org
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_resources} ${project_directory}/assets/resources
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libSDL2.so ${project_directory}/libs/${ANDROID_ABI}/libSDL2.so
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libSDL2_image.so ${project_directory}/libs/${ANDROID_ABI}/libSDL2_image.so
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libfreetype.so ${project_directory}/libs/${ANDROID_ABI}/libfreetype.so
+            COMMAND ${ANT_EXECUTABLE} ${ant_build_type} -buildfile ${project_directory}
         )
     else()
-        add_custom_target(${target_name}_copy-SDL-java
-            DEPENDS ${target_name}_copy-strings
+        add_custom_target(${target_name}_build-apk
+            DEPENDS ${target_name}
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source_AndroidManifest} ${project_directory}/AndroidManifest.xml
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${source_strings} ${project_directory}/res/values/strings.xml
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_sdl_java} ${project_directory}/src/org
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_java} ${project_directory}/src/org
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libSDL2.so ${project_directory}/libs/${ANDROID_ABI}/libSDL2.so
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libSDL2_image.so ${project_directory}/libs/${ANDROID_ABI}/libSDL2_image.so
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libfreetype.so ${project_directory}/libs/${ANDROID_ABI}/libfreetype.so
+            COMMAND ${ANT_EXECUTABLE} ${ant_build_type} -buildfile ${project_directory}
         )
     endif()
-
-    add_custom_target(${target_name}_copy-java
-        DEPENDS ${target_name}_copy-SDL-java
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_java} ${project_directory}/src/org
-    )
-
-    add_custom_target(${target_name}_build-apk
-        DEPENDS ${target_name}_copy-java
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libSDL2.so ${project_directory}/libs/${ANDROID_ABI}/libSDL2.so
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libSDL2_image.so ${project_directory}/libs/${ANDROID_ABI}/libSDL2_image.so
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LIBRARY_OUTPUT_PATH_ROOT}/libs/${ANDROID_ABI}/libfreetype.so ${project_directory}/libs/${ANDROID_ABI}/libfreetype.so
-        COMMAND ${ANT_EXECUTABLE} ${ant_build_type} -buildfile ${project_directory}
-    )
 
     add_custom_target(${target_name}_install-apk
         DEPENDS ${target_name}_build-apk
