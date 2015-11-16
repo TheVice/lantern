@@ -14,6 +14,7 @@ if [ "$1" = "gcc" ]; then
   CMAKE_GENERATOR="Eclipse CDT4 - Unix Makefiles"
   NUMBER_OF_PROCESSORS=$(nproc)
   CURRENT_DIR=$PWD
+  SOURCE_DIR=$(dirname "$0")
   GCC_VERSION=$(gcc -dumpversion)
 
   echo gcc_$GCC_VERSION
@@ -28,17 +29,17 @@ if [ "$1" = "gcc" ]; then
 
   cd $CURRENT_DIR/build/$CMAKE_VERSION/linux/gcc$GCC_VERSION/Debug
   echo "********************************************************************************"
-  cmake $(dirname $0) -G"$CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j$NUMBER_OF_PROCESSORS -s"
+  cmake "${SOURCE_DIR// /\ }" -G"$CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j$NUMBER_OF_PROCESSORS -s"
   echo "********************************************************************************"
 
   cd $CURRENT_DIR/build/$CMAKE_VERSION/linux/gcc$GCC_VERSION/Release
   echo "********************************************************************************"
-  cmake $(dirname $0) -G"$CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j$NUMBER_OF_PROCESSORS -s"
+  cmake "${SOURCE_DIR// /\ }" -G"$CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j$NUMBER_OF_PROCESSORS -s"
   echo "********************************************************************************"
 
   cd $CURRENT_DIR/build/$CMAKE_VERSION/linux/gcc$GCC_VERSION/RelWithDebInfo
   echo "********************************************************************************"
-  cmake $(dirname $0) -G"$CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE="RelWithDebInfo" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j$NUMBER_OF_PROCESSORS -s"
+  cmake "${SOURCE_DIR// /\ }" -G"$CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE="RelWithDebInfo" -DCMAKE_ECLIPSE_MAKE_ARGUMENTS="-j$NUMBER_OF_PROCESSORS -s"
   echo "********************************************************************************"
   cd $CURRENT_DIR
 fi
