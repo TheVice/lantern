@@ -62,6 +62,7 @@ On Linux it also required to set `GTEST_ROOT` path to Google Tests source code f
 * Set environment variable ```ANDROID_NDK``` for Android NDK unpacked path. It is highly recommended that path do not consist any space symbols
 * Add bin directory from Apache Ant into PATHs (Only for build through CMake/Eclipse)
 * Add directories ```ANDROID_NDK```, ```ANDROID_HOME/platform-tools``` and ```ANDROID_HOME/tools``` into PATHs
+* For x64 version of Ubuntu you may need to [install additional packages](http://developer.android.com/sdk/installing/index.html?pkg=tools)
 * Get [android.toolchain.cmake](https://github.com/taka-no-me/android-cmake/blob/master/android.toolchain.cmake) (mirror [1](https://code.google.com/p/android-cmake/source/browse/toolchain/android.toolchain.cmake), [2](http://code.opencv.org/projects/opencv/repository/revisions/master/changes/platforms/android/android.toolchain.cmake)) and save to any place you want
 * Set to ```ANDROID_TOOLCHAIN``` full path to ```android.toolchain.cmake```
 * Device or emulator that running [Android 3.1.x (API Level 12)](https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels) or above
@@ -93,3 +94,4 @@ File: minkernel\crts\ucrt\src\appcrt\lowio\read.cpp
 Line: 378
 
 Expression: _osfile(fh) & FOPEN```
+* Release version of Android apk show lower than debug value of fps
