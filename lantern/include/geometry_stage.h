@@ -134,7 +134,7 @@ namespace lantern
 				v.y = -v.y * height / 2.0f + height / 2.0f;
 			}
 		}
-		
+
 		// Process results
 		//
 		std::vector<unsigned int> const& indices = mesh.get_indices();

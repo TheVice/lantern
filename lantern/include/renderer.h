@@ -1,11 +1,11 @@
 #ifndef LANTERN_RENDERER_H
 #define LANTERN_RENDERER_H
 
+#include <stdexcept>
 #include "shader_bind_point_info.h"
 #include "geometry_stage.h"
 #include "rasterizing_stage.h"
 #include "merging_stage.h"
-#include <stdexcept>
 
 namespace lantern
 {
