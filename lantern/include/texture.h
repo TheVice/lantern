@@ -66,12 +66,12 @@ namespace lantern
 
 		/** Clears texture with specified byte value (thus clearing only with gray shade) */
 		void clear(unsigned char const bytes_value);
-
+#if !defined(__ANDROID__)
 		/** Loads texture from specified file. Only PNG is supported for now
 		* @param file File to load image from
 		*/
 		static texture load_from_file(std::string file);
-
+#endif
 	private:
 		/** Texture width */
 		unsigned int m_width;

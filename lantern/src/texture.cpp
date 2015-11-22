@@ -1,5 +1,7 @@
 #include <stdexcept>
+#if !defined(__ANDROID__)
 #include <SDL_image.h>
+#endif
 #include "texture.h"
 
 using namespace lantern;
@@ -62,7 +64,7 @@ unsigned char const* texture::get_data() const
 {
 	return m_data;
 }
-
+#if !defined(__ANDROID__)
 texture texture::load_from_file(std::string file)
 {
 	SDL_Surface* surface = IMG_Load(file.c_str());
@@ -104,3 +106,4 @@ texture texture::load_from_file(std::string file)
 		throw std::runtime_error{"Unsupported format"};
 	}
 }
+#endif

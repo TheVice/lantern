@@ -1,7 +1,22 @@
 #include <iostream>
 #include <stdexcept>
+#if !defined(__ANDROID__)
 #include <SDL_image.h>
+#endif
 #include "app.h"
+
+#if defined(__ANDROID__)
+#include <android/log.h>
+
+void info(const char* aMessage, ...)
+{
+	va_list varArgs;
+	va_start(varArgs, aMessage);
+	__android_log_vprint(ANDROID_LOG_INFO, __FILE__, aMessage, varArgs);
+	__android_log_print(ANDROID_LOG_INFO, __FILE__, "\n");
+	va_end(varArgs);
+}
+#endif
 
 using namespace lantern;
 
@@ -14,7 +29,12 @@ app::app(unsigned int const width, unsigned int const height)
 	  m_sdl_target_texture{nullptr},
 	  m_target_texture{width, height},
 	  m_target_framerate_delay{0},
-	  m_last_fps{0}
+	  m_last_fps{0},
+#ifdef _WIN32
+	  m_path_separator{'\\'}
+#else
+	  m_path_separator{'/'}
+#endif
 {
 	if (_instance != nullptr)
 	{
@@ -32,7 +52,7 @@ app::app(unsigned int const width, unsigned int const height)
 
 	// Initialize SDL library and according objects
 	//
-
+#if !defined(__ANDROID__)
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		throw std::runtime_error(SDL_GetError());
@@ -71,6 +91,17 @@ app::app(unsigned int const width, unsigned int const height)
 		throw std::runtime_error(SDL_GetError());
 	}
 
+	char* base_path{SDL_GetBasePath()};
+	if (base_path != nullptr)
+	{
+		m_resources_path = std::string(base_path) + "resources" + m_path_separator;
+		SDL_free(base_path);
+	}
+	else
+	{
+		throw std::runtime_error(SDL_GetError());
+	}
+#endif
 	set_target_framerate(60);
 }
 
@@ -84,7 +115,7 @@ app::~app()
 		FT_Done_FreeType(m_freetype_library);
 		m_freetype_library = nullptr;
 	}
-
+#if !defined(__ANDROID__)
 	// Clean up SDL library
 	//
 
@@ -109,8 +140,9 @@ app::~app()
 	IMG_Quit();
 
 	SDL_Quit();
+#endif
 }
-
+#if !defined(__ANDROID__)
 int app::start()
 {
 	bool running{true};
@@ -189,7 +221,45 @@ int app::start()
 
 	return 0;
 }
+#else
+#define RGB(alpha, red, green, blue) ((alpha << 24) | (red << 16) | (green << 8) | blue)
+#define colorInt2Float(value) ((value) / 255.0f)
+#define colorFloat2Int(value) ((int)((value) * 255))
+#define color2RGB(value) RGB(colorFloat2Int(value.a), colorFloat2Int(value.r), (colorFloat2Int(value.g)), colorFloat2Int(value.b))
+int app::start(int* pixels)
+{
+	// Clear texture with black
+	m_target_texture.clear(0);
 
+	// Execute frame
+	frame(0);
+
+	for (int j = 0; j < m_target_texture.get_height(); ++j)
+	{
+		for (int i = 0; i < m_target_texture.get_width(); ++i)
+		{
+			pixels[j * m_target_texture.get_width() + i] = color2RGB(m_target_texture.get_pixel_color(vector2ui{i, j}));
+		}
+	}
+	/*
+	const int barSize = get_target_texture().get_width() / 8;
+	for (int j = 0; j < get_target_texture().get_height(); ++j)
+	{
+		for (int i = 0; i < barSize; ++i)
+		{
+			pixels[j * get_target_texture().get_width() + i] = RGB(255, 255, 255, 255);
+			pixels[j * get_target_texture().get_width() + barSize + i] = RGB(255, 196, 196, 0);
+			pixels[j * get_target_texture().get_width() + 2 * barSize + i] = RGB(255, 0, 196, 196);
+			pixels[j * get_target_texture().get_width() + 3 * barSize + i] = RGB(255, 0, 196, 0);
+			pixels[j * get_target_texture().get_width() + 4 * barSize + i] = RGB(255, 196, 0, 196);
+			pixels[j * get_target_texture().get_width() + 5 * barSize + i] = RGB(255, 196, 0, 0);
+			pixels[j * get_target_texture().get_width() + 6 * barSize + i] = RGB(255, 0, 0, 196);
+			pixels[j * get_target_texture().get_width() + 7 * barSize + i] = RGB(255, 0, 0, 0);
+		}
+	}*/
+	return 0;
+}
+#endif
 FT_Library app::get_freetype_library() const
 {
 	return m_freetype_library;
@@ -198,6 +268,16 @@ FT_Library app::get_freetype_library() const
 unsigned int app::get_last_fps() const
 {
 	return m_last_fps;
+}
+
+std::string app::get_resources_path() const
+{
+	return m_resources_path;
+}
+
+char app::get_path_separator() const
+{
+	return m_path_separator;
 }
 
 app const* app::get_instance()

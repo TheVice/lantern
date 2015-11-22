@@ -3,7 +3,16 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <string>
+#if !defined(__ANDROID__)
 #include "SDL.h"
+#else
+#define SDL_Window void
+#define SDL_Renderer void
+#define SDL_Texture void
+#define SDL_Keysym unsigned char
+#define Uint32 int
+#endif
 #include "renderer.h"
 
 namespace lantern
@@ -22,11 +31,14 @@ namespace lantern
 
 		/** Uninitializes application */
 		virtual ~app();
-
+#if !defined(__ANDROID__)
 		/** Runs main loop
 		* @returns Result error code
 		*/
 		int start();
+#else
+		int start(int* pixels);
+#endif
 
 		/** Gets FreeType library main object
 		* @returns Pointer to FreeType main object
@@ -38,6 +50,16 @@ namespace lantern
 		*/
 		unsigned int get_last_fps() const;
 
+		/** Gets platform-dependent separator symbol 
+		* @returns Separator
+		*/
+		char get_path_separator() const;
+
+		/** Gets absolute path to resources folder, already contains ending separator
+		* @returns Path to resources
+		*/
+		std::string get_resources_path() const;
+		
 		/** Gets application instance
 		* @returns Instance
 		*/
@@ -93,6 +115,12 @@ namespace lantern
 
 		/** Last saved framerate */
 		unsigned int m_last_fps;
+
+		/** Platform-dependent path separator */
+		char const m_path_separator;
+
+		/** Absolute path to resources folder */
+		std::string m_resources_path;
 
 		/** Instance pointer */
 		static app* _instance;
