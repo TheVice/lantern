@@ -54,8 +54,6 @@ macro(add_Android_Project target_name activity_name package_name project_directo
             set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/18.1.0/${ZIPALIGN_EXECUTABLE})
         elseif(EXISTS ${SDK_PATH}/build-tools/18.0.1/${ZIPALIGN_EXECUTABLE})
             set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/18.0.1/${ZIPALIGN_EXECUTABLE})
-        # elseif(EXISTS ${SDK_PATH}/build-tools/18.0.0/${ZIPALIGN_EXECUTABLE})
-        #     set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/18.0.0/${ZIPALIGN_EXECUTABLE})
         elseif(EXISTS ${SDK_PATH}/build-tools/17.0.0/${ZIPALIGN_EXECUTABLE})
             set(ZIPALIGN_EXECUTABLE ${SDK_PATH}/build-tools/17.0.0/${ZIPALIGN_EXECUTABLE})
         else()

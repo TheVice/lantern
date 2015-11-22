@@ -1,33 +1,15 @@
 #include <iostream>
 #include <stdexcept>
 #include <SDL_image.h>
-#if __ANDROID__
+#if defined(__ANDROID__)
 #include <jni.h>
-#include <unistd.h>
 #endif
 #include "app.h"
 
 using namespace lantern;
 
 app* app::_instance = nullptr;
-
-#if __ANDROID__
-
-bool isPathExist(const char* aPath)
-{
-	return -1 != access(aPath, F_OK);
-}
-
-void changeDir(const char* aPath)
-{
-	chdir(aPath);
-}
-
-char* getCurrentDir(char* aBuffer, size_t aBufferLength)
-{
-	return getcwd(aBuffer, aBufferLength);
-}
-
+#if defined(__ANDROID__)
 char* getCacheDir(JNIEnv *aEnv, jobject aActivity, jclass aActivityClazz, char* aBuffer, size_t aBufferLength)
 {
 	jmethodID getCacheDirId = aEnv->GetMethodID(aActivityClazz, "getCacheDir", "()Ljava/io/File;");
@@ -42,9 +24,7 @@ char* getCacheDir(JNIEnv *aEnv, jobject aActivity, jclass aActivityClazz, char* 
 	aEnv->ReleaseStringUTFChars(appCacheDirJs, appCacheDir);
 	return aBuffer;
 }
-
 #endif
-
 app::app(unsigned int const width, unsigned int const height)
 	: m_freetype_library{nullptr},
 	  m_window{nullptr},
@@ -52,7 +32,12 @@ app::app(unsigned int const width, unsigned int const height)
 	  m_sdl_target_texture{nullptr},
 	  m_target_texture{width, height},
 	  m_target_framerate_delay{0},
-	  m_last_fps{0}
+	  m_last_fps{0},
+#ifdef _WIN32
+	  m_path_separator{'\\'}
+#else
+	  m_path_separator{'/'}
+#endif
 {
 	if (_instance != nullptr)
 	{
@@ -109,32 +94,39 @@ app::app(unsigned int const width, unsigned int const height)
 		throw std::runtime_error(SDL_GetError());
 	}
 
-	set_target_framerate(60);
-#if __ANDROID__
+#if defined(__ANDROID__)
 	SDL_Log("<=== __ANDROID__");
 
 	JNIEnv *env = (JNIEnv*)SDL_AndroidGetJNIEnv();
 	jobject activity = (jobject)SDL_AndroidGetActivity();
 	jclass activityClazz(env->GetObjectClass(activity));
 
-	//<=== Print cacheDir
-	char buffer[BUFSIZ];
-	SDL_Log("Current dir %s", getCurrentDir(buffer, sizeof(buffer)/sizeof(*buffer)));
-	getCacheDir(env, activity, activityClazz, buffer, sizeof(buffer)/sizeof(*buffer));
-	SDL_Log("appCacheDir %s", buffer);
-	//===> Print cacheDir
-
-	//<== Change dir
-	SDL_Log("isPathExist %i", isPathExist(buffer));
-	changeDir(buffer);
-	SDL_Log("Current dir %s", getCurrentDir(buffer, sizeof(buffer)/sizeof(*buffer)));
-	//==> Change dir
+	char base_path[BUFSIZ];
+	getCacheDir(env, activity, activityClazz, base_path, sizeof(base_path)/sizeof(*base_path));
+	SDL_Log("appCacheDir %s", base_path);
 
 	env->DeleteLocalRef(activity);
 	env->DeleteLocalRef(activityClazz);
 
 	SDL_Log("__ANDROID__ ===>");
+#else
+	char* base_path{SDL_GetBasePath()};
 #endif
+	if (base_path != nullptr)
+	{
+#if !defined(__ANDROID__)
+		m_resources_path = std::string(base_path) + "resources" + m_path_separator;
+		SDL_free(base_path);
+#else
+		m_resources_path = std::string(base_path) + m_path_separator + "resources" + m_path_separator;
+#endif
+	}
+	else
+	{
+		throw std::runtime_error(SDL_GetError());
+	}
+
+	set_target_framerate(60);
 }
 
 app::~app()
@@ -261,6 +253,16 @@ FT_Library app::get_freetype_library() const
 unsigned int app::get_last_fps() const
 {
 	return m_last_fps;
+}
+
+std::string app::get_resources_path() const
+{
+	return m_resources_path;
+}
+
+char app::get_path_separator() const
+{
+	return m_path_separator;
 }
 
 app const* app::get_instance()

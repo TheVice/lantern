@@ -31,7 +31,7 @@ public class RasterizedTriangleAppNativeActivity extends org.libsdl.app.SDLActiv
     protected void onCreate(Bundle savedInstanceState) {
 
         final String cacheDir = getCacheDir().getAbsolutePath();
-        final File file = new File(cacheDir + "/resources");
+        final File file = new File(cacheDir + "/resources"); //app::get_resources_path()
         final String pathToApk = getPathToApk();
         final ZipFile zipFile = openZipFile(pathToApk);
         final Vector<String> files = listZip(zipFile);
