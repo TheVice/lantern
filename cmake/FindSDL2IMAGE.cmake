@@ -46,7 +46,5 @@ find_file(SDL2IMAGE_ZLIB_DLL
     bin
     lib/x86)
 
-include(FindPackageHandleStandardArgs)
-
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL2IMAGE
                                   REQUIRED_VARS SDL2IMAGE_LIBRARY SDL2IMAGE_INCLUDE_DIR)

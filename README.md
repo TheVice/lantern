@@ -23,10 +23,10 @@ Note that because it doesn't use GPU, it is much slower comparing to DirectX or 
 
 Lantern uses CMake as its build system.
 
-Simple scripts `configure.cmd` and `configure.sh` were created to simplify building process a little, though (output goes to `<lantern>/build` folder). Using:
+Simple scripts `configure.cmd` and `configure.sh` were created to simplify building process a little, though (output goes to `<lantern>/build` folder):
 * `configure.cmd MSVC18` - creates VS solution for Visual Studio 2013
-* `configure.cmd MSVC19` - creates VS solution for Visual Studio 2015 (only for CMake 3.1 and above)
-* `configure.cmd MinGW` - creates Eclipse project (on Windows host
+* `configure.cmd MSVC19` - creates VS solution for Visual Studio 2015
+* `configure.cmd MinGW` - creates Eclipse project (on Windows host)
 * `configure.sh gcc` - creates Eclipse project (on Linux host)
 
 On Linux you probably have to `chmod +x configure.sh` before running them or run it directly by bash: `bash configure.sh gcc`
@@ -40,20 +40,13 @@ You also have to have all the dependencies and tools installed (obviously). As a
  * `sudo apt-get install libgtest-dev`
 
 On Windows you have to specify a few environment variables for dependencies so that CMake's `find_package` will be able to find them:
- * `SDL2DIR` - path to SDL2 development library or source of this library
- * `SDL2IMAGEDIR` - path to SDL2_Image development library or source of this library
- * `FREETYPEDIR` - path to a folder containing FreeType's headers and library or source of this library
+ * `SDL2DIR` - path to SDL2 development library
+ * `SDL2IMAGEDIR` - path to SDL2_Image development library
+ * `FREETYPE_DIR` - path to a folder containing FreeType's headers and library
  * `GTEST_ROOT` - path to Google Tests source code folder (required only if you're going to build tests target)
+
+Note for Windows FreeType library: if you're building it by yourself, make sure that output library's name is `freetype.lib` and not `freetype26.lib` (that's what bundled [FindFreeType.cmake](https://github.com/Kitware/CMake/blob/5d0d980/Modules/FindFreetype.cmake#L93) looks for). It's also assumed for now that FreeType is compiled as a static library, otherwise you'll have to copy dll to resulting folder by yourself (or alter CMakeLists.txt a little)
 
 ###Known issues
 
-* If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 using VS 2015 - just download source package and after unpack source directory set to `SDL2DIR` path to that folder, just the same you do for binary package, or just download SDL2 build both package here: https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/
-* On Visual Studio 2015 (all 3rd party libraries made from source) in release mode rasterized_triangle_app failed to start:
-```Microsoft Visual C++ Runtime Library
-Debug Assertion Failed!
-
-Program: ...\rasterized_triangle_app\Release\rasterized_triangle_app.exe
-File: minkernel\crts\ucrt\src\appcrt\lowio\read.cpp
-Line: 378
-
-Expression: _osfile(fh) & FOPEN```
+* If you're facing linking problems in SDL2main library on VS 2015, you can recompile SDL2 by yourself using VS 2015, or just download SDL2 build bot package here: https://buildbot.libsdl.org/sdl-builds/sdl-visualstudio/
