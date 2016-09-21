@@ -1,16 +1,14 @@
 #ifndef LANTERN_APP_H
 #define LANTERN_APP_H
 
+#if !defined(__ANDROID__)
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#endif
 #include <string>
 #if !defined(__ANDROID__)
 #include "SDL.h"
 #else
-#define SDL_Window void
-#define SDL_Renderer void
-#define SDL_Texture void
-#define SDL_Keysym unsigned char
 #define Uint32 int
 #endif
 #include "renderer.h"
@@ -39,12 +37,12 @@ namespace lantern
 #else
 		int start(int* pixels);
 #endif
-
+#if !defined(__ANDROID__)
 		/** Gets FreeType library main object
 		* @returns Pointer to FreeType main object
 		*/
 		FT_Library get_freetype_library() const;
-
+#endif
 		/** Gets FPS
 		* @returns Last saved framerate
 		*/
@@ -85,13 +83,14 @@ namespace lantern
 		* @param delta_since_last_frame How many seconds passed since last frame
 		*/
 		virtual void frame(float const delta_since_last_frame) = 0;
-
+#if !defined(__ANDROID__)
 		/** Handles pressed key
 		* @param key Key that was pressed
 		*/
 		virtual void on_key_down(SDL_Keysym const key);
-
+#endif
 	private:
+#if !defined(__ANDROID__)
 		/** FreeType library main object */
 		FT_Library m_freetype_library;
 
@@ -103,7 +102,7 @@ namespace lantern
 
 		/** SDL texture we are using as a framebuffer */
 		SDL_Texture* m_sdl_target_texture;
-
+#endif
 		/** Texture we are using as a framebuffer, gets copied into according SDL_Texture to be shown on a screen */
 		texture m_target_texture;
 

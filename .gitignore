@@ -37,3 +37,7 @@ build/
 
 # Gradle
 .gradle/
+
+# Android Studio
+local.properties
+*.iml
