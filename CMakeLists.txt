@@ -80,7 +80,7 @@ set(TESTS_SOURCES
     tests/src/matrix3x3.cpp
     tests/src/matrix4x4.cpp
     tests/src/obj_import.cpp
-    tests/src/pipeline.cpp
+    # tests/src/pipeline.cpp
     tests/src/vector3.cpp
     tests/src/vector4.cpp)
 
