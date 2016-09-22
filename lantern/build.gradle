@@ -50,7 +50,3 @@ tasks.withType(JavaCompile) {
 }
 
 clean.dependsOn ndkClean
-
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-}
