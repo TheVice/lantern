@@ -1,76 +1,50 @@
 
 #include "org_lantern_Lantern.h"
+#include "AssetManager.h"
 #include "empty_app.h"
 #include "logging.h"
 
 static lantern::empty_app empty_app;
+
+void printTree(JNIEnv* env, jobject object, const char* path)
+{
+	const auto assets = AssetManager::list(env, object, path);
+
+	for (const auto& asset : assets)
+	{
+		LOGI(asset.c_str());
+		printTree(env, object, asset.c_str());
+	}
+}
 
 JNIEXPORT jint JNICALL Java_org_lantern_Lantern_set_1asset_1manager
 		(JNIEnv* env, jclass, jobject object)
 {
 	LOGI("Asset manager %p", object);
 
-	if (object)
+	const auto locales = AssetManager::getLocales(env, object);
+
+	for (const auto& local : locales)
 	{
-		jclass clazz = env->GetObjectClass(object);
-		LOGI("GetObjectClass %i", clazz);
-
-		// getLocales
-		{
-			jmethodID getLocalesID = env->GetMethodID(clazz, "getLocales", "()[Ljava/lang/String;");
-			LOGI("GetMethodID %i of getLocales", getLocalesID);
-
-			if (getLocalesID)
-			{
-				jobjectArray array = (jobjectArray) env->CallObjectMethod(object, getLocalesID);
-				LOGI("CallObjectMethod %i", array);
-
-				if (array)
-				{
-					jsize count = env->GetArrayLength(array);
-					LOGI("Array size %i", count);
-
-					for (jsize i = 0; i < count; ++i)
-					{
-						jboolean isCopy;
-						jstring pointer = (jstring) env->GetObjectArrayElement(array, i);
-						const char *localString = env->GetStringUTFChars(pointer, &isCopy);
-						LOGI("%i: %s", i, localString);
-						env->ReleaseStringUTFChars(pointer, localString);
-					}
-				}
-			}
-		}
-
-		// list
-		{
-			jmethodID methodID = env->GetMethodID(clazz, "list", "(Ljava/lang/String;)[Ljava/lang/String;");
-			LOGI("GetMethodID %i of list", methodID);
-
-			if (methodID)
-			{
-				jstring path = env->NewStringUTF("");
-				jobjectArray array = (jobjectArray) env->CallObjectMethod(object, methodID, path);
-				env->DeleteLocalRef(path);
-				LOGI("CallObjectMethod %i", array);
-
-				if (array)
-				{
-					jsize count = env->GetArrayLength(array);
-					LOGI("Array size %i", count);
-
-					for (jsize i = 0; i < count; ++i)
-					{
-						jboolean isCopy;
-						jstring pointer = (jstring) env->GetObjectArrayElement(array, i);
-						const char *localString = env->GetStringUTFChars(pointer, &isCopy);
-						LOGI("%i: %s", i, localString);
-						env->ReleaseStringUTFChars(pointer, localString);
-					}
-				}
-			}
-		}
+		LOGI(local.c_str());
 	}
+
+	printTree(env, object, "");
+
+	const auto fileData = AssetManager::open(env, object, "webkit/youtube.html");
+
+	if (!fileData.empty())
+	{
+		std::string data(fileData.size(), '\0');
+		std::memcpy(&data.front(), &fileData.front(), fileData.size());
+		LOGI("%i", fileData.size());
+		LOGI("%s", data.c_str());
+	}
+
+	/*for (const auto& singleByte : fileData)
+	{
+		LOGI("%i", singleByte);
+	}*/
 
 	return nullptr == object;
 }

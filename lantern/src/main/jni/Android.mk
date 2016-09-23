@@ -6,12 +6,16 @@ LOCAL_MODULE := lantern
 LOCAL_CPP_FEATURES := exceptions
 LOCAL_CPPFLAGS := -std=c++11 -O3 -s -DNDEBUG -ffast-math -Wall -Wextra -Werror
 
-# FILE_LIST := $(wildcard $(LOCAL_PATH)/../src/*.cpp))
-# LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
+FILE_LIST := $(wildcard $(LOCAL_PATH)/*.c)
+LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
 
-LOCAL_SRC_FILES := \
-	$(LOCAL_PATH)/logging.c \
-	$(LOCAL_PATH)/org_lantern_Lantern.cpp \
+FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
+LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
+
+# FILE_LIST := $(wildcard $(LOCAL_PATH)/../../../src/*.cpp)
+# LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
+
+LOCAL_SRC_FILES += \
 	$(LOCAL_PATH)/../../../src/application.cpp \
 	$(LOCAL_PATH)/../../../src/camera.cpp \
 	$(LOCAL_PATH)/../../../src/color.cpp \
