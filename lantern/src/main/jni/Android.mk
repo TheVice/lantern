@@ -10,6 +10,7 @@ LOCAL_CPPFLAGS := -std=c++11 -O3 -s -DNDEBUG -ffast-math -Wall -Wextra -Werror
 # LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
 
 LOCAL_SRC_FILES := \
+	$(LOCAL_PATH)/logging.c \
 	$(LOCAL_PATH)/org_lantern_Lantern.cpp \
 	$(LOCAL_PATH)/../../../src/application.cpp \
 	$(LOCAL_PATH)/../../../src/camera.cpp \

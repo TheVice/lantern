@@ -9,6 +9,14 @@ extern "C" {
 #endif
 /*
  * Class:     org_lantern_Lantern
+ * Method:    set_asset_manager
+ * Signature: (Ljava/lang/Object;)I
+ */
+JNIEXPORT jint JNICALL Java_org_lantern_Lantern_set_1asset_1manager
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     org_lantern_Lantern
  * Method:    initialize
  * Signature: (II)V
  */
