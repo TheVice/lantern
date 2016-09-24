@@ -1,3 +1,4 @@
+#if !defined(__ANDROID__)
 #include "ui_label.h"
 
 using namespace lantern;
@@ -117,3 +118,4 @@ void ui_label::update_mesh()
 	}
 
 }
+#endif

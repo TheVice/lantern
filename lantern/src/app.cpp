@@ -1,8 +1,7 @@
+#if !defined(__ANDROID__)
 #include <iostream>
 #include <stdexcept>
-#if !defined(__ANDROID__)
 #include <SDL_image.h>
-#endif
 #include "app.h"
 
 using namespace lantern;
@@ -10,15 +9,11 @@ using namespace lantern;
 app* app::_instance = nullptr;
 
 app::app(unsigned int const width, unsigned int const height)
-#if !defined(__ANDROID__)
 	: m_freetype_library{nullptr},
 	  m_window{nullptr},
 	  m_sdl_renderer{nullptr},
 	  m_sdl_target_texture{nullptr},
 	  m_target_texture{width, height},
-#else
-	: m_target_texture{width, height},
-#endif
 	  m_target_framerate_delay{0},
 	  m_last_fps{0},
 #ifdef _WIN32
@@ -33,7 +28,7 @@ app::app(unsigned int const width, unsigned int const height)
 	}
 
 	_instance = this;
-#if !defined(__ANDROID__)
+
 	// Initialize FreeType library
 	//
 	if (FT_Init_FreeType(&m_freetype_library))
@@ -92,10 +87,10 @@ app::app(unsigned int const width, unsigned int const height)
 	{
 		throw std::runtime_error(SDL_GetError());
 	}
-#endif
+
 	set_target_framerate(60);
 }
-#if !defined(__ANDROID__)
+
 app::~app()
 {
 	// Clean up FreeType library
@@ -132,12 +127,7 @@ app::~app()
 
 	SDL_Quit();
 }
-#else
-app::~app()
-{
-}
-#endif
-#if !defined(__ANDROID__)
+
 int app::start()
 {
 	bool running{true};
@@ -216,19 +206,12 @@ int app::start()
 
 	return 0;
 }
-#else
-int app::start(int* pixels)
-{
-	(void)pixels;
-	return 0;
-}
-#endif
-#if !defined(__ANDROID__)
+
 FT_Library app::get_freetype_library() const
 {
 	return m_freetype_library;
 }
-#endif
+
 unsigned int app::get_last_fps() const
 {
 	return m_last_fps;
@@ -258,12 +241,12 @@ renderer& app::get_renderer()
 {
 	return m_renderer;
 }
-#if !defined(__ANDROID__)
+
 void app::on_key_down(SDL_Keysym const)
 {
 	// Does not handle any key by default
 }
-#endif
+
 void app::set_target_framerate(unsigned int const fps)
 {
 	if (fps == 0)
@@ -275,3 +258,4 @@ void app::set_target_framerate(unsigned int const fps)
 		m_target_framerate_delay = 1000 / fps;
 	}
 }
+#endif

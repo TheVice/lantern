@@ -1,6 +1,6 @@
 #ifndef LANTERN_FONT_H
 #define LANTERN_FONT_H
-
+#if !defined(__ANDROID__)
 #include <string>
 #include <map>
 #include <ft2build.h>
@@ -80,5 +80,5 @@ namespace lantern
 		std::map<char, symbol const*> m_symbols_map;
 	};
 }
-
+#endif
 #endif // LANTERN_FONT_H

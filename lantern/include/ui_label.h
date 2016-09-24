@@ -1,6 +1,6 @@
 #ifndef LANTERN_UI_LABEL_H
 #define LANTERN_UI_LABEL_H
-
+#if !defined(__ANDROID__)
 #include <string>
 #include <vector>
 #include "ui_element_base.h"
@@ -68,5 +68,5 @@ namespace lantern
 		std::vector<mesh> m_meshes;
 	};
 }
-
+#endif
 #endif // LANTERN_UI_LABEL_H

@@ -1,5 +1,4 @@
 #if !defined(__ANDROID__)
-
 #include "app.h"
 
 using namespace lantern;
@@ -20,6 +19,11 @@ empty_app::empty_app(unsigned int const width, unsigned int const height)
 
 void empty_app::frame(float delta_since_last_frame)
 {
+}
+
+int main(int argc, char* argv[])
+{
+	return empty_app{640, 480}.start();
 }
 
 #else
@@ -65,15 +69,6 @@ void empty_app::frame(float dt)
 	application::frame(dt);
 }
 
-}
-
-#endif
-
-#if !defined(__ANDROID__)
-
-int main(int argc, char* argv[])
-{
-	return empty_app{640, 480}.start();
 }
 
 #endif

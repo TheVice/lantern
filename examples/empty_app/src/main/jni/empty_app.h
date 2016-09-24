@@ -10,9 +10,10 @@ class empty_app : public application::application
 {
 public:
 	empty_app();
+	virtual ~empty_app() {};
 
 public:
-	void frame(float dt) override;
+	virtual void frame(float dt) override;
 };
 
 }

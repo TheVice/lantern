@@ -1,4 +1,6 @@
 include ':lantern'
 include ':empty_app'
+include ':rasterized_triangle_app'
 
 project(':empty_app').projectDir = new File('examples/empty_app')
+project(':rasterized_triangle_app').projectDir = new File('examples/rasterized_triangle_app')

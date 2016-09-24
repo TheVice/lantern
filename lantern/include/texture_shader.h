@@ -89,6 +89,7 @@ namespace lantern
 
 	inline color texture_shader::process_pixel(vector2ui const& pixel)
 	{
+		(void)pixel;
 		// No filtration for now, use nearest neighbour
 		return m_texture->get_pixel_color(
 			vector2ui{

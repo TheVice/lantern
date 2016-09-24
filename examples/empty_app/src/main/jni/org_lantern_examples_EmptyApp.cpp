@@ -35,8 +35,12 @@ JNIEXPORT void JNICALL Java_org_lantern_examples_EmptyApp_set_1asset_1manager
 	{
 		std::string data(fileData.size(), '\0');
 		std::memcpy(&data.front(), &fileData.front(), fileData.size());
-		LOGI("%i", fileData.size());
+		LOGI("Asset size - %i", fileData.size());
 		LOGI("%s", data.c_str());
+	}
+	else
+	{
+		LOGW("Could not locate asset resource");
 	}
 }
 

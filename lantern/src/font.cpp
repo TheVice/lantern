@@ -1,3 +1,4 @@
+#if !defined(__ANDROID__)
 #include <stdexcept>
 #include "font.h"
 #include "app.h"
@@ -113,3 +114,4 @@ symbol const* font::get_symbol(char c)
 		return find_result->second;
 	}
 }
+#endif

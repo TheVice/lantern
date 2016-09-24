@@ -75,6 +75,7 @@ namespace lantern
 
 	inline color color_shader::process_pixel(vector2ui const& pixel)
 	{
+		(void)pixel;
 		// Just return interpolated color value
 		return m_color;
 	}

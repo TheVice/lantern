@@ -2,6 +2,7 @@
 #define _APPLICATION_H_
 
 #include "renderer.h"
+#include <memory>
 
 namespace application
 {
@@ -26,8 +27,8 @@ public:
 	lantern::renderer& get_renderer();
 
 private:
-	lantern::texture* m_target_texture;
-	lantern::renderer* m_renderer;
+	std::unique_ptr<lantern::texture> m_target_texture;
+	std::unique_ptr<lantern::renderer> m_renderer;
 };
 
 }
