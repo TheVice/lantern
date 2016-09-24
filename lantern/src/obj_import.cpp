@@ -15,6 +15,11 @@ void obj_reader::read(std::string const& path)
 		throw std::runtime_error("Could not open file: " + path);
 	}
 
+	read(file_stream);
+}
+
+void obj_reader::read(std::istream& input_stream)
+{
 	on_reading_started();
 
 	// Read line-by-line
@@ -22,7 +27,7 @@ void obj_reader::read(std::string const& path)
 	std::string line;
 	parse_face_function parse_face{nullptr};
 
-	while(std::getline(file_stream, line))
+	while(std::getline(input_stream, line))
 	{
 		// Skip comments
 		//
@@ -74,7 +79,7 @@ void obj_reader::read(std::string const& path)
 			on_face_def_ended();
 		}
 
-		file_stream >> std::ws;
+		input_stream >> std::ws;
 	}
 
 	on_reading_ended();
@@ -211,17 +216,22 @@ void obj_reader::on_reading_ended()
 
 void obj_reader::on_vertex_def(float const x, float const y, float const z)
 {
-
+	(void)x;
+	(void)y;
+	(void)z;
 }
 
 void obj_reader::on_texcoord_def(float const x, float const y)
 {
-
+	(void)x;
+	(void)y;
 }
 
 void obj_reader::on_normal_def(float const x, float const y, float const z)
 {
-
+	(void)x;
+	(void)y;
+	(void)z;
 }
 
 void obj_reader::on_face_def_started()
@@ -236,17 +246,23 @@ void obj_reader::on_face_def_ended()
 
 void obj_reader::on_face_pos_def(unsigned int vertex_index0, unsigned int vertex_index1, unsigned int vertex_index2)
 {
-
+	(void)vertex_index0;
+	(void)vertex_index1;
+	(void)vertex_index2;
 }
 
 void obj_reader::on_face_texcoord_def(unsigned int texcoord_index0, unsigned int texcoord_index1, unsigned int texcoord_index2)
 {
-
+	(void)texcoord_index0;
+	(void)texcoord_index1;
+	(void)texcoord_index2;
 }
 
 void obj_reader::on_face_normal_def(unsigned int normal_index0, unsigned int normal_index1, unsigned int normal_index2)
 {
-
+	(void)normal_index0;
+	(void)normal_index1;
+	(void)normal_index2;
 }
 
 // obj_mesh_importer

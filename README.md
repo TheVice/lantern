@@ -24,8 +24,8 @@ Note that because it doesn't use GPU, it is much slower comparing to DirectX or 
 Lantern uses CMake as its build system.
 
 Simple scripts `configure.cmd` and `configure.sh` were created to simplify building process a little, though (output goes to `<lantern>/build` folder):
-* `configure.cmd MSVC18` - creates VS solution for Visual Studio 2013
 * `configure.cmd MSVC19` - creates VS solution for Visual Studio 2015
+* `configure.cmd MSVC18` - creates VS solution for Visual Studio 2013
 * `configure.cmd MinGW` - creates Eclipse project (on Windows host)
 * `configure.sh gcc` - creates Eclipse project (on Linux host)
 

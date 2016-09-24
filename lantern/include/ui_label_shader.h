@@ -101,6 +101,7 @@ namespace lantern
 
 	inline color ui_label_shader::process_pixel(vector2ui const& pixel)
 	{
+		(void)pixel;
 		color symbol_color = m_symbol_texture->get_pixel_color(
 			vector2ui{
 			static_cast<unsigned int>(m_symbol_texture->get_width() * m_uv.x),

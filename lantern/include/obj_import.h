@@ -17,6 +17,8 @@ namespace lantern
 		*/
 		void read(std::string const& path);
 
+		void read(std::istream& input_stream);
+
 		typedef void (obj_reader::*parse_face_function)(std::istringstream&);
 
 	protected:
