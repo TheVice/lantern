@@ -12,6 +12,15 @@ LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
 FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
 LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
 
+FILE_LIST := $(wildcard $(LOCAL_PATH)/../../../../examples/empty_app/src/main/jni/*.c)
+LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
+
+FILE_LIST := $(wildcard $(LOCAL_PATH)/../../../../examples/empty_app/src/main/jni/*.cpp)
+LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
+
+LOCAL_SRC_FILES += \
+	$(LOCAL_PATH)/../../../../examples/empty_app/main.cpp
+
 # FILE_LIST := $(wildcard $(LOCAL_PATH)/../../../src/*.cpp)
 # LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
 
@@ -30,10 +39,12 @@ LOCAL_SRC_FILES += \
 	$(LOCAL_PATH)/../../../src/renderer.cpp \
 	$(LOCAL_PATH)/../../../src/texture.cpp \
 	$(LOCAL_PATH)/../../../src/ui_element_base.cpp \
-	$(LOCAL_PATH)/../../../src/vector4.cpp \
-	$(LOCAL_PATH)/../../../../examples/empty_app/main.cpp
+	$(LOCAL_PATH)/../../../src/vector4.cpp
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH) $(LOCAL_PATH)/../../../include
+LOCAL_C_INCLUDES := $(LOCAL_PATH) \
+	$(LOCAL_PATH)/../../../include \
+	$(LOCAL_PATH)/../../../../examples/empty_app/src/main/jni
+
 LOCAL_LDLIBS := -llog
 
 include $(BUILD_SHARED_LIBRARY)

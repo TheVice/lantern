@@ -1,5 +1,5 @@
 
-#include "org_lantern_Lantern.h"
+#include "org_lantern_examples_EmptyApp.h"
 #include "AssetManager.h"
 #include "empty_app.h"
 #include "logging.h"
@@ -17,11 +17,9 @@ void printTree(JNIEnv* env, jobject object, const char* path)
 	}
 }
 
-JNIEXPORT jint JNICALL Java_org_lantern_Lantern_set_1asset_1manager
-		(JNIEnv* env, jclass, jobject object)
+JNIEXPORT void JNICALL Java_org_lantern_examples_EmptyApp_set_1asset_1manager
+(JNIEnv* env, jclass, jobject object)
 {
-	LOGI("Asset manager %p", object);
-
 	const auto locales = AssetManager::getLocales(env, object);
 
 	for (const auto& local : locales)
@@ -40,22 +38,15 @@ JNIEXPORT jint JNICALL Java_org_lantern_Lantern_set_1asset_1manager
 		LOGI("%i", fileData.size());
 		LOGI("%s", data.c_str());
 	}
-
-	/*for (const auto& singleByte : fileData)
-	{
-		LOGI("%i", singleByte);
-	}*/
-
-	return nullptr == object;
 }
 
-JNIEXPORT void JNICALL Java_org_lantern_Lantern_initialize
+JNIEXPORT void JNICALL Java_org_lantern_examples_EmptyApp_initialize
 (JNIEnv *, jclass, jint width, jint height)
 {
 	empty_app.initialize(width, height);
 }
 
-JNIEXPORT void JNICALL Java_org_lantern_Lantern_frame
+JNIEXPORT void JNICALL Java_org_lantern_examples_EmptyApp_frame
 (JNIEnv* env, jclass, jfloat dt, jint width, jint height, jintArray area)
 {
 	empty_app.frame(dt);
@@ -65,4 +56,6 @@ JNIEXPORT void JNICALL Java_org_lantern_Lantern_frame
 	//
 	env->SetIntArrayRegion(area, 0, width * height, elements);
 	env->ReleaseIntArrayElements(area, elements, 0);
+	//
+	LOGI("onFrame");
 }

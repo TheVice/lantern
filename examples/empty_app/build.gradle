@@ -12,11 +12,12 @@ android {
         versionName "1.0"
     }
 
-    /*sourceSets.main {
-        java.srcDirs = ['java']
+    sourceSets.main {
+        jni.srcDirs = []
+        /* java.srcDirs = ['java']
         manifest.srcFile 'AndroidManifest.xml'
-        resources.srcDir('res')
-    }*/
+        resources.srcDir('res') */
+    }
 
     signingConfigs {
         release {

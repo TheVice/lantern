@@ -98,10 +98,6 @@ std::vector<int8_t> AssetManager::open(JNIEnv* env, jobject object, const char* 
 			while (-1 != (readCount = env->CallIntMethod(inputStreamObject, inputStreamMethodID, buffer, 0, bufferLength)))
 			{
 				jbyte* pointer = env->GetByteArrayElements(buffer, 0);
-				/*for (jint i = 0; i < readCount; ++i)
-				{
-					LOGI("%i", pointer[i]);
-				}*/
 				fileContent.insert(fileContent.end(), pointer, pointer + readCount);
 			}
 
