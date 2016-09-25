@@ -19,6 +19,8 @@ namespace lantern
 
 		void read(std::istream& input_stream);
 
+		void read_from_string(std::string const& input_string);
+
 		typedef void (obj_reader::*parse_face_function)(std::istringstream&);
 
 	protected:
@@ -86,6 +88,8 @@ namespace lantern
 		* @param stream Face definition string stream
 		*/
 		void parse_face_vertex(std::istringstream& stream);
+
+		void parse_face_vertex(std::string const & input_string);
 
 		/** Parses vertex and normal face defintiion
 		* @param stream Face definition string stream

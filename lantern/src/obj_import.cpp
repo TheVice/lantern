@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -85,6 +86,102 @@ void obj_reader::read(std::istream& input_stream)
 	on_reading_ended();
 }
 
+bool getline(std::string const& input_string, std::string& line, size_t start_line_position)
+{
+	const auto input_string_length = input_string.length();
+
+	if (start_line_position >= input_string_length)
+	{
+		return false;
+	}
+
+	auto end_line_position = input_string.find('\n', start_line_position);
+
+	if (std::string::npos == end_line_position)
+	{
+		end_line_position = input_string_length;
+	}
+
+	line.reserve(end_line_position - start_line_position);
+	line.clear();
+	line.insert(line.end(), &input_string[start_line_position], &input_string[end_line_position]);
+
+	return true;
+}
+
+void obj_reader::read_from_string(std::string const& input_string)
+{
+	on_reading_started();
+
+	// Read line-by-line
+	//
+	std::string line;
+	auto position = line.length();
+
+	while (getline(input_string, line, position))
+	{
+		position += 1 + line.length();
+
+		if (line.empty())
+		{
+			continue;
+		}
+
+		// Skip comments
+		//
+		if (line[0] == '#')
+		{
+			continue;
+		}
+
+		// Process each definition
+		//
+
+		if (line.length() > 1 && line[0] == 'v' && line[1] == ' ')
+		{
+			const auto pos1 = line.find(' ', 0);
+			const auto pos2 = line.find(' ', pos1 + 1);
+			const auto pos3 = line.find(' ', pos2 + 1);
+			//
+			float x = atof(&line.front() + pos1);
+			float y = atof(&line.front() + pos2);
+			float z = atof(&line.front() + pos3);
+			//
+			on_vertex_def(x, y, z);
+		}
+		else if (line.length() > 1 && line[0] == 'v' && line[1] == 'n')
+		{
+			const auto pos1 = line.find(' ', 0);
+			const auto pos2 = line.find(' ', pos1 + 1);
+			const auto pos3 = line.find(' ', pos2 + 1);
+			//
+			float x = atof(&line.front() + pos1);
+			float y = atof(&line.front() + pos2);
+			float z = atof(&line.front() + pos3);
+			//
+			on_normal_def(x, y, z);
+		}
+		else if (line.length() > 1 && line[0] == 'v' && line[1] == 't')
+		{
+			const auto pos1 = line.find(' ', 0);
+			const auto pos2 = line.find(' ', pos1 + 1);
+			//
+			float x = atof(&line.front() + pos1);
+			float y = atof(&line.front() + pos2);
+			//
+			on_texcoord_def(x, y);
+		}
+		else if (line[0] == 'f')
+		{
+			on_face_def_started();
+			parse_face_vertex(line);
+			on_face_def_ended();
+		}
+	}
+
+	on_reading_ended();
+}
+
 obj_reader::parse_face_function obj_reader::get_parse_function(std::string face_definition)
 {
 	std::istringstream stream{face_definition};
@@ -129,6 +226,19 @@ void obj_reader::parse_face_vertex(std::istringstream& stream)
 {
 	unsigned int index0, index1, index2;
 	stream >> index0 >> index1 >> index2;
+
+	on_face_pos_def(index0 - 1, index1 - 1, index2 - 1);
+}
+
+void obj_reader::parse_face_vertex(std::string const & input_string)
+{
+	const auto pos1 = input_string.find(' ', 0);
+	const auto pos2 = input_string.find(' ', pos1 + 1);
+	const auto pos3 = input_string.find(' ', pos2 + 1);
+
+	unsigned int index0 = atoi(&input_string.front() + pos1);
+	unsigned int index1 = atoi(&input_string.front() + pos2);
+	unsigned int index2 = atoi(&input_string.front() + pos3);
 
 	on_face_pos_def(index0 - 1, index1 - 1, index2 - 1);
 }
@@ -362,8 +472,7 @@ mesh lantern::load_mesh_from_obj(std::string const& path, bool const read_texcoo
 	#if !defined(__ANDROID__)
 	importer.read(path);
 	#else
-	std::istringstream string_stream(path);
-	importer.read(string_stream);
+	importer.read_from_string(path);
 	#endif
 
 	return importer.get_mesh();
