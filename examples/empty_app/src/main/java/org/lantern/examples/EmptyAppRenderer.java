@@ -43,6 +43,21 @@ public class EmptyAppRenderer extends GLSurfaceView
         super(context);
     }
 
+    private static int getHighThanInPowerOf2(int in) {
+
+        int inPowerOfTwo = 2;
+
+        while (true) {
+
+            if (inPowerOfTwo > in || inPowerOfTwo == in) {
+
+                return inPowerOfTwo;
+            }
+
+            inPowerOfTwo *= 2;
+        }
+    }
+
     /**
      * Called to draw the current frame.
      *
@@ -52,14 +67,12 @@ public class EmptyAppRenderer extends GLSurfaceView
     @Override
     public void onDrawFrame(GL10 gl) {
 
-        EmptyApp.frame(0.0f, 4 * bitmap.getWidth(), bitmap.getHeight(), area);
+        EmptyApp.frame(0.0f, bitmap.getWidth(), bitmap.getHeight(), area);
         bitmap = bitmap.copy(bitmap.getConfig(), true);
         bitmap.setPixels(area, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
 
         gl.glVertexPointer(2, GL10.GL_FLOAT, 0, vertexBuffer);
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        //gl.glColorPointer(4, GL10.GL_UNSIGNED_BYTE, 0, mColorBuffer);
-        //gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
 
         gl.glEnable(GL10.GL_TEXTURE_2D);
         gl.glEnable(GL10.GL_BLEND);
@@ -68,19 +81,19 @@ public class EmptyAppRenderer extends GLSurfaceView
 
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
+
         gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
         gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
         gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
 
         gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-        //gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
 
         gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
 
-        /*gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-        gl.glClearColor(0.392f, 0.584f, 0.929f, 1.0f);*/
+        // gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+        // gl.glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
     }
 
     /**
@@ -94,16 +107,22 @@ public class EmptyAppRenderer extends GLSurfaceView
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
 
-        area = new int[4 * width * height];
-        EmptyApp.initialize(width, height);
-        bitmap = Bitmap.createBitmap(area, 0, width, width, height, Bitmap.Config.ARGB_8888);
-
         gl.glViewport(0, 0, width, height);
+        gl.glPixelStorei(gl.GL_PACK_ALIGNMENT, 1);
+
+        int widthInPowerOf2 = getHighThanInPowerOf2(width);
+        int heightInPowerOf2 = getHighThanInPowerOf2(height);
+
+        area = new int[4 * widthInPowerOf2 * heightInPowerOf2];
+        bitmap = Bitmap.createBitmap(area, 0, widthInPowerOf2, widthInPowerOf2, heightInPowerOf2, Bitmap.Config.ARGB_8888);
+
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
+
+        EmptyApp.initialize(widthInPowerOf2, heightInPowerOf2);
     }
 
     /**

@@ -56,7 +56,8 @@ JNIEXPORT void JNICALL Java_org_lantern_examples_EmptyApp_frame
 	empty_app.frame(dt);
 	//
 	jint* elements = env->GetIntArrayElements(area, 0);
-	std::memcpy(elements, empty_app.get_target_texture().get_data(), width * height);
+	std::memcpy(elements, empty_app.get_target_texture().get_data(), 4 * width * height);
+	// std::memcpy(elements, empty_app.get_target_texture().get_data(), 4 * empty_app.get_target_texture().get_width() * empty_app.get_target_texture().get_height());
 	//
 	env->SetIntArrayRegion(area, 0, width * height, elements);
 	env->ReleaseIntArrayElements(area, elements, 0);
