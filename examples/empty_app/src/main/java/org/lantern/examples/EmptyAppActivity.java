@@ -12,12 +12,16 @@ public class EmptyAppActivity extends Activity {
     private SurfaceView surfaceView;
     private EmptyAppHolder holder;
     private SurfaceHolder surfaceHolder;
+    private EmptyAppRenderer renderer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        renderer = new EmptyAppRenderer(this);
+        renderer.setRenderer(renderer);
+        setContentView(renderer);
+        /*setContentView(R.layout.main);
 
         manager = getAssets();
         EmptyApp.set_asset_manager(manager);
@@ -26,7 +30,7 @@ public class EmptyAppActivity extends Activity {
         surfaceHolder = surfaceView.getHolder();
         holder = new EmptyAppHolder();
         surfaceHolder.addCallback(holder);
-        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_NORMAL);
+        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_NORMAL);*/
     }
 
 }
