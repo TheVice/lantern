@@ -16,8 +16,8 @@ application::~application()
 
 void application::initialize(int width, int height)
 {
-	m_target_texture = std::make_unique<lantern::texture>(width, height);
-	m_renderer = std::make_unique<lantern::renderer>();
+	m_target_texture.reset(new lantern::texture(width, height));
+	m_renderer.reset(new lantern::renderer());
 }
 
 void application::frame(float)

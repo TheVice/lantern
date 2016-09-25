@@ -2,6 +2,7 @@
 #define LANTERN_VECTOR3_H
 
 #include "math_common.h"
+#include "color.h"
 
 namespace lantern
 {
@@ -98,6 +99,13 @@ namespace lantern
 	template<typename T>
 	inline vector3<T>::vector3()
 		: x{}, y{}, z{}
+	{
+
+	}
+
+	template<>
+	inline vector3<color>::vector3()
+		: x{0.0f, 0.0f, 0.0f, 1.0f}, y{0.0f, 0.0f, 0.0f, 1.0f}, z{0.0f, 0.0f, 0.0f, 1.0f}
 	{
 
 	}
