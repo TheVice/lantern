@@ -40,6 +40,7 @@ public:
 protected:
 	WNDCLASSEX mWindow;
 	HWND mWindowHandle;
+	TCHAR mModulePath[MAX_PATH + 1];
 
 protected:
 	static std::vector<MessageHandler> sHandlers;

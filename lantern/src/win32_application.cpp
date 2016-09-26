@@ -1,5 +1,6 @@
 
 #include "win32_application.h"
+#include <tchar.h>
 
 #if defined(WIN32)
 
@@ -9,9 +10,17 @@ namespace application
 win32_application::win32_application(HINSTANCE hinstance) :
 	application(),
 	mWindow(),
-	mWindowHandle(HWND_DESKTOP)
+	mWindowHandle(HWND_DESKTOP),
+	mModulePath()
 {
 	mWindow.hInstance = hinstance;
+	GetModuleFileName(nullptr, mModulePath, MAX_PATH);
+	auto baseNameStart = _tcsrchr(mModulePath, '\\');
+	if (baseNameStart)
+	{
+		baseNameStart += 1;
+		*baseNameStart = '\0';
+	}
 }
 
 win32_application::~win32_application()

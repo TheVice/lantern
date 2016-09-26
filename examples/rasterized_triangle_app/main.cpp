@@ -1,5 +1,6 @@
 #include <sstream>
 #include "app.h"
+#include "gdi_application.h"
 #include "obj_import.h"
 #include "camera.h"
 #include "color_shader.h"
@@ -229,9 +230,228 @@ void rasterized_color_triangle_app::update_shader_mvp()
 		m_texture_shader.set_mvp_matrix(local_to_clip_transform);
 	}
 }
+#if defined(WIN32)
+class rasterized_triangle_app : public application::gdi_application
+{
+public:
+	rasterized_triangle_app();
+	virtual ~rasterized_triangle_app();
 
+	void initialize(int width, int height) override;
+	void frame(float dt) override;
+	void on_key_down(unsigned char key) override;
+
+private:
+	/** Updates view-model-projection matrix and gives it to the shader */
+	void update_shader_mvp();
+
+	vector3f const m_triangle_position;
+	vector3f const m_triangle_rotation;
+	std::unique_ptr<mesh> m_triangle_mesh;
+
+	std::unique_ptr<camera> m_camera;
+
+	color_shader m_color_shader;
+
+private:
+	static rasterized_triangle_app* instance;
+	static void key_down(unsigned char key) { instance->on_key_down(key); }
+};
+
+rasterized_triangle_app* rasterized_triangle_app::instance = nullptr;
+
+rasterized_triangle_app::rasterized_triangle_app() :
+	gdi_application(GetModuleHandle(nullptr)),
+	m_triangle_position{0.0f, 0.0f, 1.5f},
+	m_triangle_rotation{vector3f{0.0f, 0.0f, 0.0f}},
+	m_triangle_mesh(nullptr),
+	m_camera(nullptr),
+	m_color_shader()
+{
+}
+
+rasterized_triangle_app::~rasterized_triangle_app()
+{
+}
+
+void rasterized_triangle_app::initialize(int width, int height)
+{
+	instance = this;
+	sHandlers.push_back(::application::MessageHandler(WM_KEYDOWN, [](HWND, WPARAM wParam, LPARAM) -> LRESULT
+	{
+		key_down(wParam);
+		return 0;
+	}));
+
+	/*sHandlers.push_back(::application::MessageHandler(WM_SYSKEYDOWN, [](HWND, WPARAM, LPARAM) -> LRESULT
+	{
+		//on_key_down();
+		return 0;
+	}));*/
+
+	std::string resourcePath(mModulePath);
+	resourcePath += "resources/triangle.obj";
+
+	{
+		m_triangle_mesh.reset(new mesh(
+			load_mesh_from_obj(resourcePath, false, false)));
+		//
+		m_camera.reset(new camera(
+			vector3f{0.0f, 0.0f, 0.0f},
+			vector3f{0.0f, 0.0f, 1.0f},
+			vector3f{0.0f, 1.0f, 0.0f},
+			static_cast<float>(M_PI) / 2.0f,
+			static_cast<float>(height) / static_cast<float>(width),
+			0.01f,
+			20.0f));
+		// Update model-view-projection matrix for the first time
+		update_shader_mvp();
+
+		std::vector<unsigned int> const indices{0, 1, 2};
+
+		// Add color attribute to triangle mesh
+		//
+		std::vector<color> const colors{color::GREEN.with_alpha(0.0f), color::RED.with_alpha(0.0f), color::BLUE.with_alpha(1.0f)};
+		mesh_attribute_info<color> const color_info{COLOR_ATTR_ID, colors, indices, attribute_interpolation_option::linear};
+		m_triangle_mesh->get_color_attributes().push_back(color_info);
+
+		// Add uv attribute to triangle mesh
+		//
+		std::vector<vector2f> uvs{vector2f{0.5f, 0.0f}, vector2f{0.0f, 1.0f}, vector2f{1.0f, 1.0f}};
+		mesh_attribute_info<vector2f> uv_info{TEXCOORD_ATTR_ID, uvs, indices, attribute_interpolation_option::perspective_correct};
+		m_triangle_mesh->get_vector2f_attributes().push_back(uv_info);
+
+		// This enables alpha blending
+		//
+		// get_pipeline().get_merger().set_alpha_blending_enabled(true);
+	}
+
+	gdi_application::initialize(width, height);
+}
+
+void rasterized_triangle_app::frame(float dt)
+{
+	// Draw the triangle
+	//
+	if (m_triangle_mesh.get())
+	{
+		get_renderer().render_mesh(*m_triangle_mesh.get(), m_color_shader, get_target_texture());
+	}
+
+	gdi_application::frame(dt);
+}
+
+void rasterized_triangle_app::on_key_down(unsigned char key)
+{
+	gdi_application::on_key_down(key);
+
+	float const moving_speed{0.01f};
+	float const rotation_speed{0.05f};
+
+	switch (key)
+	{
+		case 'A':
+			m_camera->move_left(moving_speed);
+			break;
+		case 'D':
+			m_camera->move_right(moving_speed);
+			break;
+		case 'W':
+			m_camera->move_forward(moving_speed);
+			break;
+		case 'S':
+			m_camera->move_backward(moving_speed);
+			break;
+		case 'R':
+			m_camera->move_up(moving_speed);
+			break;
+		case 'F':
+			m_camera->move_down(moving_speed);
+			break;
+		case 'Q':
+			m_camera->yaw(-rotation_speed);
+			break;
+		case 'E':
+			m_camera->yaw(rotation_speed);
+			break;
+		/*case '1':
+			m_shader_option = shader_option::color;
+			break;
+		case '2':
+			m_shader_option = shader_option::texture;
+			break;*/
+		case VK_ESCAPE:
+			PostQuitMessage(0);
+			return;
+		default:
+			break;
+	}
+
+	// Update model-view-projection according to camera changes
+	update_shader_mvp();
+}
+
+void rasterized_triangle_app::update_shader_mvp()
+{
+	matrix4x4f const local_to_world_transform{
+		matrix4x4f::rotation_around_x_axis(m_triangle_rotation.x) *
+		matrix4x4f::rotation_around_y_axis(m_triangle_rotation.y) *
+		matrix4x4f::rotation_around_z_axis(m_triangle_rotation.z) *
+		matrix4x4f::translation(m_triangle_position.x, m_triangle_position.y, m_triangle_position.z)};
+
+	matrix4x4f const camera_rotation{
+		m_camera->get_right().x, m_camera->get_up().x, m_camera->get_forward().x, 0.0f,
+		m_camera->get_right().y, m_camera->get_up().y, m_camera->get_forward().y, 0.0f,
+		m_camera->get_right().z, m_camera->get_up().z, m_camera->get_forward().z, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f};
+
+	matrix4x4f const camera_translation{
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		-m_camera->get_position().x, -m_camera->get_position().y, -m_camera->get_position().z, 1.0f};
+
+	matrix4x4f const world_to_camera_transform{camera_translation * camera_rotation};
+
+	matrix4x4f const camera_to_clip_transform{
+		matrix4x4f::clip_space(
+			m_camera->get_horizontal_fov(),
+			m_camera->get_vertical_fov(),
+			m_camera->get_near_plane_z(),
+			m_camera->get_far_plane_z())};
+
+	matrix4x4f const local_to_clip_transform{
+		local_to_world_transform * world_to_camera_transform * camera_to_clip_transform};
+
+
+	m_color_shader.set_mvp_matrix(local_to_clip_transform);
+}
+
+#endif
 int main(int argc, char* argv[])
 {
+#if !defined(WIN32)
 	return rasterized_color_triangle_app{640, 480}.start();
+#else
+	rasterized_triangle_app appication;
+	appication.initialize(640, 480);
+	MSG msg = { 0 };
+
+	do
+	{
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else
+		{
+			appication.frame(0.0f);
+		}
+	}
+	while (WM_QUIT != msg.message);
+
+	return 0;
+#endif
 }
 
