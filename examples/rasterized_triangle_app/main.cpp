@@ -283,12 +283,6 @@ void rasterized_triangle_app::initialize(int width, int height)
 		return 0;
 	}));
 
-	/*sHandlers.push_back(::application::MessageHandler(WM_SYSKEYDOWN, [](HWND, WPARAM, LPARAM) -> LRESULT
-	{
-		//on_key_down();
-		return 0;
-	}));*/
-
 	std::string resourcePath(mModulePath);
 	resourcePath += "resources/triangle.obj";
 
@@ -331,12 +325,10 @@ void rasterized_triangle_app::initialize(int width, int height)
 
 void rasterized_triangle_app::frame(float dt)
 {
+	get_target_texture().clear(0);
 	// Draw the triangle
 	//
-	if (m_triangle_mesh.get())
-	{
-		get_renderer().render_mesh(*m_triangle_mesh.get(), m_color_shader, get_target_texture());
-	}
+	get_renderer().render_mesh(*m_triangle_mesh.get(), m_color_shader, get_target_texture());
 
 	gdi_application::frame(dt);
 }

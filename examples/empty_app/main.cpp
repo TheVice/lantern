@@ -41,6 +41,8 @@ empty_application::~empty_application()
 #define colorInt2Float(value) (static_cast<float>(value) / 255)
 void empty_application::frame(float dt)
 {
+	get_target_texture().clear(0);
+
 	const auto barSize = get_target_texture().get_width() / 8;
 
 	for (auto j = 0u; j < get_target_texture().get_height(); ++j)
