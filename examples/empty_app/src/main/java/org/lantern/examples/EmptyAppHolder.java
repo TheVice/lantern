@@ -16,8 +16,7 @@ public class EmptyAppHolder implements SurfaceHolder.Callback {
         final int width = canvas.getWidth();
         final int height = canvas.getHeight();
         EmptyApp.initialize(width, height);
-        final int stride = 4 * width;
-        area = new int[stride * height];
+        area = new int[4 * width * height];
         holder.unlockCanvasAndPost(canvas);
     }
 
@@ -25,8 +24,7 @@ public class EmptyAppHolder implements SurfaceHolder.Callback {
     public void surfaceChanged(
             SurfaceHolder holder, int format, int width, int height) {
 
-        final int stride = 4 * width;
-        EmptyApp.frame(0.0f, stride, height, area);
+        EmptyApp.frame(0.0f, width, height, area);
         Bitmap bitmap = Bitmap.createBitmap(area, 0, width, width, height, Bitmap.Config.ARGB_8888);
         final Canvas canvas =  holder.lockCanvas();
         canvas.drawBitmap(bitmap, 0, 0, new Paint());

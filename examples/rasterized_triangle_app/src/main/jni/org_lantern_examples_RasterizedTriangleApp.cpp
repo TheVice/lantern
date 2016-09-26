@@ -8,8 +8,8 @@ extern void printTree(JNIEnv* env, jobject object, const char* path);
 
 static lantern::rasterized_triangle_app rasterized_triangle_app;
 
-JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_initialize
-(JNIEnv* env, jclass, jobject object, jint width, jint height)
+JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_set_1asset_1manager
+(JNIEnv* env, jclass, jobject object)
 {
 	printTree(env, object, "");
 
@@ -23,12 +23,17 @@ JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_initializ
 		std::memcpy(&data.front(), &fileData.front(), fileData.size());
 		//
 		lantern::rasterized_triangle_app::mResources["triangle.obj"] = data;
-		rasterized_triangle_app.initialize(width, height);
 	}
 	else
 	{
 		LOGW("Could not locate asset resource");
 	}
+}
+
+JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_initialize
+(JNIEnv*, jclass, jint width, jint height)
+{
+	rasterized_triangle_app.initialize(width, height);
 }
 
 JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_frame
@@ -37,8 +42,14 @@ JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_frame
 	rasterized_triangle_app.frame(dt);
 	//
 	jint* elements = env->GetIntArrayElements(area, 0);
-	std::memcpy(elements, rasterized_triangle_app.get_target_texture().get_data(), width * height);
+	std::memcpy(elements, rasterized_triangle_app.get_target_texture().get_data(), 4 * width * height);
 	//
 	env->SetIntArrayRegion(area, 0, width * height, elements);
 	env->ReleaseIntArrayElements(area, elements, 0);
+}
+
+JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_on_1key_1down
+(JNIEnv *, jclass, jshort key)
+{
+	rasterized_triangle_app.on_key_down(static_cast<unsigned char>(key));
 }

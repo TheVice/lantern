@@ -2,6 +2,13 @@
 #include "AssetManager.h"
 #include "InputStream.h"
 
+void AssetManager::close(JNIEnv* env, jobject object)
+{
+	const jclass clazz = env->GetObjectClass(object);
+	const jmethodID methodID = env->GetMethodID(clazz, "close", "()V");
+	env->CallVoidMethod(object, methodID);
+}
+
 std::vector<std::string> AssetManager::getLocales(JNIEnv* env, jobject object)
 {
 	std::vector<std::string> locales;
@@ -84,6 +91,8 @@ std::vector<int8_t> AssetManager::open(JNIEnv* env, jobject object, const char* 
 		const jint bufferLength = InputStream::available(env, inputStreamObject);
 		jbyteArray buffer = env->NewByteArray(bufferLength);
 		jint readCount = 0;
+		fileContent.reserve(bufferLength);
+		fileContent.clear();
 
 		while (-1 != (readCount = InputStream::read(env, inputStreamObject, buffer, bufferLength)))
 		{

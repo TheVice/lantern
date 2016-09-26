@@ -9,11 +9,19 @@ extern "C" {
 #endif
 /*
  * Class:     org_lantern_examples_RasterizedTriangleApp
+ * Method:    set_asset_manager
+ * Signature: (Ljava/lang/Object;)V
+ */
+JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_set_1asset_1manager
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     org_lantern_examples_RasterizedTriangleApp
  * Method:    initialize
- * Signature: (Ljava/lang/Object;II)V
+ * Signature: (II)V
  */
 JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_initialize
-  (JNIEnv *, jclass, jobject, jint, jint);
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     org_lantern_examples_RasterizedTriangleApp
@@ -22,6 +30,14 @@ JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_initializ
  */
 JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_frame
   (JNIEnv *, jclass, jfloat, jint, jint, jintArray);
+
+/*
+ * Class:     org_lantern_examples_RasterizedTriangleApp
+ * Method:    on_key_down
+ * Signature: (S)V
+ */
+JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_on_1key_1down
+  (JNIEnv *, jclass, jshort);
 
 #ifdef __cplusplus
 }
