@@ -17,6 +17,8 @@ JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_initializ
 
 	if (!fileData.empty())
 	{
+		LOGI("Asset size - %i", fileData.size());
+		//
 		std::string data(fileData.size(), '\0');
 		std::memcpy(&data.front(), &fileData.front(), fileData.size());
 		//
@@ -39,6 +41,4 @@ JNIEXPORT void JNICALL Java_org_lantern_examples_RasterizedTriangleApp_frame
 	//
 	env->SetIntArrayRegion(area, 0, width * height, elements);
 	env->ReleaseIntArrayElements(area, elements, 0);
-	//
-	LOGI("onFrame");
 }

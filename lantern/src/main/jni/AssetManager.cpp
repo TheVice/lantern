@@ -1,5 +1,6 @@
 
 #include "AssetManager.h"
+#include "InputStream.h"
 
 std::vector<std::string> AssetManager::getLocales(JNIEnv* env, jobject object)
 {
@@ -7,25 +8,22 @@ std::vector<std::string> AssetManager::getLocales(JNIEnv* env, jobject object)
 	//
 	const jclass clazz = env->GetObjectClass(object);
 	const jmethodID methodID = env->GetMethodID(clazz, "getLocales", "()[Ljava/lang/String;");
+	//
+	const jobjectArray array = (jobjectArray)env->CallObjectMethod(object, methodID);
 
-	if (methodID)
+	if (array)
 	{
-		const jobjectArray array = (jobjectArray)env->CallObjectMethod(object, methodID);
+		const jsize count = env->GetArrayLength(array);
+		locales.reserve(count);
+		locales.resize(count);
 
-		if (array)
+		for (jsize i = 0; i < count; ++i)
 		{
-			const jsize count = env->GetArrayLength(array);
-			locales.reserve(count);
-			locales.resize(count);
-
-			for (jsize i = 0; i < count; ++i)
-			{
-				jboolean isCopy;
-				const jstring pointer = (jstring)env->GetObjectArrayElement(array, i);
-				const char *localString = env->GetStringUTFChars(pointer, &isCopy);
-				locales[i] = std::string(localString);
-				env->ReleaseStringUTFChars(pointer, localString);
-			}
+			jboolean isCopy;
+			const jstring pointer = (jstring)env->GetObjectArrayElement(array, i);
+			const char *localString = env->GetStringUTFChars(pointer, &isCopy);
+			locales[i] = std::string(localString);
+			env->ReleaseStringUTFChars(pointer, localString);
 		}
 	}
 
@@ -38,27 +36,24 @@ std::vector<std::string> AssetManager::list(JNIEnv* env, jobject object, const c
 	//
 	const jclass clazz = env->GetObjectClass(object);
 	const jmethodID methodID = env->GetMethodID(clazz, "list", "(Ljava/lang/String;)[Ljava/lang/String;");
+	//
+	const jstring jstringPath = env->NewStringUTF(path);
+	const jobjectArray array = (jobjectArray)env->CallObjectMethod(object, methodID, jstringPath);
+	env->DeleteLocalRef(jstringPath);
 
-	if (methodID)
+	if (array)
 	{
-		const jstring jstringPath = env->NewStringUTF(path);
-		const jobjectArray array = (jobjectArray)env->CallObjectMethod(object, methodID, jstringPath);
-		env->DeleteLocalRef(jstringPath);
+		const jsize count = env->GetArrayLength(array);
+		assets.reserve(count);
+		assets.resize(count);
 
-		if (array)
+		for (jsize i = 0; i < count; ++i)
 		{
-			const jsize count = env->GetArrayLength(array);
-			assets.reserve(count);
-			assets.resize(count);
-
-			for (jsize i = 0; i < count; ++i)
-			{
-				jboolean isCopy;
-				const jstring pointer = (jstring)env->GetObjectArrayElement(array, i);
-				const char *localString = env->GetStringUTFChars(pointer, &isCopy);
-				assets[i] = std::string(localString);
-				env->ReleaseStringUTFChars(pointer, localString);
-			}
+			jboolean isCopy;
+			const jstring pointer = (jstring)env->GetObjectArrayElement(array, i);
+			const char *localString = env->GetStringUTFChars(pointer, &isCopy);
+			assets[i] = std::string(localString);
+			env->ReleaseStringUTFChars(pointer, localString);
 		}
 	}
 
@@ -71,38 +66,34 @@ std::vector<int8_t> AssetManager::open(JNIEnv* env, jobject object, const char* 
 	//
 	const jclass clazz = env->GetObjectClass(object);
 	const jmethodID methodID = env->GetMethodID(clazz, "open", "(Ljava/lang/String;)Ljava/io/InputStream;");
+	//
+	const jstring jstringPath = env->NewStringUTF(fileName);
+	const jobject inputStreamObject = env->CallObjectMethod(object, methodID, jstringPath);
 
-	if (methodID)
+	if (env->ExceptionCheck())
 	{
-		const jstring jstringPath = env->NewStringUTF(fileName);
-		const jobject inputStreamObject = env->CallObjectMethod(object, methodID, jstringPath);
-
-		if (env->ExceptionCheck())
-		{
-			env->ExceptionClear();
-			env->DeleteLocalRef(jstringPath);
-			return fileContent;
-		}
-
+		env->ExceptionClear();
 		env->DeleteLocalRef(jstringPath);
+		return fileContent;
+	}
 
-		if (inputStreamObject)
+	env->DeleteLocalRef(jstringPath);
+
+	if (inputStreamObject)
+	{
+		const jint bufferLength = InputStream::available(env, inputStreamObject);
+		jbyteArray buffer = env->NewByteArray(bufferLength);
+		jint readCount = 0;
+
+		while (-1 != (readCount = InputStream::read(env, inputStreamObject, buffer, bufferLength)))
 		{
-			const jclass inputStreamClazz = env->GetObjectClass(inputStreamObject);
-			const jmethodID inputStreamMethodID = env->GetMethodID(inputStreamClazz, "read", "([BII)I");
-
-			const jint bufferLength = 4096;
-			jbyteArray buffer = env->NewByteArray(bufferLength);
-			jint readCount = 0;
-			
-			while (-1 != (readCount = env->CallIntMethod(inputStreamObject, inputStreamMethodID, buffer, 0, bufferLength)))
-			{
-				jbyte* pointer = env->GetByteArrayElements(buffer, 0);
-				fileContent.insert(fileContent.end(), pointer, pointer + readCount);
-			}
-
-			env->DeleteLocalRef(buffer);
+			jbyte* pointer = env->GetByteArrayElements(buffer, 0);
+			fileContent.insert(fileContent.end(), pointer, pointer + readCount);
 		}
+
+		env->DeleteLocalRef(buffer);
+
+		InputStream::close(env, inputStreamObject);
 	}
 
 	return fileContent;

@@ -19,9 +19,11 @@ void loggingAssert(const char* aConditional, const char* aTag, const char* aMess
 #endif
 
 #define TAG "Native"
+#define LOGV(...) loggingMessageFormat(ANDROID_LOG_VERBOSE, TAG, __VA_ARGS__)
 #define LOGI(...) loggingMessageFormat(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
 #define LOGW(...) loggingMessageFormat(ANDROID_LOG_WARN, TAG, __VA_ARGS__)
 #define LOGE(...) loggingMessageFormat(ANDROID_LOG_ERROR, TAG, __VA_ARGS__)
+#define LOGF(...) loggingMessageFormat(ANDROID_LOG_FATAL, TAG, __VA_ARGS__)
 
 #endif
 #endif
