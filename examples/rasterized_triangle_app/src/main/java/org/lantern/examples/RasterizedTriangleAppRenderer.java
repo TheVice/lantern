@@ -111,8 +111,11 @@ public class RasterizedTriangleAppRenderer extends GLSurfaceView
         gl.glViewport(0, 0, width, height);
         gl.glPixelStorei(GL10.GL_PACK_ALIGNMENT, 1);
 
-        int widthInPowerOf2 = getHighThanInPowerOf2(width);
-        int heightInPowerOf2 = getHighThanInPowerOf2(height);
+        final String extensions = gl.glGetString(GL10.GL_EXTENSIONS);
+        final boolean is_GL_OES_texture_npot_Supported = extensions.contains("GL_OES_texture_npot");
+
+        final int widthInPowerOf2 = is_GL_OES_texture_npot_Supported ? width : getHighThanInPowerOf2(width);
+        final int heightInPowerOf2 = is_GL_OES_texture_npot_Supported ? height : getHighThanInPowerOf2(height);
 
         area = new int[4 * widthInPowerOf2 * heightInPowerOf2];
         bitmap = Bitmap.createBitmap(area, 0, widthInPowerOf2, widthInPowerOf2, heightInPowerOf2, Bitmap.Config.ARGB_8888);

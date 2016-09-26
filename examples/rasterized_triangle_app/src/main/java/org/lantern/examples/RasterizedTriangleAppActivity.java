@@ -3,8 +3,7 @@ package org.lantern.examples;
 import android.app.Activity;
 import android.content.res.AssetManager;
 import android.os.Bundle;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.view.KeyEvent;
 
 public class RasterizedTriangleAppActivity extends Activity {
 
@@ -19,6 +18,23 @@ public class RasterizedTriangleAppActivity extends Activity {
         renderer = new RasterizedTriangleAppRenderer(this, manager);
         renderer.setRenderer(renderer);
         setContentView(renderer);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+
+            renderer.onKeyDown((short)'W');
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+
+            renderer.onKeyDown((short)'S');
+            return true;
+        } else {
+
+            return super.onKeyDown(keyCode, event);
+        }
     }
 
 }

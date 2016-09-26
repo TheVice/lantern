@@ -297,6 +297,7 @@ void rasterized_triangle_app::initialize(int width, int height)
 
 void rasterized_triangle_app::frame(float)
 {
+	get_target_texture().clear(0);
 	// Draw the triangle
 	//
 	if (m_triangle_mesh.get())
@@ -305,8 +306,24 @@ void rasterized_triangle_app::frame(float)
 	}
 }
 
-void rasterized_triangle_app::on_key_down(unsigned char)
+void rasterized_triangle_app::on_key_down(unsigned char key)
 {
+	float const moving_speed{0.01f};
+
+	switch (key)
+	{
+		case 'W':
+			m_camera->move_forward(moving_speed);
+			break;
+		case 'S':
+			m_camera->move_backward(moving_speed);
+			break;
+		default:
+			break;
+	}
+
+	// Update model-view-projection according to camera changes
+	update_shader_mvp();
 }
 
 void rasterized_triangle_app::update_shader_mvp()
