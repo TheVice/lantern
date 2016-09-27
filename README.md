@@ -14,16 +14,23 @@ Note that because it doesn't use GPU, it is much slower comparing to DirectX or 
 
 ###Dependencies
 
-* ~~[SDL2](http://www.libsdl.org/download-2.0.php) - used for creating windows, copying resulting texture data to a screen, handling input and system events~~
-* ~~[SDL2_Image](https://www.libsdl.org/projects/SDL_image/) - used for loading images files~~
-* [FreeType](http://www.freetype.org/download.html) - used for loading truetype fonts, calculating their metrics and rendering glyphs bitmaps
+* Install\unpack [Java Platform (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) version 8
+* Unpack [Android SDK](https://developer.android.com/studio/index.html#downloads). It is also may require to download build tool release 24.0.2 via SDK Manager if that release not located in downloaded Android SDK
+* Unpack [Android NDK](https://developer.android.com/ndk/downloads/index.html) not above than ```Android NDK, Revision 10e (May 2015)``` (see addition download [links](https://github.com/taka-no-me/android-cmake/blob/master/ndk_links.md))
+* Create ```local.properties``` and put to it paths to sdk and ndk folders.
+* On Windows host it can be next:
+* ```sdk.dir=C\:\\android-sdk-windows```
+* ```ndk.dir=C\:\\android-ndk-r10e-windows-x86_64```
+* On Linux host it can be next:
+* ```sdk.dir=/home/user/android-sdk-linux```
+* ```ndk.dir=/home/user/android-ndk-r10e-linux-x86_64```
 
 ###Building for Android
 
 Lantern uses [Gradle](http://gradle.org/) as its build system.
 
-* Set environment variable FREETYPEDIR path to source of FreeType library
-* Run [Android Studio](http://developer.android.com/tools/studio/index.html) from console(terminal) where you set environment variable
-
-###Known issues
-* Second run of app on device will fail
+* To build release apk files run next commands. First command need only to generate key file that can be keep for future using, so do not need to run it again if file located at original location
+* ```gradlew --daemon generateKey --q```
+* ```gradlew --daemon :empty_app:assembleRelease```
+* ```gradlew --daemon :rasterized_triangle_app:assembleRelease```
+* To build all apk command ```gradlew --daemon build``` can be used

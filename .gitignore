@@ -41,3 +41,13 @@ build/
 # Android Studio
 local.properties
 *.iml
+
+# Generated files
+build/
+
+# keytool
+*.jks
+
+# Built application files
+*.apk
+*.ap_

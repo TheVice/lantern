@@ -28,3 +28,11 @@ task clean(type: Delete) {
 task wrapper(type: Wrapper) {
     gradleVersion = '2.14.1'
 }
+
+task generateKey(type: Exec) {
+    def kt = new KeyTool()
+    commandLine kt, '-genkey', '-v', '-keystore', 'key.jks', '-alias',
+                    'alias', '-keyalg', 'RSA', '-keysize', '2048',
+                    '-validity', '9125', '-dname', '"cn=, ou=, o=, c="',
+                    '-keypass', '123456', '-storepass', '123456'
+}

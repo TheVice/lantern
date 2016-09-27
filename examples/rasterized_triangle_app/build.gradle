@@ -19,13 +19,17 @@ android {
 
     signingConfigs {
         release {
+            keyAlias "alias"
+            keyPassword "123456"
+            storeFile file("../../key.jks")
+            storePassword "123456"
         }
     }
 
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles.add(file("proguard-rules.txt"))
+            // proguardFiles.add(file("proguard-rules.txt"))
             signingConfig signingConfigs.release
         }
     }
